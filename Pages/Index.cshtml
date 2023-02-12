@@ -1,0 +1,29 @@
+﻿@page
+@model IndexModel
+
+@{
+    ViewData["Title"] = "Sign In";
+}
+
+
+<h1>Welcome to our website</h1>
+
+@if (!Model.sessionHandler.IsSignedOn())
+{
+        <form method="post">
+            <div class="form-group">
+                <label for="Username">Username:</label>
+                <input type="text" class="form-control" id="Username" name="Username" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" name="button" value="Login">Sign In</button>
+        </form>
+}
+else
+{
+        <p>Welcome back, @Model.sessionHandler.GetUsername()!</p>
+        <form method="post">
+            <button type="submit" class="btn btn-danger" name="button" value="Logout">Logout</button>
+        </form>
+
+}

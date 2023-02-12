@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>5df6db9f-e5cd-435d-8e47-84dd1e28130f</UserSecretsId>
+    <StartupObject>SCCP.Program</StartupObject>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'SeniorCapstone' " />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Session" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Pages\Photos_Icons\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Pages\Photos_Icons\" />
+  </ItemGroup>
+</Project>

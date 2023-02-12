@@ -1,0 +1,46 @@
+﻿@page
+@model ProfileModel
+@{
+    ViewData["Title"] = $"Profile";
+}
+
+
+<div class="text-center">
+    
+    <h1 style="padding-top: 2%;" class="display-4">Welcome @Model.sessionHandler.GetUsername()!</h1>
+
+    <p style="padding-top: 2%;" class="display-2">Your session information:</p>
+    <table>
+        <tr>
+            <td>ID:</td>
+            <td>@Model.sessionHandler.GetID()</td>
+            <td>private</td>
+        </tr>
+        <tr>
+            <td>Username:</td>
+            <td>@Model.sessionHandler.GetUsername()</td>
+            <td>public</td>
+        </tr>
+        <tr>
+            <td>SignedOn:</td>
+            <td>@Model.sessionHandler.IsSignedOn()</td>
+            <td>public</td>
+        </tr>
+        <tr>
+            <td>SessionID:</td>
+            <td>@Model.HttpContext.Session.Id</td>
+            <td>private</td>
+        </tr>
+        <tr>
+            <td>Username:</td>
+            <td>
+                
+                    @foreach (string s in Model.HttpContext.Session.Keys)
+                    {
+                        <p>@s</p>
+                    }
+            </td>
+            <td>private</td>
+        </tr>
+    </table>
+</div>
