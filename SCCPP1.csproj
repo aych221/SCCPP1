@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>5df6db9f-e5cd-435d-8e47-84dd1e28130f</UserSecretsId>
-    <StartupObject>SCCP.Program</StartupObject>
+    <StartupObject>SCCPP1.Program</StartupObject>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'SeniorCapstone' " />
