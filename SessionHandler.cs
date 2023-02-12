@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace SCCP
+namespace SCCPP1
 {
     public class SessionHandler
     {

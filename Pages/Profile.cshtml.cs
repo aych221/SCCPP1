@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace SCCP.Pages
+namespace SCCPP1.Pages
 {
 	public class ProfileModel : SessionModel
 	{

@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using SCCP;
-using SCCP.Pages;
+using SCCPP1;
+using SCCPP1.Pages;
 
-namespace SCCP.Pages
+namespace SCCPP1.Pages
 {
 	public class EditSubProfileModel : PageModel
     {

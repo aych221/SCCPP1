@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Session;
 
-namespace SCCP
+namespace SCCPP1
 {
 
 
