@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using SCCP;
 using SCCP.Pages;
 
-namespace SCCPP1.Pages
+namespace SCCP.Pages
 {
 	public class UserHomeModel : PageModel
     {
