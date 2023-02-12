@@ -6,6 +6,7 @@ namespace SCCP
 
     public class Program
     {
+        //test commit
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
