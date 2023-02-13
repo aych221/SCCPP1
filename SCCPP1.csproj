@@ -19,5 +19,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Pages\Photos_Icons\" />
+    <Folder Include="wwwroot\img\" />
   </ItemGroup>
 </Project>

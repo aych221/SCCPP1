@@ -9,6 +9,12 @@ namespace SCCPP1
         //test commit
         public static void Main(string[] args)
         {
+            DatabaseConnector.CreateDatabase();
+            /*
+            if (true)
+                return;
+            //*/
+
             CreateHostBuilder(args).Build().Run();
         }
 

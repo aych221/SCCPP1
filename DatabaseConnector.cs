@@ -5,11 +5,11 @@ namespace SCCPP1
 {
     public class DatabaseConnector
     {
-        public Account user { get; private set; }
 
         private static string connStr = @"Data Source=CPPDatabse.db";
 
-        public void Load()
+
+        public static void CreateDatabase()
         {
 
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -20,12 +20,11 @@ namespace SCCPP1
                     cmd.ExecuteNonQuery();
                 }
             }
-            //printusers();
+
         }
 
 
-
-
+        //old code from my other db
         private static void printusers()
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -71,6 +70,7 @@ namespace SCCPP1
         }
 
 
+        //old code from my other db
         public static void SaveLogout(Account account)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -86,7 +86,7 @@ namespace SCCPP1
             }
         }
 
-        //TODO
+        //old code from my other db
         public static void SaveLogout()
         {
             /*if (account == null)
@@ -118,114 +118,186 @@ namespace SCCPP1
 
 		USE MovieSchedulingDB;*/
 
-        private const string dbSQL = @" 
+        
+        ///<summary>
+        ///This is initial query used for creating the initial database and tables.
+        ///Should only be used if the database is being completely reset or initially created.
+        ///</summary>
+        private const string dbSQL = @"
+
+        BEGIN TRANSACTION; 
+        DROP TABLE IF EXISTS [colleagues];
+        DROP TABLE IF EXISTS [municipalities];
+        DROP TABLE IF EXISTS [states];
+        DROP TABLE IF EXISTS [education_types];
+        DROP TABLE IF EXISTS [institutions];
+        DROP TABLE IF EXISTS [education_history];
+        DROP TABLE IF EXISTS [employers];
+        DROP TABLE IF EXISTS [job_titles];
+        DROP TABLE IF EXISTS [work_history];
+        DROP TABLE IF EXISTS [skills];
+        DROP TABLE IF EXISTS [colleague_skills];
+        DROP TABLE IF EXISTS [profiles];
+        COMMIT;
+
+        CREATE TABLE colleagues (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_hash TEXT NOT NULL,
+          role INTEGER NOT NULL, --0=admin 1=normal
+          name TEXT NOT NULL,
+          phone TEXT,
+          address TEXT,
+          intro_narrative TEXT
+        );
+
+        CREATE TABLE municipalities (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL
+        );
+
+        CREATE TABLE states (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          abbreviation CHAR(2)
+        );
+
+        CREATE TABLE institutions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL
+        );
+
+        CREATE TABLE education_types (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          type TEXT NOT NULL
+        );
+
+        CREATE TABLE education_history (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          colleague_id INTEGER NOT NULL,
+          education_type_id INTEGER NOT NULL,
+          institution_id INTEGER NOT NULL,
+          municipality_id INTEGER,
+          state_id INTEGER,
+          start_date DATE NOT NULL,
+          end_date DATE,
+          description TEXT,
+          FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
+          FOREIGN KEY (education_type_id) REFERENCES education_types(id),
+          FOREIGN KEY (institution_id) REFERENCES institutions(id),
+          FOREIGN KEY (municipality_id) REFERENCES municipalities(id),
+          FOREIGN KEY (state_id) REFERENCES states(id)
+        );
 
 
-					BEGIN TRANSACTION; 
-                    DROP TABLE IF EXISTS [account];
-                    DROP TABLE IF EXISTS [session];
-                    COMMIT;
+        CREATE TABLE employers (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL
+        );
 
-CREATE TABLE [account] (
-ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  
-user_hash CHAR(64) UNIQUE,
-pass_hash CHAR(64), --Hash storage in SQL datatype
-acc_role VARCHAR(100)
-);
+        CREATE TABLE job_titles (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL
+        );
 
-CREATE TABLE [session] (
-ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  
-acc_id INTEGER,
-end_time time, 
-  
-FOREIGN KEY (acc_id) REFERENCES account(ID)
-);
+        CREATE TABLE work_history (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          colleague_id INTEGER NOT NULL,
+          employer_id INTEGER NOT NULL,
+          municipality_id INTEGER,
+          state_id INTEGER,
+          job_title_id INTEGER NOT NULL,
+          start_date DATE NOT NULL,
+          end_date DATE,
+          description TEXT,
+          FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
+          FOREIGN KEY (employer_id) REFERENCES employers(id),
+          FOREIGN KEY (municipality_id) REFERENCES municipalities(id),
+          FOREIGN KEY (state_id) REFERENCES states(id),
+          FOREIGN KEY (job_title_id) REFERENCES job_titles(id)
+          );
 
-CREATE TABLE [movie] (
-ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  
-title VARCHAR(100) UNIQUE,
-time_in_sec INTEGER
-);
+        CREATE TABLE skills (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL
+        );
 
-CREATE TABLE [theatre] (
-ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  
-capacity INTEGER
-);
+        CREATE TABLE colleague_skills (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          colleague_id INTEGER NOT NULL,
+          skill_id INTEGER NOT NULL,
+          rating INTEGER,
+          FOREIGN KEY (colleague_id) REFERENCES colleagues(colleague_id),
+          FOREIGN KEY (skill_id) REFERENCES skills(skill_id)
+        );
 
-CREATE TABLE [showing] (
-ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  
-theatre_id INTEGER,
-movie_id INTEGER, 
-start_time time, -- Needs to be worked on
-end_time time, --Needs to be worked on
-  
-FOREIGN KEY (theatre_id) REFERENCES [theatre](ID),
-FOREIGN KEY (movie_id) REFERENCES [movie](ID)
-);
+        CREATE TABLE profiles (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          colleague_id INTEGER NOT NULL,
+          title TEXT NOT NULL,          --similar to the file name
+          education_history_ids TEXT,   --list of education history ids in specified order
+          work_history_ids TEXT,        --list of work history ids in specified order
+          colleague_skills_ids TEXT,    --list of skill ids in specified order
+          ordering TEXT,                --The ordering of how the different sections will be (education, work, skills, etc)
+          FOREIGN KEY (colleague_id) REFERENCES colleagues(colleague_id)
+        );
 
-CREATE TABLE [ticket] (
-ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  
-acc_id INTEGER,
-showing_id INTEGER, 
-type_movie VARCHAR(100),
-amount INTEGER,
-  
-FOREIGN KEY (acc_id) REFERENCES [account](ID),
-FOREIGN KEY (showing_id) REFERENCES [showing](ID)
-);
+        ALTER TABLE colleagues ADD COLUMN main_profile_id INTEGER REFERENCES profiles(id);
+        
+        --Populate states table, since this likely will not change.
+        INSERT INTO states (name, abbreviation)
+        VALUES
+          ('Alabama', 'AL'),
+          ('Alaska', 'AK'),
+          ('Arizona', 'AZ'),
+          ('Arkansas', 'AR'),
+          ('California', 'CA'),
+          ('Colorado', 'CO'),
+          ('Connecticut', 'CT'),
+          ('Delaware', 'DE'),
+          ('Florida', 'FL'),
+          ('Georgia', 'GA'),
+          ('Hawaii', 'HI'),
+          ('Idaho', 'ID'),
+          ('Illinois', 'IL'),
+          ('Indiana', 'IN'),
+          ('Iowa', 'IA'),
+          ('Kansas', 'KS'),
+          ('Kentucky', 'KY'),
+          ('Louisiana', 'LA'),
+          ('Maine', 'ME'),
+          ('Maryland', 'MD'),
+          ('Massachusetts', 'MA'),
+          ('Michigan', 'MI'),
+          ('Minnesota', 'MN'),
+          ('Mississippi', 'MS'),
+          ('Missouri', 'MO'),
+          ('Montana', 'MT'),
+          ('Nebraska', 'NE'),
+          ('Nevada', 'NV'),
+          ('New Hampshire', 'NH'),
+          ('New Jersey', 'NJ'),
+          ('New Mexico', 'NM'),
+          ('New York', 'NY'),
+          ('North Carolina', 'NC'),
+          ('North Dakota', 'ND'),
+          ('Ohio', 'OH'),
+          ('Oklahoma', 'OK'),
+          ('Oregon', 'OR'),
+          ('Pennsylvania', 'PA'),
+          ('Rhode Island', 'RI'),
+          ('South Carolina', 'SC'),
+          ('South Dakota', 'SD'),
+          ('Tennessee', 'TN'),
+          ('Texas', 'TX'),
+          ('Utah', 'UT'),
+          ('Vermont', 'VT'),
+          ('Virginia', 'VA'),
+          ('Washington', 'WA'),
+          ('West Virginia', 'WV'),
+          ('Wisconsin', 'WI'),
+          ('Wyoming', 'WY');
 
-insert into account (user_hash, pass_hash, acc_role)
-values('d80426c1f7bc58a13ea79e4776acf8cb35d1c1b6f8daf5cf22f2a964ec38632a', '0f49dcfc100202a827a6176dcbe67439d38d1668628345eb34adc5cc171bfd49', 'employee'), --('admin@move.theatre', 'Passwerd1!', 'admin')
-('944c15b7bcdc8282b4c9d32410098ab46ad9b6829190ce52a07dca69b826b22c', 'b0f8ce197d3a9bd8234b98901ba0722abe20522ddc2a2471ae60b3c67577f0d4', 'customer'); --('number1cust@aol.net', 'someSafePass11', 'customer')
-
-
-insert into theatre(capacity)
-values(150),
-(175),
-(135),
-(145);
-
-insert into movie( title, time_in_sec)
-values('Inglorious Basterds', 11580), --2 hours and 33 minutes 1
-('Iron Man 3', 7800), --2 hours and 10 minutes 2
-('The Batman', 10560), --2 hours and 56 minutes 3
-('Top Gun: Maverick', 7860), --2 Hours and 11 minutes 4
-('Forest Gump', 8520), --2 hours and 22 minutes 5
-('Fight Club', 8340), --2 hours and 19 minutes 6
-('The Truman Show', 6420), --1 hour and 47 minutes 7
-('Interstellar', 10140), --2 hours and 49 minutes 8
-('Pulp Fiction', 9240), --2 hours and 34 minutes 9
-('The Godfather', 10500); --2 hours and 55 minutes 10
-
-insert into showing(theatre_id, movie_id, start_time, end_time)
-values(1, 9, '12:00:00', '14:34:00' ),
-(1, 1, '12:30:00', '15:03:00' ),
-(1, 2, '13:00:00', '15:10:00' ),
-(1, 5, '13:30:00', '15:52:00' ),
-(1, 7, '14:00:00', '15:47:00' ),
-(1, 10, '14:30:00', '17:25:00' ),
-(2, 8, '12:00:00' , '14:49:00' ),
-(2, 5, '12:30:00' , '14:52:00' ),
-(2, 3, '13:00:00' , '15:56:00' ),
-(2, 1, '13:30:00' , '16:03:00' ),
-(2, 6, '14:00:00' , '16:19:00' ),
-(3, 2, '12:00:00' , '14:10:00' ),
-(3, 5, '12:30:00' , '14:52:00'),
-(3, 3, '13:00:00' , '15:56:00'),
-(3, 7, '13:30:00' , '15:17:00' ),
-(3, 4, '14:00:00' , '15:11:00' ),
-(4, 10, '12:00:00' , '14:55:00' ),
-(4, 5, '12:30:00' , '14:52:00' ),
-(4, 1, '13:00:00' , '15:33:00' ),
-(4, 8, '13:30:00' , '16:19:00' ),
-(4, 6, '14:00:00' , '16:19:00' );
-		";
+        ";
 
     }
 }
