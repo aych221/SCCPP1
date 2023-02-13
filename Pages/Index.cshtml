@@ -6,38 +6,45 @@
 }
 
 
-<h1>Welcome to our website</h1>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<div id="g_id_onload"
+@if (!Model.sessionHandler.IsSignedOn())
+{
+    if (true)
+    {
+
+        <h1>Welcome to our website</h1>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+        <div id="g_id_onload"
      data-client_id="187681562366-na3irh88pjtadv6n8urh02dhfjc6kath.apps.googleusercontent.com"
      data-context="signin"
      data-ux_mode="redirect"
-     data-login_uri="https://localhost:7016/UserHome"
+     data-login_uri="https://localhost:7016/"
      data-auto_select="true"
      data-itp_support="true">
-</div>
+        </div>
 
-<div class="g_id_signin"
+        <div class="g_id_signin"
      data-type="standard"
      data-shape="pill"
      data-theme="filled_black"
      data-text="signin_with"
      data-size="large"
      data-logo_alignment="left">
-</div>
+        </div>
+    }
+    else
+    {
+        
+       <form method="post">
+           <div class="form-group">
+               <label for="Username">Username:</label>
+               <input type="text" class="form-control" id="Username" name="Username" required>
+           </div>
 
-@if (!Model.sessionHandler.IsSignedOn())
-{
-    /*
-        <form method="post">
-            <div class="form-group">
-                <label for="Username">Username:</label>
-                <input type="text" class="form-control" id="Username" name="Username" required>
-            </div>
-
-            <button type="submit" class="btn btn-primary" name="button" value="Login">Sign In</button>
-        </form>
-        */
+           <button type="submit" class="btn btn-primary" name="button" value="Login">Sign In</button>
+       </form>
+       
+    }
+            
 }
 else
 {

@@ -1,4 +1,4 @@
-﻿namespace SCCPP1
+﻿namespace SCCPP1.Session
 {
     public class SessionData
     {

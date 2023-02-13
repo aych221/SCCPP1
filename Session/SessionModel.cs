@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace SCCPP1
+namespace SCCPP1.Session
 {
     public class SessionModel : PageModel
     {

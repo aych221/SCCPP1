@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SCCPP1.Session;
 
 namespace SCCPP1.Pages
 {
-	public class ProfileModel : SessionModel
+    public class ProfileModel : SessionModel
 	{
         private readonly ILogger<ProfileModel> _logger;
 

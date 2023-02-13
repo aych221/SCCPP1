@@ -4,19 +4,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using SCCPP1;
-using SCCPP1.Pages;
+using SCCPP1.Session;
 
 namespace SCCPP1.Pages
 {
-	public class ViewPDFModel : PageModel
+	public class ViewPDFModel : SessionModel
     {
-        public readonly SessionHandler sessionHandler;
+
         private readonly ILogger<PrivacyModel> _logger;
 
-        public ViewPDFModel(SessionHandler sessionHandler, ILogger<PrivacyModel> logger)
+        public ViewPDFModel(SessionHandler sessionHandler, ILogger<PrivacyModel> logger) : base(sessionHandler)
         {
-            this.sessionHandler = sessionHandler;
             _logger = logger;
         }
 

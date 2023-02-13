@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace SCCPP1
+namespace SCCPP1.Session
 {
     public class SessionHandler
     {
@@ -13,7 +13,7 @@ namespace SCCPP1
         }
 
 
-        //Session Data accessors
+        //SessionData accessors
         public int GetID()
         {
             if (_data == null)
@@ -22,7 +22,7 @@ namespace SCCPP1
             return _data.ID;
         }
 
-        public string GetUsername()
+        public string? GetUsername()
         {
             if (_data == null)
                 return null;
