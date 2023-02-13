@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using SCCPP1.Entity;
+using System.Data;
 
 namespace SCCPP1
 {
@@ -20,7 +21,7 @@ namespace SCCPP1
                     cmd.ExecuteNonQuery();
                 }
             }
-
+            
         }
 
 
@@ -45,25 +46,34 @@ namespace SCCPP1
             }
         }
 
-        public static Account LoadUser(string username, string password)
+        public static List<string> list;
+        public static List<string> LoadUser(string username)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-                string sql = @"SELECT *  FROM account WHERE (user_hash=@user AND pass_hash=@pass);";
+                string sql = @"SELECT user_hash, role, name, phone, address, intro_narrative FROM account WHERE (user_hash=@user);";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@user", Utilities.ToSHA256Hash(username));
                     using (SqliteDataReader r = cmd.ExecuteReader())
                     {
-                        if (r.Read())
-                        {
-                            //account = new Account(r.GetInt32(0), username, r.GetString(3));
+                        if (!r.Read())
                             return null;
-                        }
 
-                        Console.WriteLine("No Account");
-                        return null;
+
+                        List<string> list = new List<string>(6);
+                        list.Add("user_hash: " + r.GetString(1));
+                        list.Add("role: " + r.GetInt32(2));
+                        list.Add("name: " + r.GetString(3));
+                        list.Add("phone: " + r.GetString(2));
+                        list.Add("address: " + r.GetString(2));
+                        list.Add("intro_narrative: " + r.GetString(2));
+
+
+
+                        Console.WriteLine("Found account");
+                        return DatabaseConnector.list = list;
                     }
                 }
             }
@@ -106,6 +116,33 @@ namespace SCCPP1
         }
 
 
+
+        public static void TestBrittany()
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                //colleague insertion
+                using (SqliteCommand cmd = new SqliteCommand("INSERT OR IGNORE INTO colleagues (user_hash, role, name, phone, address, intro_narrative) VALUES (@user_hash, @role, @name, @phone, @address, @intro_narrative)", conn))
+                {
+                    // all emails will be lowercased to ensure hash consistency
+                    cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash("BrittL".ToLower()));
+                    // normal user
+                    cmd.Parameters.AddWithValue("@role", 1);
+                    cmd.Parameters.AddWithValue("@name", "Brittany Langosh");
+                    cmd.Parameters.AddWithValue("@phone", "555-555-5555");
+                    cmd.Parameters.AddWithValue("@address", "123 Hopper Lane");
+                    cmd.Parameters.AddWithValue("@intro_narrative", "Brittany Langosh has been a Program Manager for the past 12 years. She has extensive experience in...");
+                    cmd.ExecuteNonQuery();
+                }
+
+            }
+
+        }
+
+
+
+
         /*
 		 * 
 		USE master;
@@ -118,11 +155,11 @@ namespace SCCPP1
 
 		USE MovieSchedulingDB;*/
 
-        
-        ///<summary>
-        ///This is initial query used for creating the initial database and tables.
-        ///Should only be used if the database is being completely reset or initially created.
-        ///</summary>
+
+                        ///<summary>
+                        ///This is initial query used for creating the initial database and tables.
+                        ///Should only be used if the database is being completely reset or initially created.
+                        ///</summary>
         private const string dbSQL = @"
 
         BEGIN TRANSACTION; 

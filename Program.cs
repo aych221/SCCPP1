@@ -10,6 +10,9 @@ namespace SCCPP1
         public static void Main(string[] args)
         {
             DatabaseConnector.CreateDatabase();
+
+            //test profile
+            DatabaseConnector.TestBrittany();
             /*
             if (true)
                 return;

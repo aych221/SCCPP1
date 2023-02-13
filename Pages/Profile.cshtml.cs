@@ -21,5 +21,8 @@ namespace SCCPP1.Pages
 			//verify and load session
 			return Page();
 		}
+
+		public static List<string> list;
+
 	}
 }
