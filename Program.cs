@@ -21,6 +21,8 @@ namespace SCCPP1
             CreateHostBuilder(args).Build().Run();
         }
 
+
+        //this code was modified/restructured from the original template code
         public static IHostBuilder CreateHostBuilder(string[] args)
         {
             IHostBuilder builder = Host.CreateDefaultBuilder(args);

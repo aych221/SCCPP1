@@ -4,13 +4,19 @@ namespace SCCPP1
 {
     public class Startup
     {
+
+        
         public void ConfigureServices(IServiceCollection services)
         {
+            //this line was from original template code
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             //services.AddSingleton<SessionData>();
             services.AddSingleton<SessionHandler>();
 
+            //this line was from original template code
             services.AddRazorPages();
+
             services.AddDistributedMemoryCache();
             services.AddDataProtection();
             services.AddSession(options =>
@@ -21,8 +27,11 @@ namespace SCCPP1
             });
         }
 
+
+        //this code was modified/restructured from the original template code
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            //block is from original template code
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -33,8 +42,13 @@ namespace SCCPP1
                 app.UseHsts();
             }
 
+            //redirect http to https
             app.UseHttpsRedirection();
+
+            //in case we need to use static access to dynamic pages
             app.UseStaticFiles();
+
+            //cookie session
             app.UseSession();
             /*app.Use(async (context, next) =>
             {
@@ -50,8 +64,11 @@ namespace SCCPP1
             });*/
 
             app.UseRouting();
+
+            //session auth
             app.UseAuthorization();
 
+            //needed for mapping pages with links
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
