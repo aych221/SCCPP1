@@ -19,9 +19,29 @@ namespace SCCPP1.Entity
         //Email stored (may not want to use signed on E-mail)
         public string Email { get; set; }
 
-        public Account(SessionData sessionData)
+        public int Phone { get; set; }
+
+        public string Address { get; set; }
+
+        public string IntroNarrative { get; set; }
+
+        public int MainProfileID { get; set; }
+
+
+        /// <summary>
+        /// Are they a returning user?
+        /// </summary>
+        public readonly bool IsReturning;
+
+        public Account(SessionData sessionData, bool isReturning)
         {
             this._sessionData = sessionData;
+            this.IsReturning= isReturning;
+        }
+
+        public string GetUsername()
+        {
+            return _sessionData.Username;
         }
 
     }

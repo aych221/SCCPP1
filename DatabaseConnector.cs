@@ -3,9 +3,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SCCPP1.Entity;
 using SCCPP1.Session;
 using System.Data;
+using System.Net.Sockets;
 using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
+using System.Security.Principal;
 
 namespace SCCPP1
 {
@@ -101,6 +103,32 @@ namespace SCCPP1
         {
             job_titles = LoadTwoColumnTable("job_titles");
         }
+
+
+        private static Dictionary<int, string> LoadTwoColumnTable(string tableName)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT * FROM @table;";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@table", tableName);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        Dictionary<int, string> table = new Dictionary<int, string>();
+
+                        while (!r.Read())
+                        {
+                            //loads the ID as the key and the value as the string
+                            table.TryAdd(r.GetInt32(1), r.GetString(2));
+                        }
+
+                        return table;
+                    }
+                }
+            }
+        }
         #endregion
 
 
@@ -109,6 +137,18 @@ namespace SCCPP1
         public static string? GetSkill(int id)
         {
             return GetFromDictionary(id, skills);
+        }
+
+        //first searches the dictionary for the skill,
+        //if not found, it will search the database
+        //if nothing is found, it will return null.
+        public static string? TryGetSkill(int id)
+        {
+            string? s;
+            if ((s = GetSkill(id)) == null)
+                return GetSkill(id);
+
+            return s;
         }
 
         public static string? GetEducationType(int id)
@@ -153,26 +193,97 @@ namespace SCCPP1
         }
         #endregion
 
-        private static Dictionary<int, string> LoadTwoColumnTable(string tableName)
+
+        /// <summary>
+        /// Loads a new Account object into the SessionData provided, if the user exists.
+        /// </summary>
+        /// <param name="sessionData">The current session object</param>
+        /// <returns>true if the account exists, false if the account does not exist</returns>
+        public static bool LoadUserData(SessionData sessionData)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-                string sql = @"SELECT * FROM @table;";
+                string sql = @"SELECT id, role, email, name FROM account WHERE (user_hash=@user);";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@table", tableName);
+                    cmd.Parameters.AddWithValue("@user", Utilities.ToSHA256Hash(sessionData.Username));
                     using (SqliteDataReader r = cmd.ExecuteReader())
                     {
-                        Dictionary<int, string> table = new Dictionary<int, string>();
 
-                        while (!r.Read())
-                        {
-                            //loads the ID as the key and the value as the string
-                            table.TryAdd(r.GetInt32(1), r.GetString(2));
-                        }
+                        //could not find account.
+                        //redirect account to creation page, if any input is entered, save new account to database
+                        if (!r.Read())
+                            return false;
 
-                        return table;
+
+                        //load new instance with basic colleague information
+                        Account a = new Account(sessionData, true);
+
+                        a.ID = r.GetInt32(1);
+                        a.Role = r.GetInt32(2);
+                        a.Name = r.GetString(3);
+                        a.Email = r.GetString(4);
+
+                        sessionData.Account = a;
+
+                        return true;
+                    }
+                }
+            }
+        }
+
+
+        public static bool SaveUser(Account account)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"UPDATE account SET user_hash=@user_hash, role=@role, name=@name, email=@email, phone=@phone, address=@address, intro_narrative=@intro_narrative, main_profile_id=@main_profile_id WHERE id = @id;";
+                if (!account.IsReturning)
+                    sql = @"INSERT INTO account (user_hash, role, name, email, phone, address, intro_narrative, main_profile_id) VALUES (@user_hash, @role, @name, @email, @phone, @address, @intro_narrative, @main_profile_id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    
+                    cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(account.GetUsername()));
+
+                    cmd.Parameters.AddWithValue("@role", account.Role);
+                    cmd.Parameters.AddWithValue("@name", account.Name);
+                    cmd.Parameters.AddWithValue("@email", account.Email);
+                    cmd.Parameters.AddWithValue("@phone", account.Phone);
+                    cmd.Parameters.AddWithValue("@address", account.Address);
+                    cmd.Parameters.AddWithValue("@intro_narrative", account.IntroNarrative);
+                    cmd.Parameters.AddWithValue("@main_profile_id", account.MainProfileID);
+
+                    //failed to insert or update account
+                    if (cmd.ExecuteNonQuery() == 0)
+                        return false;
+
+                    account.ID = GetAccountID(account.GetUsername());
+                    return true;
+                }
+            }
+        }
+
+        public static int GetAccountID(string username)
+        {
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT id, role, email, name FROM account WHERE (user_hash=@user);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@user", Utilities.ToSHA256Hash(username));
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+
+                        //could not find account.
+                        //redirect account to creation page, if any input is entered, save new account to database
+                        if (!r.Read())
+                            return -1;
+
+                        return r.GetInt32(1);
                     }
                 }
             }
@@ -200,6 +311,8 @@ namespace SCCPP1
                 }
             }
         }
+        
+
 
         public static List<string> list;
         public static List<string>? GetUser(string username)
@@ -235,43 +348,112 @@ namespace SCCPP1
         }
 
         /// <summary>
-        /// Loads a new Account object into the SessionData provided, if the user exists.
+        /// Inserts a new skill to the database
         /// </summary>
-        /// <param name="sessionData">The current session object</param>
-        /// <returns>true if the account exists, false if the account does not exist</returns>
-        public static bool LoadUserData(SessionData sessionData)
+        /// <param name="skillName"></param>
+        /// <returns>-1 if the skill was not added, otherwise returns the id that was given to the record</returns>
+        public static int SaveSkill(string skillName)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-                string sql = @"SELECT id, role, email, name FROM account WHERE (user_hash=@user);";
+                string sql = @"INSERT INTO skills(name) VALUES (@name) RETURNING id;";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@user", Utilities.ToSHA256Hash(sessionData.Username));
+                    cmd.Parameters.AddWithValue("@name", skillName);
+                    return Convert.ToInt32(cmd.ExecuteScalar());//return record ID
+                }
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the skill name based on the id.
+        /// </summary>
+        /// <param name="id">the skill id</param>
+        /// <returns>null if skill id does not exist, otherwise returns skill name</returns>
+        public static string? GetSkillName(int id)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT name FROM skills WHERE (id=@id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
                     using (SqliteDataReader r = cmd.ExecuteReader())
                     {
+                        if (r.Read())
+                            return r.GetString(1);
 
-                        //could not find account.
-                        //redirect account to creation page, if any input is entered, save new account to database
-                        if (!r.Read())
-                            return false;
-
-
-                        //load new account with basic colleague information
-                        Account a = new Account(sessionData);
-
-                        a.ID = r.GetInt32(1);
-                        a.Role = r.GetInt32(2);
-                        a.Name = r.GetString(3);
-                        a.Email = r.GetString(4);
-
-                        sessionData.Account = a;
-
-                        return true;
+                        return null;
                     }
                 }
             }
         }
+
+        /// <summary>
+        /// Retrieves the ID for a skill if it exists.
+        /// </summary>
+        /// <param name="skillName"></param>
+        /// <returns>-1 if the skills was not found, otherwise returns the skill record ID</returns>
+        public static int GetSkillID(string skillName)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT id FROM skills WHERE (name=@name);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@name", skillName);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        if (r.Read())
+                            return r.GetInt32(1);
+
+                        return -1;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns all of the saved colleague skills.
+        /// </summary>
+        /// <param name="account">The account associated with the skills</param>
+        /// <returns>a list of strings that stores the colleague_skill_id\skill_id\rating in that format</returns>
+        public static List<string>? GetColleagueSkills(Account account)
+        {
+            //session must've not had an account, so user must not exist
+            if (account == null)
+                return null;
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT * FROM colleague_skills WHERE (colleague_id=@id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", account.ID);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        List<string> list = new List<string>();
+
+                        string s;
+                        while (r.Read())
+                        {
+                            s = r.GetInt32(1) + "\\"; //colleage skill id
+                            s += r.GetInt32(3) + "\\"; //skill id
+                            s += r.GetInt32(4) + ""; //rating for skill
+
+                            list.Add(s);
+                        }
+
+                        return list;
+                    }
+                }
+            }
+        }
+
 
         /*
         public static bool LoadUserData(SessionData sessionData)
@@ -308,41 +490,7 @@ namespace SCCPP1
             }
         }
         //*/
-        //old code from my other db
-        public static void SaveLogout(Account account)
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();//acc, show, seats
-                string sql = @"INSERT INTO [session] (acc_id, end_time) VALUES (@id, @end);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    //cmd.Parameters.AddWithValue("@id", account.getID());
-                    cmd.Parameters.AddWithValue("@end", DateTime.Now);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
 
-        //old code from my other db
-        public static void SaveUser()
-        {
-
-            /*if (account == null)
-                return;*/
-
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();//acc, show, seats
-                string sql = @"INSERT INTO [session] (acc_id, end_time) VALUES (@id, @end);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    //cmd.Parameters.AddWithValue("@id", account.getID());
-                    //cmd.Parameters.AddWithValue("@end", DateTime.Now);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
 
 
 
@@ -435,7 +583,7 @@ namespace SCCPP1
           role INTEGER NOT NULL, --0=admin 1=normal
           name TEXT NOT NULL,
           email TEXT,
-          phone TEXT,
+          phone INTEGER,
           address TEXT,
           intro_narrative TEXT
         );
