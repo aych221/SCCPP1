@@ -5,5 +5,43 @@
 }
 <h1>@ViewData["Title"]</h1>
 
-<p>Use this page to create your main profile. Only seen once upon initial login for user to first create their main profile. </p>
+<!--<p>Use this page to create your main profile. Only seen once upon initial login for user to first create their main profile. </p>-->
+<h3>Create Main Profile</h3>
+
+<div class="container">
+    <form>
+    <label for="fname">First Name</label>
+    <input type="text" id="fname" name="firstname" placeholder="Enter your first name...">
+    <br>
+
+    <label for="lname">Last Name</label>
+    <input type="text" id="lname" name="lastname" placeholder="Enter your last name...">
+    <br>
+
+    <label for="lname">Middle Initial</label>
+    <input type="text" id="minitial" name="middleinitial" placeholder="Enter your middle initial...">
+    <br>
+
+    <label for="aboutme">About</label>
+    <textarea id="about" name="about" placeholder="Tell me about yourself..." style="height:200px"></textarea>
+    <br>
+
+    <label for="skill">Skill</label>
+    <textarea id="skill" name="skill" placeholder="Tell us what skills you possess..." style="height:200px"></textarea>
+    <br>
+
+    <label for="experience">Experience</label>
+    <textarea id="experience" name="experience" placeholder="Tell us what you know..." style="height:200px"></textarea>
+    <br>
+
+    <label for="education">Education/Certificates</label>
+    <input type="text" id="edu" name="education" placeholder="Tell us your education/certificate title...">
+
+    <label for="eduyear">Education Year</label>
+    <input type="text" id="eduyear" name="educationyear" placeholder="When did you get your edu/cert......">
+    <br>
+
+    <input type="submit" value="Submit">
+  </form>
+</div>
 
