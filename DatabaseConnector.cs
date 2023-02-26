@@ -14,7 +14,7 @@ namespace SCCPP1
         //load these tables in memory to reduce CPU usage
         //may not need to do this
         private static Dictionary<int, string> skills = new Dictionary<int, string>();
-        private static  Dictionary<int, string> education_types = new Dictionary<int, string>();
+        private static Dictionary<int, string> education_types = new Dictionary<int, string>();
         private static Dictionary<int, string> institutions = new Dictionary<int, string>();
         private static Dictionary<int, string> municipalities = new Dictionary<int, string>();
 
@@ -264,32 +264,6 @@ namespace SCCPP1
         public static int InsertUser(Account account)
         {
             return InsertUser(account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID);
-            /*   using (SqliteConnection conn = new SqliteConnection(connStr))
-               {
-                   conn.Open();
-                   string sql = @"INSERT INTO account (user_hash, role, name, email, phone, address, intro_narrative, main_profile_id) VALUES (@user_hash, @role, @name, @email, @phone, @address, @intro_narrative, @main_profile_id) RETURNING id;";
-                   using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                   {
-
-                       cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(account.GetUsername()));
-
-                       cmd.Parameters.AddWithValue("@role", account.Role);
-                       cmd.Parameters.AddWithValue("@name", account.Name);
-                       cmd.Parameters.AddWithValue("@email", account.Email);
-                       cmd.Parameters.AddWithValue("@phone", account.Phone);
-                       cmd.Parameters.AddWithValue("@address", account.Address);
-                       cmd.Parameters.AddWithValue("@intro_narrative", account.IntroNarrative);
-                       cmd.Parameters.AddWithValue("@main_profile_id", account.MainProfileID);
-
-                       object? accountID = cmd.ExecuteScalar();
-
-                       if (accountID == null)
-                           return -1;
-
-                       return account.ID = Convert.ToInt32(accountID);//return record ID
-
-                   }
-               }//*/
         }
 
         public static int UpdateUser(int id, string userID, int role, string name, string email, int phone, string address, string introNarrative, int mainProfileID)
@@ -313,11 +287,6 @@ namespace SCCPP1
                     cmd.Parameters.AddWithValue("@intro_narrative", introNarrative);
                     cmd.Parameters.AddWithValue("@main_profile_id", mainProfileID);
 
-                    //failed to insert or update account
-                    /*if (cmd.ExecuteNonQuery() == 0)
-                        return -1;
-
-                    account.ID = GetAccountID(account.GetUsername());*/
                     return cmd.ExecuteNonQuery();
                 }
             }
@@ -326,31 +295,6 @@ namespace SCCPP1
         public static int UpdateUser(Account account)
         {
             return UpdateUser(account.ID, account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID);
-            /*using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"UPDATE account SET user_hash=@user_hash, role=@role, name=@name, email=@email, phone=@phone, address=@address, intro_narrative=@intro_narrative, main_profile_id=@main_profile_id WHERE id = @id;";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-
-                    cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(account.GetUsername()));
-
-                    cmd.Parameters.AddWithValue("@role", account.Role);
-                    cmd.Parameters.AddWithValue("@name", account.Name);
-                    cmd.Parameters.AddWithValue("@email", account.Email);
-                    cmd.Parameters.AddWithValue("@phone", account.Phone);
-                    cmd.Parameters.AddWithValue("@address", account.Address);
-                    cmd.Parameters.AddWithValue("@intro_narrative", account.IntroNarrative);
-                    cmd.Parameters.AddWithValue("@main_profile_id", account.MainProfileID);
-
-                    //failed to insert or update account
-                    if (cmd.ExecuteNonQuery() == 0)
-                        return -1;
-
-                    account.ID = GetAccountID(account.GetUsername());
-                    return cmd.ExecuteNonQuery();
-                }
-            }//*/
         }
 
         public static int GetAccountID(string username)
@@ -479,6 +423,18 @@ namespace SCCPP1
 
 
         #region Skill Data
+
+        //TODO, do we need to care about case?
+        public static int SaveSkill(string skillName)
+        {
+            int id = GetSkillID(skillName);
+
+            if (id < 0)
+                return InsertSkill(skillName);
+
+            return id;
+        }
+
         /// <summary>
         /// Inserts a new skill to the database
         /// </summary>
@@ -555,6 +511,7 @@ namespace SCCPP1
             }
         }
 
+        //TODO: may need to change skills to be a csv string
         /// <summary>
         /// Returns all of the saved colleague skills.
         /// </summary>
@@ -629,10 +586,10 @@ namespace SCCPP1
         }
 
 
-        /*public static int InsertEducationHistory(EducationData ed)
+        public static int InsertEducationHistory(EducationData ed)
         {
-            return InsertEducationHistory()
-        }*/
+            return InsertEducationHistory(ed.Owner.ID, ed.EducationTypeID, ed.InstitutionID, ed.Location.MunicipalityID, ed.Location.StateID, ed.StartDate, ed.EndDate, ed.Description);
+        }
 
         public static int UpdateEducationHistory(int id, int colleagueID, int educationTypeID, int institutionID, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
         {
@@ -658,7 +615,29 @@ namespace SCCPP1
             }
         }
 
+        public static int UpdateEducationHistory(EducationData ed)
+        {
+            return UpdateEducationHistory(ed.RecordID, ed.Owner.ID, ed.EducationTypeID, ed.InstitutionID, ed.Location.MunicipalityID, ed.Location.StateID, ed.StartDate, ed.EndDate, ed.Description);
+        }
 
+
+        //put -1 if id is unknown
+        public static bool SaveEducationHistory(int id, int colleagueID, string educationType, string institutionName, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
+        {
+            int educationTypeID = SaveEducationType(educationType),
+                institutionID = SaveInstitution(institutionName);
+
+            if (ExistsEducationHistory(id))
+                return UpdateEducationHistory(id, colleagueID, educationTypeID, institutionID, municipalityID, stateID, startDate, endDate, description) >= 0;
+            return InsertEducationHistory(colleagueID, educationTypeID, institutionID, municipalityID, stateID, startDate, endDate, description) >= 0;
+        }
+
+        public static bool SaveEducationHistory(EducationData ed)
+        {
+            return SaveEducationHistory(ed.RecordID, ed.Owner.ID, ed.EducationType, ed.Institution, ed.Location.MunicipalityID, ed.Location.StateID, ed.StartDate, ed.EndDate, ed.Description);
+        }
+
+        #region Education Type
         public static int GetEducationTypeID(string educationType)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -699,6 +678,47 @@ namespace SCCPP1
             }
         }
 
+
+        public static int InsertEducationType(string type)
+        {
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"INSERT INTO 
+                                education_types(type) 
+                                VALUES (@type)
+                                RETURNING id;";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@type", type);
+
+
+                    object? educationTypeID = cmd.ExecuteScalar();
+
+                    if (educationTypeID == null)
+                        return -1;
+
+                    return Convert.ToInt32(educationTypeID);//return record ID
+                }
+            }
+
+        }
+
+        //TODO, do we need to care about case?
+        public static int SaveEducationType(string type)
+        {
+            int id = GetEducationTypeID(type);
+
+            if (id < 0)
+                return InsertEducationType(type);
+
+            return id;
+        }
+        #endregion
+
+
+        #region Institutions
         public static string? GetInstitution(int id)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -739,6 +759,66 @@ namespace SCCPP1
             }
         }
 
+        public static int InsertInstitution(string name)
+        {
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"INSERT INTO 
+                                institutions(name) 
+                                VALUES (@name)
+                                RETURNING id;";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@name", name);
+
+
+                    object? institutionID = cmd.ExecuteScalar();
+
+                    if (institutionID == null)
+                        return -1;
+
+                    return Convert.ToInt32(institutionID);//return record ID
+                }
+            }
+
+        }
+
+        //TODO, do we need to care about case?
+        public static int SaveInstitution(string name)
+        {
+            int id = GetInstitutionID(name);
+
+            if (id < 0)
+                return InsertInstitution(name);
+
+            return id;
+        }
+        #endregion
+
+
+        public static bool ExistsEducationHistory(int id)
+        {
+            if (id < 0)
+                return false;
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT id FROM education_history WHERE (id=@id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        if (r.Read())
+                            return true;
+                        return false;
+                    }
+                }
+            }
+        }
 
         public static List<string> GetRawColleagueEducationHistory(int colleagueID)
         {
@@ -819,19 +899,20 @@ namespace SCCPP1
 
         #region Work Data
 
-        public static int InsertWorkHistory(int colleagueID, int employerID, int municipalityID, int stateID, int jobTitleID, DateOnly startDate, DateOnly endDate, string description)
+        public static int InsertWorkHistory(int colleagueID, int employerID, int jobTitleID, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
                 string sql = @"INSERT INTO 
-                                work_history(colleague_id, employer_id, municipality_id, state_id, start_date, end_date, description) 
-                                VALUES (@colleague_id, @employer_id, @municipality_id, @state_id, @start_date, @end_date, @description)
+                                work_history(colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description) 
+                                VALUES (@colleague_id, @employer_id, @job_title_id, @municipality_id, @state_id, @start_date, @end_date, @description)
                                 RETURNING id;";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
                     cmd.Parameters.AddWithValue("@employer_id", employerID);
+                    cmd.Parameters.AddWithValue("@job_title_id", jobTitleID);
                     cmd.Parameters.AddWithValue("@municipality_id", municipalityID);
                     cmd.Parameters.AddWithValue("@state_id", stateID);
                     cmd.Parameters.AddWithValue("@start_date", startDate);
@@ -849,20 +930,26 @@ namespace SCCPP1
             }
         }
 
+        public static int InsertWorkHistory(WorkData wd)
+        {
+            return InsertWorkHistory(wd.Owner.ID, wd.EmployerID, wd.JobTitleID, wd.Location.MunicipalityID, wd.Location.StateID, wd.StartDate, wd.EndDate, wd.Description);
+        }
 
-        public static int UpdateWorkHistory(int id, int colleagueID, int employerID, int municipalityID, int stateID, int jobTitleID, DateOnly startDate, DateOnly endDate, string description)
+
+        public static int UpdateWorkHistory(int id, int colleagueID, int employerID, int jobTitleID, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
                 string sql = @"UPDATE work_history SET 
-                                colleague_id=@colleague_id, employer_id=@employer_id, municipality_id=municipality_id, state_id=@state_id, start_date=@start_date, end_date=@end_date, description=@description WHERE id = @id;";
+                                colleague_id=@colleague_id, employer_id=@employer_id, job_title_id=@job_title_id, municipality_id=municipality_id, state_id=@state_id, start_date=@start_date, end_date=@end_date, description=@description WHERE id = @id;";
 
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
                     cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
                     cmd.Parameters.AddWithValue("@employer_id", employerID);
+                    cmd.Parameters.AddWithValue("@job_title_id", jobTitleID);
                     cmd.Parameters.AddWithValue("@municipality_id", municipalityID);
                     cmd.Parameters.AddWithValue("@state_id", stateID);
                     cmd.Parameters.AddWithValue("@start_date", startDate);
@@ -875,6 +962,59 @@ namespace SCCPP1
         }
 
 
+        public static int UpdateWorkHistory(WorkData wd)
+        {
+            return UpdateWorkHistory(wd.RecordID, wd.Owner.ID, wd.EmployerID, wd.JobTitleID, wd.Location.MunicipalityID, wd.Location.StateID, wd.StartDate, wd.EndDate, wd.Description);
+        }
+
+        public static bool ExistsWorkHistory(int id)
+        {
+            if (id < 0)
+                return false;
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT id FROM work_history WHERE (id=@id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        if (r.Read())
+                            return true;
+                        return false;
+                    }
+                }
+            }
+        }
+
+
+
+
+        //put -1 if id is unknown
+        public static bool SaveWorkHistory(int id, int colleagueID, string employer, string jobTitle, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
+        {
+            int employerID = SaveEmployer(employer),
+                jobTitleID = SaveJobTitle(jobTitle);
+
+            if (ExistsWorkHistory(id))
+                return UpdateWorkHistory(id, colleagueID, employerID, jobTitleID, municipalityID, stateID, startDate, endDate, description) >= 0;
+            return InsertWorkHistory(colleagueID, employerID, jobTitleID, municipalityID, stateID, startDate, endDate, description) >= 0;
+        }
+
+        public static bool SaveWorkHistory(WorkData wd)
+        {
+            SaveEmployer(wd.Employer);
+            SaveJobTitle(wd.JobTitle);
+
+            if (ExistsWorkHistory(wd.RecordID))
+                return UpdateWorkHistory(wd) >= 0;
+
+            return InsertWorkHistory(wd) >= 0;
+        }
+
+        #region Employer
         public static int GetEmployerID(string employer)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -915,6 +1055,47 @@ namespace SCCPP1
             }
         }
 
+
+        public static int InsertEmployer(string name)
+        {
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"INSERT INTO 
+                                employers(name) 
+                                VALUES (@name)
+                                RETURNING id;";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@name", name);
+
+
+                    object? employerID = cmd.ExecuteScalar();
+
+                    if (employerID == null)
+                        return -1;
+
+                    return Convert.ToInt32(employerID);//return record ID
+                }
+            }
+
+        }
+
+        //TODO, do we need to care about case?
+        public static int SaveEmployer(string name)
+        {
+            int id = GetEmployerID(name);
+
+            if (id < 0)
+                return InsertEmployer(name);
+
+            return id;
+        }
+        #endregion
+
+
+        #region Job Title
         public static string? GetJobTitle(int id)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -956,12 +1137,53 @@ namespace SCCPP1
         }
 
 
+        public static int InsertJobTitle(string title)
+        {
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"INSERT INTO 
+                                job_titles(title) 
+                                VALUES (@title)
+                                RETURNING id;";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@title", title);
+
+
+                    object? jobTitleID = cmd.ExecuteScalar();
+
+                    if (jobTitleID == null)
+                        return -1;
+
+                    return Convert.ToInt32(jobTitleID);//return record ID
+                }
+            }
+
+        }
+
+        //TODO, do we need to care about case?
+        public static int SaveJobTitle(string title)
+        {
+            int id = GetJobTitleID(title);
+
+            if (id < 0)
+                return InsertJobTitle(title);
+
+            return id;
+        }
+        #endregion
+
+
+
+
         public static List<string> GetRawColleagueWorkHistory(int colleagueID)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-                string sql = @"SELECT id, colleague_id, employer_id, municipality_id, state_id, start_date, end_date, description FROM work_history WHERE (colleague_id=@colleague_id);";
+                string sql = @"SELECT id, colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description FROM work_history WHERE (colleague_id=@colleague_id);";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
@@ -974,13 +1196,14 @@ namespace SCCPP1
                         {
                             s = r.GetInt32(1) + "\\"; //record id
                             s += r.GetInt32(3) + "\\"; //employer id
-                            s += r.GetInt32(4) + "\\"; //municipality id
-                            s += r.GetInt32(5) + "\\"; //state id
+                            s += r.GetInt32(4) + "\\"; // job title id
+                            s += r.GetInt32(5) + "\\"; //municipality id
+                            s += r.GetInt32(6) + "\\"; //state id
 
-                            s += r.GetDateTime(6) + "\\"; //start date
-                            s += r.GetDateTime(7) + "\\"; //end date (might be empty)
+                            s += r.GetDateTime(7) + "\\"; //start date
+                            s += r.GetDateTime(8) + "\\"; //end date (might be empty)
 
-                            s += r.GetString(8) + "\\"; //description (might be empty)
+                            s += r.GetString(9) + ""; //description (might be empty)
 
                             list.Add(s);
                         }
@@ -1000,7 +1223,7 @@ namespace SCCPP1
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-                string sql = @"SELECT id, colleague_id, employer_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleague_id);";
+                string sql = @"SELECT id, colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleague_id);";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@colleague_id", account.ID);
@@ -1012,12 +1235,13 @@ namespace SCCPP1
                         {
                             WorkData wd = new WorkData(account, r.GetInt32(1));
                             wd.EmployerID = r.GetInt32(3);
-                            wd.Location = new Location(r.GetInt32(4), r.GetInt32(5));
+                            wd.JobTitleID = r.GetInt32(4);
+                            wd.Location = new Location(r.GetInt32(5), r.GetInt32(6));
 
-                            wd.StartDate = Utilities.ToDateOnly(r.GetDateTime(6));
-                            wd.EndDate = Utilities.ToDateOnly(r.GetDateTime(7));
+                            wd.StartDate = Utilities.ToDateOnly(r.GetDateTime(7));
+                            wd.EndDate = Utilities.ToDateOnly(r.GetDateTime(8));
 
-                            wd.Description = r.GetString(8);
+                            wd.Description = r.GetString(9);
 
                             list.Add(wd);
                         }
@@ -1028,42 +1252,6 @@ namespace SCCPP1
             }
         }
         #endregion
-
-        /*
-        public static bool LoadUserData(SessionData sessionData)
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"SELECT id, role, email, name FROM account WHERE (user_hash=@user);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@user", Utilities.ToSHA256Hash(sessionData.Username));
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-
-                        //could not find account.
-                        //redirect account to creation page, if any input is entered, save new account to database
-                        if (!r.Read())
-                            return false;
-
-
-                        //load new account with basic colleague information
-                        Account a = new Account(sessionData);
-
-                        a.ID = r.GetInt32(1);
-                        a.Role = r.GetInt32(2);
-                        a.Name = r.GetString(3);
-                        a.Email = r.GetString(4);
-
-                        sessionData.Account = a;
-
-                        return true;
-                    }
-                }
-            }
-        }
-        //*/
 
 
 
@@ -1215,9 +1403,9 @@ namespace SCCPP1
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           colleague_id INTEGER NOT NULL,
           employer_id INTEGER NOT NULL,
+          job_title_id INTEGER NOT NULL,
           municipality_id INTEGER,
           state_id INTEGER,
-          job_title_id INTEGER NOT NULL,
           start_date DATE NOT NULL,
           end_date DATE,
           description TEXT,
