@@ -1,4 +1,4 @@
-﻿using SCCPP1.Entity;
+﻿using SCCPP1.User;
 
 namespace SCCPP1.Session
 {
@@ -9,7 +9,7 @@ namespace SCCPP1.Session
         public string Username { get; set; }
         public bool SignedOn { get; set; }
 
-        public Account Account  { get; set; }
+        public Account Owner  { get; set; }
 
         public SessionData(string username)
         { 

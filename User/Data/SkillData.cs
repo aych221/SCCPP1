@@ -1,21 +1,15 @@
 ﻿namespace SCCPP1.User.Data
 {
-    public class SkillData
+    public class SkillData : AccountRecordData
     {
 
-        private class SkillRecord
+        public string Skill { get; set; }
+
+        public int Rating { get; set; }
+
+        public SkillData(Account owner, int id) : base(owner, id)
         {
-            public int ID;
 
-            public int Rating;
-
-        }
-
-        private List<SkillRecord> records;
-
-        public SkillData()
-        {
-            records = new List<SkillRecord>();
         }
     }
 }

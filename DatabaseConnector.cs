@@ -1,13 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using SCCPP1.Entity;
 using SCCPP1.Session;
-using System.Data;
-using System.Net.Sockets;
-using System.Reflection.Metadata.Ecma335;
-using System.Reflection.PortableExecutable;
-using System.Runtime.CompilerServices;
-using System.Security.Principal;
+using SCCPP1.User;
+using SCCPP1.User.Data;
 
 namespace SCCPP1
 {
@@ -134,9 +128,9 @@ namespace SCCPP1
 
         #region Dictionary Getters
         //Dictionary getters
-        public static string? GetSkill(int id)
+        public static string? GetCachedSkill(int id)
         {
-            return GetFromDictionary(id, skills);
+            return GetCachedValue(id, skills);
         }
 
         //first searches the dictionary for the skill,
@@ -145,44 +139,44 @@ namespace SCCPP1
         public static string? TryGetSkill(int id)
         {
             string? s;
-            if ((s = GetSkill(id)) == null)
-                return GetSkill(id);
+            if ((s = GetCachedSkill(id)) == null)
+                return GetCachedSkill(id);
 
             return s;
         }
 
-        public static string? GetEducationType(int id)
+        public static string? GetCachedEducationType(int id)
         {
-            return GetFromDictionary(id, education_types);
+            return GetCachedValue(id, education_types);
         }
 
-        public static string? GetInstitution(int id)
+        public static string? GetCachedInstitution(int id)
         {
-            return GetFromDictionary(id, institutions);
+            return GetCachedValue(id, institutions);
         }
 
-        public static string? GetMunicipalities(int id)
+        public static string? GetCachedMunicipality(int id)
         {
-            return GetFromDictionary(id, municipalities);
+            return GetCachedValue(id, municipalities);
         }
 
-        public static string? GetState(int id)
+        public static string? GetCachedState(int id)
         {
-            return GetFromDictionary(id, states);
+            return GetCachedValue(id, states);
         }
 
-        public static string? GetEmployer(int id)
+        public static string? GetCachedEmployer(int id)
         {
-            return GetFromDictionary(id, employers);
+            return GetCachedValue(id, employers);
         }
         
-        public static string? GetJobTitle(int id)
+        public static string? GetCachedJobTitle(int id)
         {
-            return GetFromDictionary(id, job_titles);
+            return GetCachedValue(id, job_titles);
         }
 
 
-        private static string? GetFromDictionary(int id, Dictionary<int, string> table)
+        private static string? GetCachedValue(int id, Dictionary<int, string> table)
         {
             string? s;
 
@@ -193,7 +187,7 @@ namespace SCCPP1
         }
         #endregion
 
-
+        #region Account Data
         /// <summary>
         /// Loads a new Account object into the SessionData provided, if the user exists.
         /// </summary>
@@ -225,7 +219,7 @@ namespace SCCPP1
                         a.Name = r.GetString(3);
                         a.Email = r.GetString(4);
 
-                        sessionData.Account = a;
+                        sessionData.Owner = a;
 
                         return true;
                     }
@@ -346,7 +340,11 @@ namespace SCCPP1
                 }
             }
         }
+        #endregion
 
+
+
+        #region Skill Data
         /// <summary>
         /// Inserts a new skill to the database
         /// </summary>
@@ -453,7 +451,171 @@ namespace SCCPP1
                 }
             }
         }
+        #endregion
 
+
+        #region Education Data
+
+        public static int SaveEducation(int colleagueID, int educationTypeID, int institutionID, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"INSERT INTO 
+                                education_history(colleague_id, education_type_id, institution_id, municipality_id, state_id, start_date, end_date, description) 
+                                VALUES (@colleague_id, @education_type_id, @institution_id, @municipality_id, @state_id, @start_date, @end_date, @description)
+                                RETURNING id;";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
+                    cmd.Parameters.AddWithValue("@education_type_id", educationTypeID);
+                    cmd.Parameters.AddWithValue("@institution_id", institutionID);
+                    cmd.Parameters.AddWithValue("@municipality_id", municipalityID);
+                    cmd.Parameters.AddWithValue("@state_id", stateID);
+                    cmd.Parameters.AddWithValue("@start_date", startDate);
+                    cmd.Parameters.AddWithValue("@end_date", endDate);
+                    cmd.Parameters.AddWithValue("@description", description);
+                    return Convert.ToInt32(cmd.ExecuteScalar());//return record ID
+                }
+            }
+        }
+
+        public static int GetEducationTypeID(string educationType)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT id FROM education_types WHERE (type=@type);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@type", educationType);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        if (r.Read())
+                            return r.GetInt32(1);
+
+                        return -1;
+                    }
+                }
+            }
+        }
+
+        public static string? GetInstitution(int id)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT name FROM institutions WHERE (id=@id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        if (r.Read())
+                            return r.GetString(1);
+
+                        return null;
+                    }
+                }
+            }
+        }
+
+        public static int GetInstitutionID(string institutionName)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT id FROM institutions WHERE (name=@name);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@name", institutionName);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        if (r.Read())
+                            return r.GetInt32(1);
+
+                        return -1;
+                    }
+                }
+            }
+        }
+
+
+        public static List<string> GetRawColleagueEducationHistory(int colleagueID)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT education_history_id, colleague_id, education_type_id, institution_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleagueID);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleagueID", colleagueID);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        List<string> list = new List<string>();
+
+                        string s;
+                        while (r.Read())
+                        {
+                            s = r.GetInt32(1) + "\\"; //record id
+                            s += r.GetInt32(3) + "\\"; //education type id
+                            s += r.GetInt32(4) + "\\"; //institution id
+                            s += r.GetInt32(5) + "\\"; //municipality id
+                            s += r.GetInt32(6) + "\\"; //state id
+
+                            s += r.GetDateTime(7) + "\\"; //start date
+                            s += r.GetDateTime(8) + "\\"; //end date (might be empty)
+
+                            s += r.GetString(9) + "\\"; //description (might be empty)
+
+                            list.Add(s);
+                        }
+
+                        return list;
+                    }
+                }
+            }
+        }
+
+
+        public static List<EducationData>? GetColleagueEducationHistory(Account account)
+        {
+            if (account == null || account.ID < 0)
+                return null;
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT education_history_id, colleague_id, education_type_id, institution_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleagueID);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleagueID", account.ID);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        List<EducationData> list = new List<EducationData>();
+
+                        while (r.Read())
+                        {
+                            EducationData ed = new EducationData(account, r.GetInt32(1));
+                            ed.EducationTypeID = r.GetInt32(3);
+                            ed.InstitutionID = r.GetInt32(4);
+                            ed.Location = new Location(r.GetInt32(5), r.GetInt32(6));
+
+                            ed.StartDate = Utilities.ToDateOnly(r.GetDateTime(7));
+                            ed.EndDate = Utilities.ToDateOnly(r.GetDateTime(8));
+
+                            ed.Description = r.GetString(9);
+
+                            list.Add(ed);
+                        }
+
+                        return list;
+                    }
+                }
+            }
+        }
+
+        #endregion
 
         /*
         public static bool LoadUserData(SessionData sessionData)
@@ -737,5 +899,19 @@ namespace SCCPP1
 
         ";
 
+
+        protected class Row<TValue>
+        {
+            public readonly string ColumnName;
+
+            public readonly TValue Value;
+
+            public Row(string columnName, TValue value)
+            {
+                this.ColumnName = columnName;
+                this.Value = value;
+            }
+        }
     }
+
 }

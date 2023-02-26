@@ -1,6 +1,7 @@
 ﻿using SCCPP1.Session;
+using SCCPP1.User.Data;
 
-namespace SCCPP1.Entity
+namespace SCCPP1.User
 {
     public class Account
     {
@@ -26,6 +27,15 @@ namespace SCCPP1.Entity
         public string IntroNarrative { get; set; }
 
         public int MainProfileID { get; set; }
+
+
+
+        public List<SkillData> Skills { get; set; }
+
+        public List<EducationData> EducationHistory { get; set; }
+
+        public List<WorkData> WorkHistory { get; set; }
+
 
 
         /// <summary>

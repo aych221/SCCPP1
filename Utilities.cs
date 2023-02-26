@@ -20,5 +20,23 @@ namespace SCCPP1
             return s.ToString();
         }
 
+        //TODO
+        public static DateOnly ToDateOnly(string input)
+        {
+            return new();
+        }
+
+        //TODO
+        public static DateOnly ToDateOnly(DateTime input)
+        {
+            return new();
+        }
+
+        //TODO
+        public static DateTime FromDateOnly(DateOnly input)
+        {
+            return new();
+        }
+
     }
 }
