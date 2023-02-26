@@ -2,6 +2,7 @@
 using SCCPP1.Session;
 using SCCPP1.User;
 using SCCPP1.User.Data;
+using System.Security.Principal;
 
 namespace SCCPP1
 {
@@ -228,17 +229,110 @@ namespace SCCPP1
         }
 
 
-        public static bool SaveUser(Account account)
+        public static int InsertUser(string userID, int role, string name, string email, int phone, string address, string introNarrative, int mainProfileID)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"INSERT INTO account (user_hash, role, name, email, phone, address, intro_narrative, main_profile_id) VALUES (@user_hash, @role, @name, @email, @phone, @address, @intro_narrative, @main_profile_id) RETURNING id;";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    
+                    cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(userID));
+
+                    cmd.Parameters.AddWithValue("@role", role);
+                    cmd.Parameters.AddWithValue("@name", name);
+                    cmd.Parameters.AddWithValue("@email", email);
+                    cmd.Parameters.AddWithValue("@phone", phone);
+                    cmd.Parameters.AddWithValue("@address", address);
+                    cmd.Parameters.AddWithValue("@intro_narrative", introNarrative);
+                    cmd.Parameters.AddWithValue("@main_profile_id", mainProfileID);
+
+                    object? accountID = cmd.ExecuteScalar();
+
+                    if (accountID == null)
+                        return -1;
+
+                    return Convert.ToInt32(accountID);//return record ID
+
+                }
+            }
+        }
+
+
+
+        public static int InsertUser(Account account)
+        {
+            return InsertUser(account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID);
+            /*   using (SqliteConnection conn = new SqliteConnection(connStr))
+               {
+                   conn.Open();
+                   string sql = @"INSERT INTO account (user_hash, role, name, email, phone, address, intro_narrative, main_profile_id) VALUES (@user_hash, @role, @name, @email, @phone, @address, @intro_narrative, @main_profile_id) RETURNING id;";
+                   using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                   {
+
+                       cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(account.GetUsername()));
+
+                       cmd.Parameters.AddWithValue("@role", account.Role);
+                       cmd.Parameters.AddWithValue("@name", account.Name);
+                       cmd.Parameters.AddWithValue("@email", account.Email);
+                       cmd.Parameters.AddWithValue("@phone", account.Phone);
+                       cmd.Parameters.AddWithValue("@address", account.Address);
+                       cmd.Parameters.AddWithValue("@intro_narrative", account.IntroNarrative);
+                       cmd.Parameters.AddWithValue("@main_profile_id", account.MainProfileID);
+
+                       object? accountID = cmd.ExecuteScalar();
+
+                       if (accountID == null)
+                           return -1;
+
+                       return account.ID = Convert.ToInt32(accountID);//return record ID
+
+                   }
+               }//*/
+        }
+
+        public static int UpdateUser(int id, string userID, int role, string name, string email, int phone, string address, string introNarrative, int mainProfileID)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
                 string sql = @"UPDATE account SET user_hash=@user_hash, role=@role, name=@name, email=@email, phone=@phone, address=@address, intro_narrative=@intro_narrative, main_profile_id=@main_profile_id WHERE id = @id;";
-                if (!account.IsReturning)
-                    sql = @"INSERT INTO account (user_hash, role, name, email, phone, address, intro_narrative, main_profile_id) VALUES (@user_hash, @role, @name, @email, @phone, @address, @intro_narrative, @main_profile_id);";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
-                    
+
+                    cmd.Parameters.AddWithValue("@id", id);
+
+                    cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(userID));
+
+                    cmd.Parameters.AddWithValue("@role", role);
+                    cmd.Parameters.AddWithValue("@name", name);
+                    cmd.Parameters.AddWithValue("@email", email);
+                    cmd.Parameters.AddWithValue("@phone", phone);
+                    cmd.Parameters.AddWithValue("@address", address);
+                    cmd.Parameters.AddWithValue("@intro_narrative", introNarrative);
+                    cmd.Parameters.AddWithValue("@main_profile_id", mainProfileID);
+
+                    //failed to insert or update account
+                    /*if (cmd.ExecuteNonQuery() == 0)
+                        return -1;
+
+                    account.ID = GetAccountID(account.GetUsername());*/
+                    return cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static int UpdateUser(Account account)
+        {
+            return UpdateUser(account.ID, account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID);
+            /*using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"UPDATE account SET user_hash=@user_hash, role=@role, name=@name, email=@email, phone=@phone, address=@address, intro_narrative=@intro_narrative, main_profile_id=@main_profile_id WHERE id = @id;";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+
                     cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(account.GetUsername()));
 
                     cmd.Parameters.AddWithValue("@role", account.Role);
@@ -251,12 +345,12 @@ namespace SCCPP1
 
                     //failed to insert or update account
                     if (cmd.ExecuteNonQuery() == 0)
-                        return false;
+                        return -1;
 
                     account.ID = GetAccountID(account.GetUsername());
-                    return true;
+                    return cmd.ExecuteNonQuery();
                 }
-            }
+            }//*/
         }
 
         public static int GetAccountID(string username)
@@ -305,37 +399,77 @@ namespace SCCPP1
                 }
             }
         }
-        
 
 
-        public static List<string> list;
-        public static List<string>? GetUser(string username)
+        public static Account? GetUser(string userID)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-                string sql = @"SELECT user_hash, role, name, phone, address, intro_narrative FROM account WHERE (user_hash=@user);";
+                string sql = @"SELECT id, role, name, email, phone, address, intro_narrative, main_profile_id FROM account WHERE (user_hash=@user_hash);";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@user", Utilities.ToSHA256Hash(username));
+                    cmd.Parameters.AddWithValue("@user_hash", userID);
                     using (SqliteDataReader r = cmd.ExecuteReader())
                     {
+
+                        //could not find account.
+                        //redirect account to creation page, if any input is entered, save new account to database
                         if (!r.Read())
                             return null;
 
 
-                        List<string> list = new List<string>(6);
-                        list.Add("user_hash: " + r.GetString(1));
-                        list.Add("role: " + r.GetInt32(2));
-                        list.Add("name: " + r.GetString(3));
-                        list.Add("phone: " + r.GetString(2));
-                        list.Add("address: " + r.GetString(2));
-                        list.Add("intro_narrative: " + r.GetString(2));
+                        //load new instance with basic colleague information
+                        Account a = new Account(null, true);
+
+                        a.ID = r.GetInt32(1);
+                        a.Role = r.GetInt32(2);
+                        a.Name = r.GetString(3);
+                        a.Email = r.GetString(4);
+                        a.Phone = r.GetInt32(5);
+                        a.Address = r.GetString(6);
+                        a.IntroNarrative = r.GetString(7);
+                        a.MainProfileID = r.GetInt32(8);
+
+                        return a;
+                    }
+                }
+            }
+        }
 
 
+        //loads user based on ID into an Account, likely will be used by admins
+        public static Account? GetUser(int id)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT id, role, name, email, phone, address, intro_narrative, main_profile_id FROM account WHERE (id=@id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
 
-                        Console.WriteLine("Found account");
-                        return DatabaseConnector.list = list;
+                        //could not find account.
+                        //redirect account to creation page, if any input is entered, save new account to database
+                        if (!r.Read())
+                            return null;
+
+
+                        //load new instance with basic colleague information
+                        Account a = new Account(null, true);
+
+                        a.ID = r.GetInt32(1);
+                        a.Role = r.GetInt32(2);
+                        a.Name = r.GetString(3);
+                        a.Email = r.GetString(4);
+                        a.Phone = r.GetInt32(5);
+                        a.Address = r.GetString(6);
+                        a.IntroNarrative = r.GetString(7);
+                        a.MainProfileID = r.GetInt32(8);
+
+                        return a;
                     }
                 }
             }
@@ -350,7 +484,7 @@ namespace SCCPP1
         /// </summary>
         /// <param name="skillName"></param>
         /// <returns>-1 if the skill was not added, otherwise returns the id that was given to the record</returns>
-        public static int SaveSkill(string skillName)
+        public static int InsertSkill(string skillName)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
@@ -359,7 +493,14 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@name", skillName);
-                    return Convert.ToInt32(cmd.ExecuteScalar());//return record ID
+
+
+                    object? skillID = cmd.ExecuteScalar();
+
+                    if (skillID == null)
+                        return -1;
+
+                    return Convert.ToInt32(skillID);//return record ID
                 }
             }
         }
@@ -456,7 +597,7 @@ namespace SCCPP1
 
         #region Education Data
 
-        public static int SaveEducation(int colleagueID, int educationTypeID, int institutionID, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
+        public static int InsertEducationHistory(int colleagueID, int educationTypeID, int institutionID, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
@@ -475,10 +616,48 @@ namespace SCCPP1
                     cmd.Parameters.AddWithValue("@start_date", startDate);
                     cmd.Parameters.AddWithValue("@end_date", endDate);
                     cmd.Parameters.AddWithValue("@description", description);
-                    return Convert.ToInt32(cmd.ExecuteScalar());//return record ID
+
+
+                    object? educationID = cmd.ExecuteScalar();
+
+                    if (educationID == null)
+                        return -1;
+
+                    return Convert.ToInt32(educationID);//return record ID
                 }
             }
         }
+
+
+        /*public static int InsertEducationHistory(EducationData ed)
+        {
+            return InsertEducationHistory()
+        }*/
+
+        public static int UpdateEducationHistory(int id, int colleagueID, int educationTypeID, int institutionID, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"UPDATE education_history SET 
+                                colleague_id=@colleague_id, education_type_id=@education_type_id, institution_id=@institution_id, municipality_id=municipality_id, state_id=@state_id, start_date=@start_date, end_date=@end_date, description=@description WHERE id = @id;";
+                
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
+                    cmd.Parameters.AddWithValue("@education_type_id", educationTypeID);
+                    cmd.Parameters.AddWithValue("@institution_id", institutionID);
+                    cmd.Parameters.AddWithValue("@municipality_id", municipalityID);
+                    cmd.Parameters.AddWithValue("@state_id", stateID);
+                    cmd.Parameters.AddWithValue("@start_date", startDate);
+                    cmd.Parameters.AddWithValue("@end_date", endDate);
+                    cmd.Parameters.AddWithValue("@description", description);
+                    return cmd.ExecuteNonQuery();//rows affected
+                }
+            }
+        }
+
 
         public static int GetEducationTypeID(string educationType)
         {
@@ -495,6 +674,26 @@ namespace SCCPP1
                             return r.GetInt32(1);
 
                         return -1;
+                    }
+                }
+            }
+        }
+
+        public static string? GetEducationType(int id)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT type FROM education_types WHERE (id=@id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        if (r.Read())
+                            return r.GetString(1);
+
+                        return null;
                     }
                 }
             }
@@ -546,10 +745,10 @@ namespace SCCPP1
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-                string sql = @"SELECT education_history_id, colleague_id, education_type_id, institution_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleagueID);";
+                string sql = @"SELECT id, colleague_id, education_type_id, institution_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleague_id);";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@colleagueID", colleagueID);
+                    cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
                     using (SqliteDataReader r = cmd.ExecuteReader())
                     {
                         List<string> list = new List<string>();
@@ -586,10 +785,10 @@ namespace SCCPP1
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-                string sql = @"SELECT education_history_id, colleague_id, education_type_id, institution_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleagueID);";
+                string sql = @"SELECT id, colleague_id, education_type_id, institution_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleague_id);";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@colleagueID", account.ID);
+                    cmd.Parameters.AddWithValue("@colleague_id", account.ID);
                     using (SqliteDataReader r = cmd.ExecuteReader())
                     {
                         List<EducationData> list = new List<EducationData>();
@@ -615,6 +814,219 @@ namespace SCCPP1
             }
         }
 
+        #endregion
+
+
+        #region Work Data
+
+        public static int InsertWorkHistory(int colleagueID, int employerID, int municipalityID, int stateID, int jobTitleID, DateOnly startDate, DateOnly endDate, string description)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"INSERT INTO 
+                                work_history(colleague_id, employer_id, municipality_id, state_id, start_date, end_date, description) 
+                                VALUES (@colleague_id, @employer_id, @municipality_id, @state_id, @start_date, @end_date, @description)
+                                RETURNING id;";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
+                    cmd.Parameters.AddWithValue("@employer_id", employerID);
+                    cmd.Parameters.AddWithValue("@municipality_id", municipalityID);
+                    cmd.Parameters.AddWithValue("@state_id", stateID);
+                    cmd.Parameters.AddWithValue("@start_date", startDate);
+                    cmd.Parameters.AddWithValue("@end_date", endDate);
+                    cmd.Parameters.AddWithValue("@description", description);
+
+
+                    object? workID = cmd.ExecuteScalar();
+
+                    if (workID == null)
+                        return -1;
+
+                    return Convert.ToInt32(workID);//return record ID
+                }
+            }
+        }
+
+
+        public static int UpdateWorkHistory(int id, int colleagueID, int employerID, int municipalityID, int stateID, int jobTitleID, DateOnly startDate, DateOnly endDate, string description)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"UPDATE work_history SET 
+                                colleague_id=@colleague_id, employer_id=@employer_id, municipality_id=municipality_id, state_id=@state_id, start_date=@start_date, end_date=@end_date, description=@description WHERE id = @id;";
+
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
+                    cmd.Parameters.AddWithValue("@employer_id", employerID);
+                    cmd.Parameters.AddWithValue("@municipality_id", municipalityID);
+                    cmd.Parameters.AddWithValue("@state_id", stateID);
+                    cmd.Parameters.AddWithValue("@start_date", startDate);
+                    cmd.Parameters.AddWithValue("@end_date", endDate);
+                    cmd.Parameters.AddWithValue("@description", description);
+
+                    return cmd.ExecuteNonQuery();//rows affected
+                }
+            }
+        }
+
+
+        public static int GetEmployerID(string employer)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT id FROM employers WHERE (name=@name);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@name", employer);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        if (r.Read())
+                            return r.GetInt32(1);
+
+                        return -1;
+                    }
+                }
+            }
+        }
+
+        public static string? GetEmployer(int id)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT name FROM employers WHERE (id=@id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        if (r.Read())
+                            return r.GetString(1);
+
+                        return null;
+                    }
+                }
+            }
+        }
+
+        public static string? GetJobTitle(int id)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT title FROM job_titles WHERE (id=@id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        if (r.Read())
+                            return r.GetString(1);
+
+                        return null;
+                    }
+                }
+            }
+        }
+
+        public static int GetJobTitleID(string title)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT id FROM job_titles WHERE (title=@title);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@title", title);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        if (r.Read())
+                            return r.GetInt32(1);
+
+                        return -1;
+                    }
+                }
+            }
+        }
+
+
+        public static List<string> GetRawColleagueWorkHistory(int colleagueID)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT id, colleague_id, employer_id, municipality_id, state_id, start_date, end_date, description FROM work_history WHERE (colleague_id=@colleague_id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        List<string> list = new List<string>();
+
+                        string s;
+                        while (r.Read())
+                        {
+                            s = r.GetInt32(1) + "\\"; //record id
+                            s += r.GetInt32(3) + "\\"; //employer id
+                            s += r.GetInt32(4) + "\\"; //municipality id
+                            s += r.GetInt32(5) + "\\"; //state id
+
+                            s += r.GetDateTime(6) + "\\"; //start date
+                            s += r.GetDateTime(7) + "\\"; //end date (might be empty)
+
+                            s += r.GetString(8) + "\\"; //description (might be empty)
+
+                            list.Add(s);
+                        }
+
+                        return list;
+                    }
+                }
+            }
+        }
+
+
+        public static List<WorkData>? GetColleagueWorkHistory(Account account)
+        {
+            if (account == null || account.ID < 0)
+                return null;
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT id, colleague_id, employer_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleague_id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", account.ID);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        List<WorkData> list = new List<WorkData>();
+
+                        while (r.Read())
+                        {
+                            WorkData wd = new WorkData(account, r.GetInt32(1));
+                            wd.EmployerID = r.GetInt32(3);
+                            wd.Location = new Location(r.GetInt32(4), r.GetInt32(5));
+
+                            wd.StartDate = Utilities.ToDateOnly(r.GetDateTime(6));
+                            wd.EndDate = Utilities.ToDateOnly(r.GetDateTime(7));
+
+                            wd.Description = r.GetString(8);
+
+                            list.Add(wd);
+                        }
+
+                        return list;
+                    }
+                }
+            }
+        }
         #endregion
 
         /*

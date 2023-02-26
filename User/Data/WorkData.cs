@@ -4,9 +4,13 @@
     {
         public string Employer { get; set; }
 
+        public int EmployerID { get; set; }
+
         public Location Location { get; set; }
 
         public string JobTitle { get; set; }
+
+        public int JobTitleID { get; set; }
 
         public DateOnly StartDate { get; set; }
 
