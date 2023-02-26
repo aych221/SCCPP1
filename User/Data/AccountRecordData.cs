@@ -6,6 +6,7 @@
 
         public int RecordID { get; set; }
 
+
         public AccountRecordData(Account owner, int id = -1)
         {
             this.Owner = owner;
