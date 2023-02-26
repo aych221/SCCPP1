@@ -3,29 +3,82 @@
 @{
     ViewData["Title"] = "Create Main Profile";
 }
-<h1>@ViewData["Title"]</h1>
 
-<!--<p>Use this page to create your main profile. Only seen once upon initial login for user to first create their main profile. </p>-->
-<h3>Create Main Profile</h3>
+<!-- This page is used to create the user's profile. Will only be seen once upon inital login. -->
 
-<div class="container">
+<style>
+    body 
+    {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    * 
+    {
+        box-sizing: border-box;
+    }
+
+    input[type=text], select, textarea 
+    {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        margin-top: 6px;
+        margin-bottom: 16px;
+        resize: vertical;
+    }
+
+    input[type=submit] 
+    {
+        background-color: #04AA6D;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    input[type=submit]:hover 
+    {
+        background-color: #45a049;
+    }
+
+    .profile 
+    {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        padding: 20px;
+    }
+</style>
+
+<h1>Create Your Profile</h1>
+
+<!-- This section is for the About part of the profile -->
+<div class="profile">
+    <form action ="/action_page.php">
+        <fieldset>
+            <legend>About:</legend>
+
+            <label for="fname">First Name</label>
+            <input type="text" id="fname" name="firstname" placeholder="Your first name...">
+            <br>
+
+            <label for="lname">Last Name</label>
+            <input type="text" id="lname" name="lastname" placeholder="Your last name...">
+            <br>
+
+            <label for="lname">Middle Initial</label>
+            <input type="text" id="minitial" name="middleinitial" placeholder="Your middle initial...">
+            <br>
+
+            <label for="aboutme">About</label>
+            <textarea id="about" name="about" placeholder="Tell me about yourself..." style="height:200px"></textarea>
+            <br>
+        </fieldset>
+    </form>
+    
     <form>
-    <label for="fname">First Name</label>
-    <input type="text" id="fname" name="firstname" placeholder="Enter your first name...">
-    <br>
-
-    <label for="lname">Last Name</label>
-    <input type="text" id="lname" name="lastname" placeholder="Enter your last name...">
-    <br>
-
-    <label for="lname">Middle Initial</label>
-    <input type="text" id="minitial" name="middleinitial" placeholder="Enter your middle initial...">
-    <br>
-
-    <label for="aboutme">About</label>
-    <textarea id="about" name="about" placeholder="Tell me about yourself..." style="height:200px"></textarea>
-    <br>
-
     <label for="skill">Skill</label>
     <textarea id="skill" name="skill" placeholder="Tell us what skills you possess..." style="height:200px"></textarea>
     <br>
