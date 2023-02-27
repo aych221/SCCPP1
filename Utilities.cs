@@ -20,22 +20,24 @@ namespace SCCPP1
             return s.ToString();
         }
 
-        //TODO
         public static DateOnly ToDateOnly(string input)
         {
-            return new();
+            DateOnly date = new DateOnly();
+            bool pass = DateOnly.TryParse(input, out date); //need to set a fail condition
+            return date;
         }
 
         //TODO
         public static DateOnly ToDateOnly(DateTime input)
         {
-            return new();
+            //DateOnly date = DateOnly.FromDateTime(input);
+            return DateOnly.FromDateTime(input);
         }
 
         //TODO
         public static DateTime FromDateOnly(DateOnly input)
         {
-            return new();
+            return input.ToDateTime(new TimeOnly(0, 0));
         }
 
     }

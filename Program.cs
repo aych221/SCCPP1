@@ -12,7 +12,7 @@ namespace SCCPP1
             DatabaseConnector.CreateDatabase();
 
             //test profile
-            DatabaseConnector.TestBrittany();
+            //DatabaseConnector.TestBrittany();
             /*
             if (true)
                 return;

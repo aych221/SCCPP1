@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using SCCPP1.User;
 
 namespace SCCPP1.Session
 {
@@ -65,6 +66,9 @@ namespace SCCPP1.Session
 
             _data = new SessionData(username);
 
+            //debug only
+            if (username.ToLower().Equals("debugbrittl"))
+                DatabaseConnector.SaveBrittany(new Account(_data, false));
         }
 
         public void Logout(PageModel pm)

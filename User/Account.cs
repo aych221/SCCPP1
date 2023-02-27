@@ -9,7 +9,7 @@ namespace SCCPP1.User
         private readonly SessionData _sessionData;
 
         //the colleague's database ID
-        public int ID { get; set; }
+        public int RecordID { get; set; }
 
         //0 = admin, 1 = normal user
         public int Role { get; set; }
