@@ -5,8 +5,14 @@
     },
     "sqlite1": {
       "secretStore": "LocalSecretsFile",
+      "resourceId": null,
       "type": "sqlite.local",
-      "connectionId": "CPPDatabase.db",
+      "connectionId": "CPPDatabase.db"
+    },
+    "mssql1": {
+      "secretStore": "LocalSecretsFile",
+      "type": "mssql.local",
+      "connectionId": "ConnectionStrings:DefaultConnection",
       "dynamicId": null
     }
   }

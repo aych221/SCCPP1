@@ -5,7 +5,11 @@
     },
     "sqlite1": {
       "type": "sqlite",
-      "connectionId": "CPPDatabase.db",
+      "connectionId": "CPPDatabase.db"
+    },
+    "mssql1": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:DefaultConnection",
       "dynamicId": null
     }
   }

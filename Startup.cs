@@ -13,12 +13,14 @@ namespace SCCPP1
 
             //services.AddSingleton<SessionData>();
             services.AddSingleton<SessionHandler>();
+            services.AddSingleton<SessionModel>();
 
             //this line was from original template code
             services.AddRazorPages();
 
             services.AddDistributedMemoryCache();
             services.AddDataProtection();
+
             services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -62,7 +64,7 @@ namespace SCCPP1
                 //continue request if session exists
                 await next();
             });*/
-
+            
             app.UseRouting();
 
             //session auth
