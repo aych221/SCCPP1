@@ -1,87 +1,50 @@
-using Microsoft.AspNetCore.Session;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.UI;
+using SCCPP1;
+using SCCPP1.Session;
 
-namespace SCCPP1
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+
+builder.Services.AddAuthorization(options =>
 {
+    // By default, all incoming requests will be authorized according to the default policy.
+    options.FallbackPolicy = options.DefaultPolicy;
+});
+builder.Services.AddRazorPages()
+    .AddMicrosoftIdentityUI();
+builder.Services.AddSingleton<SessionHandler>();
+builder.Services.AddSingleton<SessionModel>();
 
+var app = builder.Build();
 
-    public class Program
-    {
-        //test commit
-        public static void Main(string[] args)
-        {
-            DatabaseConnector.CreateDatabase();
-
-            //test profile
-            //DatabaseConnector.TestBrittany();
-            /*
-            if (true)
-                return;
-            //*/
-
-            CreateHostBuilder(args).Build().Run();
-        }
-
-
-        //this code was modified/restructured from the original template code
-        public static IHostBuilder CreateHostBuilder(string[] args)
-        {
-            IHostBuilder builder = Host.CreateDefaultBuilder(args);
-
-            builder.ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder.UseStartup<Startup>();
-            });
-            return builder;
-        }
-
-    }
-
-
-    /*public class Program
-	{
-
-		/*public static void Main(string[] args)
-		{
-            var builder = WebApplication.CreateBuilder(args);
-
-            builder.Services.AddRazorPages();
-            builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddSession(options =>
-            {
-                options.IdleTimeout = TimeSpan.FromMinutes(30);
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-            });
-
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
-
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseSession();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.MapRazorPages();
-
-            app.Run();
-        }
-
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-           Host.CreateDefaultBuilder(args)
-               .ConfigureWebHostDefaults(webBuilder =>
-               {
-                   webBuilder.UseStartup<Startup>();
-               });
-		}*/
-
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapRazorPages();
+app.MapControllers();
+
+app.Run();
+
+DatabaseConnector.CreateDatabase();
+

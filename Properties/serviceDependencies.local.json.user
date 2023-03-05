@@ -1,5 +1,13 @@
 {
   "dependencies": {
+    "mssql1": {
+      "restored": true,
+      "restoreTime": "2023-03-05T20:34:01.8303181Z"
+    },
+    "identityapp1": {
+      "restored": true,
+      "restoreTime": "2023-03-05T20:29:19.0976424Z"
+    },
     "secrets1": {
       "restored": true,
       "restoreTime": "2023-02-05T03:07:16.6685481Z"
