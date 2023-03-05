@@ -18,7 +18,7 @@
         public string Description { get; set; }
 
 
-        public EducationData(Account owner, int id) : base(owner, id)
+        public EducationData(Account owner, int id = -1) : base(owner, id)
         {
 
         }

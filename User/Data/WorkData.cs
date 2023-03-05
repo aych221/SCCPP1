@@ -19,7 +19,7 @@
         public string Description { get; set; }
 
 
-        public WorkData(Account owner, int id) : base(owner, id)
+        public WorkData(Account owner, int id = -1) : base(owner, id)
         {
 
         }

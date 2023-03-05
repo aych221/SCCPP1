@@ -79,10 +79,10 @@ namespace SCCPP1
                         {
 
                             //(column#, dataOffset, char array, buffer offset, char length)
-                            r.GetChars(3, 0, c, 0, 2);
+                            r.GetChars(2, 0, c, 0, 2);
 
                             //loads the ID as the key and the value as the string
-                            table.TryAdd(r.GetInt32(1), c + "" + r.GetString(2));
+                            table.TryAdd(GetInt32(r, 0), c + "" + GetString(r, 1));
                         }
 
                         states = table;
@@ -118,7 +118,7 @@ namespace SCCPP1
                         while (!r.Read())
                         {
                             //loads the ID as the key and the value as the string
-                            table.TryAdd(r.GetInt32(1), r.GetString(2));
+                            table.TryAdd(GetInt32(r, 0), GetString(r, 1));
                         }
 
                         return table;
@@ -206,7 +206,7 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@user", Utilities.ToSHA256Hash(sessionData.Username));
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
 
                         //could not find account.
@@ -218,10 +218,10 @@ namespace SCCPP1
                         //load new instance with basic colleague information
                         Account a = new Account(sessionData, true);
 
-                        a.RecordID = r.GetInt32(1);
-                        a.Role = r.GetInt32(2);
-                        a.Name = r.GetString(3);
-                        a.Email = r.GetString(4);
+                        a.RecordID = GetInt32(r, 0);
+                        a.Role = GetInt32(r, 1);
+                        a.Name = GetString(r, 2);
+                        a.Email = GetString(r, 3);
 
                         sessionData.Owner = a;
 
@@ -246,10 +246,10 @@ namespace SCCPP1
                     cmd.Parameters.AddWithValue("@role", role);
                     cmd.Parameters.AddWithValue("@name", name);
                     cmd.Parameters.AddWithValue("@email", email);
-                    cmd.Parameters.AddWithValue("@phone", phone);
-                    cmd.Parameters.AddWithValue("@address", address);
-                    cmd.Parameters.AddWithValue("@intro_narrative", introNarrative);
-                    cmd.Parameters.AddWithValue("@main_profile_id", mainProfileID);
+                    cmd.Parameters.AddWithValue("@phone", ValueCleaner(phone));
+                    cmd.Parameters.AddWithValue("@address", ValueCleaner(address));
+                    cmd.Parameters.AddWithValue("@intro_narrative", ValueCleaner(introNarrative));
+                    cmd.Parameters.AddWithValue("@main_profile_id", ValueCleaner(mainProfileID));
 
                     object? accountID = cmd.ExecuteScalar();
 
@@ -285,10 +285,10 @@ namespace SCCPP1
                     cmd.Parameters.AddWithValue("@role", role);
                     cmd.Parameters.AddWithValue("@name", name);
                     cmd.Parameters.AddWithValue("@email", email);
-                    cmd.Parameters.AddWithValue("@phone", phone);
-                    cmd.Parameters.AddWithValue("@address", address);
-                    cmd.Parameters.AddWithValue("@intro_narrative", introNarrative);
-                    cmd.Parameters.AddWithValue("@main_profile_id", mainProfileID);
+                    cmd.Parameters.AddWithValue("@phone", ValueCleaner(phone));
+                    cmd.Parameters.AddWithValue("@address", ValueCleaner(address));
+                    cmd.Parameters.AddWithValue("@intro_narrative", ValueCleaner(introNarrative));
+                    cmd.Parameters.AddWithValue("@main_profile_id", ValueCleaner(mainProfileID));
 
                     return cmd.ExecuteNonQuery();
                 }
@@ -327,7 +327,7 @@ namespace SCCPP1
             if (account.IsReturning)
                 return SaveUser(account.RecordID, account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID);
             
-            return SaveUser(account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID) >= 0;
+            return (account.RecordID = SaveUser(account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID)) >= 0;
         }
 
 
@@ -343,7 +343,7 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
                             return true;
@@ -366,10 +366,10 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(userID));
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
-                            return r.GetInt32(0);
+                            return GetInt32(r, 0);
                         return -1;
                     }
                 }
@@ -386,7 +386,7 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@user", Utilities.ToSHA256Hash(username));
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleRow))
                     {
 
                         //could not find account.
@@ -394,7 +394,7 @@ namespace SCCPP1
                         if (!r.Read())
                             return -1;
 
-                        return r.GetInt32(1);
+                        return GetInt32(r, 0);
                     }
                 }
             }
@@ -415,7 +415,7 @@ namespace SCCPP1
                     {
                         while (r.Read())
                         {
-                            Console.WriteLine($"'{r.GetString(1)}', '{r.GetString(2)}'");//user
+                            Console.WriteLine($"'{GetString(r, 1)}', '{GetString(r, 2)}'");//user
                         }
 
                     }
@@ -434,7 +434,7 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@user_hash", userID);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleRow))
                     {
 
                         //could not find account.
@@ -446,14 +446,14 @@ namespace SCCPP1
                         //load new instance with basic colleague information
                         Account a = new Account(null, true);
 
-                        a.RecordID = r.GetInt32(1);
-                        a.Role = r.GetInt32(2);
-                        a.Name = r.GetString(3);
-                        a.Email = r.GetString(4);
-                        a.Phone = r.GetInt32(5);
-                        a.Address = r.GetString(6);
-                        a.IntroNarrative = r.GetString(7);
-                        a.MainProfileID = r.GetInt32(8);
+                        a.RecordID = GetInt32(r, 0);
+                        a.Role = GetInt32(r, 1);
+                        a.Name = GetString(r, 2);
+                        a.Email = GetString(r, 3);
+                        a.Phone = GetInt32(r, 4);
+                        a.Address = GetString(r, 5);
+                        a.IntroNarrative = GetString(r, 6);
+                        a.MainProfileID = GetInt32(r, 7);
 
                         return a;
                     }
@@ -472,7 +472,7 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleRow))
                     {
 
                         //could not find account.
@@ -484,14 +484,14 @@ namespace SCCPP1
                         //load new instance with basic colleague information
                         Account a = new Account(null, true);
 
-                        a.RecordID = r.GetInt32(1);
-                        a.Role = r.GetInt32(2);
-                        a.Name = r.GetString(3);
-                        a.Email = r.GetString(4);
-                        a.Phone = r.GetInt32(5);
-                        a.Address = r.GetString(6);
-                        a.IntroNarrative = r.GetString(7);
-                        a.MainProfileID = r.GetInt32(8);
+                        a.RecordID = GetInt32(r, 1);
+                        a.Role = GetInt32(r, 2);
+                        a.Name = GetString(r, 3);
+                        a.Email = GetString(r, 4);
+                        a.Phone = GetInt32(r, 5);
+                        a.Address = GetString(r, 6);
+                        a.IntroNarrative = GetString(r, 7);
+                        a.MainProfileID = GetInt32(r, 8);
 
                         return a;
                     }
@@ -608,10 +608,10 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
-                            return r.GetString(1);
+                            return GetString(r, 0);
 
                         return null;
                     }
@@ -633,10 +633,10 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@name", skillName);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
-                            return r.GetInt32(1);
+                            return GetInt32(r, 0);
 
                         return -1;
                     }
@@ -671,7 +671,7 @@ namespace SCCPP1
                     using (SqliteDataReader r = cmd.ExecuteReader())
                     {
                         while (r.Read())
-                            skillNameResults[r.GetString(1)] = r.GetInt32(2);
+                            skillNameResults[GetString(r, 0)] = GetInt32(r, 1);
 
                         for (int i = 0; i < skillNames.Length; i++)
                             skillIDs[i] = skillNameResults[skillNames[i]];
@@ -711,7 +711,7 @@ namespace SCCPP1
                     using (SqliteDataReader r = cmd.ExecuteReader())
                     {
                         while (r.Read())
-                            skillNameResults[r.GetString(1)] = r.GetInt32(2);
+                            skillNameResults[GetString(r, 0)] = GetInt32(r, 1);
 
                         for (int i = 0; i < skillNames.Length; i++)
                         {
@@ -783,9 +783,9 @@ namespace SCCPP1
                         string s;
                         while (r.Read())
                         {
-                            s = r.GetInt32(1) + "\\"; //colleage skill id
-                            s += r.GetInt32(3) + "\\"; //skill id
-                            s += r.GetInt32(4) + ""; //rating for skill
+                            s = GetInt32(r, 0) + "\\"; //colleage skill id
+                            s += GetInt32(r, 2) + "\\"; //skill id
+                            s += GetInt32(r, 3) + ""; //rating for skill
 
                             list.Add(s);
                         }
@@ -872,7 +872,7 @@ namespace SCCPP1
         {
             int educationTypeID = SaveEducationType(educationType),
                 institutionID = SaveInstitution(institutionName);
-
+            Thread.Sleep(1);
             if (ExistsEducationHistory(id))
                 return UpdateEducationHistory(id, colleagueID, educationTypeID, institutionID, municipalityID, stateID, startDate, endDate, description) >= 0;
             return InsertEducationHistory(colleagueID, educationTypeID, institutionID, municipalityID, stateID, startDate, endDate, description) >= 0;
@@ -893,10 +893,11 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@type", educationType);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
-                            return r.GetInt32(1);
+                            return GetInt32(r, 0);
 
                         return -1;
                     }
@@ -913,10 +914,10 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
-                            return r.GetString(1);
+                            return GetString(r, 0);
 
                         return null;
                     }
@@ -974,10 +975,10 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
-                            return r.GetString(1);
+                            return GetString(r, 0);
 
                         return null;
                     }
@@ -994,10 +995,10 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@name", institutionName);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
-                            return r.GetInt32(1);
+                            return GetInt32(r, 0);
 
                         return -1;
                     }
@@ -1056,7 +1057,7 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
                             return true;
@@ -1079,19 +1080,21 @@ namespace SCCPP1
                     {
                         List<string> list = new List<string>();
 
+                        Console.WriteLine($"Attempting to fetch Education record for {colleagueID}");
                         string s;
                         while (r.Read())
                         {
-                            s = r.GetInt32(1) + "\\"; //record id
-                            s += r.GetInt32(3) + "\\"; //education type id
-                            s += r.GetInt32(4) + "\\"; //institution id
-                            s += r.GetInt32(5) + "\\"; //municipality id
-                            s += r.GetInt32(6) + "\\"; //state id
+                            s = GetInt32(r, 0) + "\\"; //record id
+                            s += GetInt32(r, 2) + "\\"; //education type id
+                            s += GetInt32(r, 3) + "\\"; //institution id
+                            s += GetInt32(r, 4) + "\\"; //municipality id
+                            s += GetInt32(r, 5) + "\\"; //state id
 
-                            s += r.GetDateTime(7) + "\\"; //start date
-                            s += r.GetDateTime(8) + "\\"; //end date (might be empty)
+                            s += GetDateOnly(r, 6).ToString() + "\\"; //start date
+                            s += GetDateOnly(r, 7).ToString() + "\\"; //end date (might be empty)
 
-                            s += r.GetString(9) + "\\"; //description (might be empty)
+                            s += GetString(r, 8) + "\\"; //description (might be empty)
+                            Console.WriteLine(GetInt32(r, 0) + " record");
 
                             list.Add(s);
                         }
@@ -1121,15 +1124,15 @@ namespace SCCPP1
 
                         while (r.Read())
                         {
-                            EducationData ed = new EducationData(account, r.GetInt32(1));
-                            ed.EducationTypeID = r.GetInt32(3);
-                            ed.InstitutionID = r.GetInt32(4);
-                            ed.Location = new Location(r.GetInt32(5), r.GetInt32(6));
+                            EducationData ed = new EducationData(account, GetInt32(r, 0));
+                            ed.EducationTypeID = GetInt32(r, 2);
+                            ed.InstitutionID = GetInt32(r, 3);
+                            ed.Location = new Location(GetInt32(r, 4), GetInt32(r, 5));
 
-                            ed.StartDate = Utilities.ToDateOnly(r.GetDateTime(7));
-                            ed.EndDate = Utilities.ToDateOnly(r.GetDateTime(8));
+                            ed.StartDate = GetDateOnly(r, 6);
+                            ed.EndDate = GetDateOnly(r,7);
 
-                            ed.Description = r.GetString(9);
+                            ed.Description = GetString(r, 8);
 
                             list.Add(ed);
                         }
@@ -1189,18 +1192,20 @@ namespace SCCPP1
                     cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
                     cmd.Parameters.AddWithValue("@employer_id", employerID);
                     cmd.Parameters.AddWithValue("@job_title_id", jobTitleID);
-                    cmd.Parameters.AddWithValue("@municipality_id", municipalityID);
-                    cmd.Parameters.AddWithValue("@state_id", stateID);
-                    cmd.Parameters.AddWithValue("@start_date", startDate);
-                    cmd.Parameters.AddWithValue("@end_date", endDate);
-                    cmd.Parameters.AddWithValue("@description", description);
+                    cmd.Parameters.AddWithValue("@municipality_id", ValueCleaner(municipalityID));
+                    cmd.Parameters.AddWithValue("@state_id", ValueCleaner(stateID));
+                    cmd.Parameters.AddWithValue("@start_date", ValueCleaner(startDate));
+                    cmd.Parameters.AddWithValue("@end_date", ValueCleaner(endDate));
+                    cmd.Parameters.AddWithValue("@description", ValueCleaner(description));
 
-
+                    Console.WriteLine("Saving Work History...");
+                    //TODO fix empty values
                     object? workID = cmd.ExecuteScalar();
 
                     if (workID == null)
                         return -1;
 
+                    Console.WriteLine("Saved Work History!");
                     return Convert.ToInt32(workID);//return record ID
                 }
             }
@@ -1226,11 +1231,11 @@ namespace SCCPP1
                     cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
                     cmd.Parameters.AddWithValue("@employer_id", employerID);
                     cmd.Parameters.AddWithValue("@job_title_id", jobTitleID);
-                    cmd.Parameters.AddWithValue("@municipality_id", municipalityID);
-                    cmd.Parameters.AddWithValue("@state_id", stateID);
-                    cmd.Parameters.AddWithValue("@start_date", startDate);
-                    cmd.Parameters.AddWithValue("@end_date", endDate);
-                    cmd.Parameters.AddWithValue("@description", description);
+                    cmd.Parameters.AddWithValue("@municipality_id", ValueCleaner(municipalityID));
+                    cmd.Parameters.AddWithValue("@state_id", ValueCleaner(stateID));
+                    cmd.Parameters.AddWithValue("@start_date", ValueCleaner(startDate));
+                    cmd.Parameters.AddWithValue("@end_date", ValueCleaner(endDate));
+                    cmd.Parameters.AddWithValue("@description", ValueCleaner(description));
 
                     return cmd.ExecuteNonQuery();//rows affected
                 }
@@ -1255,7 +1260,7 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
                             return true;
@@ -1281,13 +1286,13 @@ namespace SCCPP1
 
         public static bool SaveWorkHistory(WorkData wd)
         {
-            SaveEmployer(wd.Employer);
-            SaveJobTitle(wd.JobTitle);
+            wd.EmployerID = SaveEmployer(wd.Employer);
+            wd.JobTitleID = SaveJobTitle(wd.JobTitle);
 
             if (ExistsWorkHistory(wd.RecordID))
-                return UpdateWorkHistory(wd) >= 0;
+                return (wd.RecordID = UpdateWorkHistory(wd)) >= 0;
 
-            return InsertWorkHistory(wd) >= 0;
+            return (wd.RecordID = InsertWorkHistory(wd)) >= 0;
         }
 
         #region Employer
@@ -1300,10 +1305,10 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@name", employer);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
-                            return r.GetInt32(1);
+                            return GetInt32(r, 0);
 
                         return -1;
                     }
@@ -1320,10 +1325,10 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
-                            return r.GetString(1);
+                            return GetString(r, 0);
 
                         return null;
                     }
@@ -1345,7 +1350,7 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@name", name);
-
+                    Console.WriteLine("Inserted:");
 
                     object? employerID = cmd.ExecuteScalar();
 
@@ -1381,10 +1386,10 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
-                            return r.GetString(1);
+                            return GetString(r, 0);
 
                         return null;
                     }
@@ -1401,10 +1406,10 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@title", title);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
-                            return r.GetInt32(1);
+                            return GetInt32(r, 0);
 
                         return -1;
                     }
@@ -1467,19 +1472,20 @@ namespace SCCPP1
                     {
                         List<string> list = new List<string>();
 
+                        Console.WriteLine($"Attempting to fetch Work record for {colleagueID}");
                         string s;
                         while (r.Read())
                         {
-                            s = r.GetInt32(1) + "\\"; //record id
-                            s += r.GetInt32(3) + "\\"; //employer id
-                            s += r.GetInt32(4) + "\\"; // job title id
-                            s += r.GetInt32(5) + "\\"; //municipality id
-                            s += r.GetInt32(6) + "\\"; //state id
+                            s = GetInt32(r, 0) + "\\"; //record id
+                            s += GetInt32(r, 2) + "\\"; //employer id
+                            s += GetInt32(r, 3) + "\\"; // job title id
+                            s += GetInt32(r, 4) + "\\"; //municipality id
+                            s += GetInt32(r, 5) + "\\"; //state id
 
-                            s += r.GetDateTime(7) + "\\"; //start date
-                            s += r.GetDateTime(8) + "\\"; //end date (might be empty)
+                            s += r.GetDateTime(6) + "\\"; //start date
+                            s += r.GetDateTime(7) + "\\"; //end date (might be empty)
 
-                            s += r.GetString(9) + ""; //description (might be empty)
+                            s += GetString(r, 8) + ""; //description (might be empty)
 
                             list.Add(s);
                         }
@@ -1509,15 +1515,15 @@ namespace SCCPP1
 
                         while (r.Read())
                         {
-                            WorkData wd = new WorkData(account, r.GetInt32(1));
-                            wd.EmployerID = r.GetInt32(3);
-                            wd.JobTitleID = r.GetInt32(4);
-                            wd.Location = new Location(r.GetInt32(5), r.GetInt32(6));
+                            WorkData wd = new WorkData(account, GetInt32(r, 0));
+                            wd.EmployerID = GetInt32(r, 2);
+                            wd.JobTitleID = GetInt32(r, 3);
+                            wd.Location = new Location(GetInt32(r, 4), GetInt32(r, 5));
 
-                            wd.StartDate = Utilities.ToDateOnly(r.GetDateTime(7));
-                            wd.EndDate = Utilities.ToDateOnly(r.GetDateTime(8));
+                            wd.StartDate = Utilities.ToDateOnly(r.GetDateTime(6));
+                            wd.EndDate = Utilities.ToDateOnly(r.GetDateTime(7));
 
-                            wd.Description = r.GetString(9);
+                            wd.Description = GetString(r, 8);
 
                             list.Add(wd);
                         }
@@ -1534,7 +1540,41 @@ namespace SCCPP1
 
 
         #endregion
+        public static List<string> PrintRecords(string table)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = $"SELECT * FROM {table};";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        List<string> list = new List<string>();
 
+                        Console.WriteLine($"Attempting to fetch {table} records...");
+                        string s;
+                        while (r.Read())
+                        {
+                            s = "";
+                            for (int i = 0; i < r.FieldCount; i++)
+                            {
+                                r.GetOrdinal(r.GetName(i));
+                                s += $"{r.GetOrdinal(r.GetName(i))}:{r[i]}\\";
+                            }
+                            list.Add(s);
+                        }
+
+
+                        return list;
+                    }
+                }
+            }
+        }
+
+        #region Debugging
+
+        #endregion
         public static void TestBrittany()
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -1590,24 +1630,24 @@ namespace SCCPP1
             account.Address = "123 Main St";
             account.IntroNarrative = "Brittany Langosh has been a Product Manager...";
 
-            EducationData ed1 = new EducationData(account, 1),
-                ed2 = new EducationData(account, 2),
-                ed3 = new EducationData(account, 3);
+            EducationData ed1 = new EducationData(account),
+                ed2 = new EducationData(account),
+                ed3 = new EducationData(account);
 
             ed1.EducationType = "Masters of Business Administration";
             ed1.Description = "in Crypto";
             ed1.Institution = "Harvard";
             ed1.StartDate = Utilities.ToDateOnly("August 18 1993");
 
-            ed1.EducationType = "Bachelor of Arts";
-            ed1.Description = "in Computer Design";
-            ed1.Institution = "Aiken Technical College";
-            ed1.StartDate = Utilities.ToDateOnly("August 15 1990");
+            ed2.EducationType = "Bachelor of Arts";
+            ed2.Description = "in Computer Design";
+            ed2.Institution = "Aiken Technical College";
+            ed2.StartDate = Utilities.ToDateOnly("August 15 1990");
 
-            ed1.EducationType = "Scrum Master";
-            ed1.Description = "in my Mom's Kitchen";
-            ed1.Institution = "North Augusta High School";
-            ed1.StartDate = Utilities.ToDateOnly("August 8 1980");
+            ed3.EducationType = "Scrum Master";
+            ed3.Description = "in my Mom's Kitchen";
+            ed3.Institution = "North Augusta High School";
+            ed3.StartDate = Utilities.ToDateOnly("August 8 1980");
 
 
             WorkData wd1 = new WorkData(account, 1),
@@ -1624,9 +1664,9 @@ namespace SCCPP1
             wd2.EndDate = Utilities.ToDateOnly("April 1 2023");
 
 
-            SkillData sd1 = new SkillData(account, 1),
-                sd2 = new SkillData(account, 2),
-                sd3 = new SkillData(account, 3);
+            SkillData sd1 = new SkillData(account),
+                sd2 = new SkillData(account),
+                sd3 = new SkillData(account);
 
             sd1.Skill = "Java";
             sd2.Skill = "C#";
@@ -1639,6 +1679,18 @@ namespace SCCPP1
             SaveEducationHistory(ed1);
             SaveEducationHistory(ed2);
             SaveEducationHistory(ed3);
+            Console.WriteLine("Saved!");
+            foreach (string s in GetRawColleagueEducationHistory(account.RecordID))
+                Console.WriteLine(s);
+            foreach (string s in GetRawColleagueWorkHistory(account.RecordID))
+                Console.WriteLine(s);
+
+            foreach (string s in PrintRecords("work_history"))
+                Console.WriteLine(s);
+            foreach (string s in PrintRecords("education_history"))
+                Console.WriteLine(s);
+            foreach (string s in PrintRecords("colleagues"))
+                Console.WriteLine(s);
         }
         public static void TestBrittany2()
         {
@@ -1712,7 +1764,52 @@ namespace SCCPP1
 
 
         }
-        
+
+        private static object ValueCleaner(int val)
+        {
+            if (val == 0)
+                return DBNull.Value;
+
+            return val;
+        }
+
+        private static object ValueCleaner(string val)
+        {
+            if (val == null)
+                return DBNull.Value;
+
+            return val;
+        }
+
+        private static object ValueCleaner(DateOnly? val)
+        {
+            if (val == null)
+                return DBNull.Value;
+
+            return val;
+        }
+
+        private static int GetInt32(SqliteDataReader r, int ordinal)
+        {
+            if (r.IsDBNull(ordinal))
+                return -1;
+            return r.GetInt32(ordinal);
+        }
+
+        private static string GetString(SqliteDataReader r, int ordinal)
+        {
+            if (r.IsDBNull(ordinal))
+                return null;
+            return r.GetString(ordinal);
+        }
+
+        private static DateOnly GetDateOnly(SqliteDataReader r, int ordinal)
+        {
+            if (r.IsDBNull(ordinal))
+                return DateOnly.MinValue;
+            return Utilities.ToDateOnly(r.GetDateTime(ordinal));
+        }
+
         /*private static void AddWithValueOrNull(SqliteCommand cmd, string variable, object? value)
         {
             if (value == null)

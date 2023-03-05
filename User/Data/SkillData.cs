@@ -7,7 +7,7 @@
 
         public int Rating { get; set; }
 
-        public SkillData(Account owner, int id) : base(owner, id)
+        public SkillData(Account owner, int id = -1) : base(owner, id)
         {
 
         }
