@@ -3,7 +3,78 @@
 @{
     ViewData["Title"] = "User Home";
 }
-<h1>@ViewData["Title"]</h1>
+<style>
+    /**CSS Dropdown styling for links to other pages*/
+    .dropdown {
+        position: right;
+        display: inline-block;
+    }
 
-<p>Landing page for the user upon login after main profile has been first created. Main profile and any sub profiles created will be viewable here and will have functionality for editing.</p>
+    .dropdown-content {
+        display: none;
+        position: inherit;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+    }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+            .dropdown-content a:hover {
+                background-color: #ddd;
+            }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    .dropdown:hover .dropbtn {
+        background-color: #3e8e41;
+    }
+</style>
+
+<html>
+<head>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script> <!--Icon reference-->
+    <!--Get your own code at fontawesome.com-->
+</head>
+<body>
+    <h1>@ViewData["Title"]</h1>
+
+    <br>
+    <h1>Main Profile</h1>
+    <br>
+
+    <div class=" dropdown">
+        <i style='font-size:120px' class='far'>&#xf15c;</i> <!--Unicode for page icon-->
+        <div class="dropdown-content">
+            <a href="EditMainProfile">Edit Main Profile</a>
+            <a href="ViewPDF">View as PDF</a>
+        </div>
+    </div>
+
+    <br>
+    <br>
+    <h1>Sub Profile</h1>
+    <br>
+    <div class=" dropdown">
+        <i style='font-size:120px' class='far'>&#xf15c;</i> <!--Unicode for page icon-->
+        <div class="dropdown-content">
+            <a href="EditSubProfile">Edit Sub Profile</a>
+            <a href="ViewPDF">View as PDF</a>
+        </div>
+    </div>
+    <br>
+    <br>
+    <a href="CreateSubProfile"> <button style='font-size:24px'> Create Sub-Profile </button></a>
+
+</body>
+</html>
 

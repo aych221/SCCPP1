@@ -820,17 +820,19 @@ namespace SCCPP1
                     cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
                     cmd.Parameters.AddWithValue("@education_type_id", educationTypeID);
                     cmd.Parameters.AddWithValue("@institution_id", institutionID);
-                    cmd.Parameters.AddWithValue("@municipality_id", municipalityID);
-                    cmd.Parameters.AddWithValue("@state_id", stateID);
-                    cmd.Parameters.AddWithValue("@start_date", startDate);
-                    cmd.Parameters.AddWithValue("@end_date", endDate);
-                    cmd.Parameters.AddWithValue("@description", description);
+                    cmd.Parameters.AddWithValue("@municipality_id", ValueCleaner(municipalityID));
+                    cmd.Parameters.AddWithValue("@state_id", ValueCleaner(stateID));
+                    cmd.Parameters.AddWithValue("@start_date", ValueCleaner(startDate));
+                    cmd.Parameters.AddWithValue("@end_date", ValueCleaner(endDate));
+                    cmd.Parameters.AddWithValue("@description", ValueCleaner(description));
 
-
+                    Console.WriteLine($"Inserting education_history for {colleagueID} edutypeid: {educationTypeID}, instid: {institutionID}...");
                     object? educationID = cmd.ExecuteScalar();
 
                     if (educationID == null)
                         return -1;
+
+                    Console.WriteLine($"Inserted education_history for {colleagueID}, recordID: {Convert.ToInt32(educationID)}");
 
                     return Convert.ToInt32(educationID);//return record ID
                 }
@@ -857,11 +859,11 @@ namespace SCCPP1
                     cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
                     cmd.Parameters.AddWithValue("@education_type_id", educationTypeID);
                     cmd.Parameters.AddWithValue("@institution_id", institutionID);
-                    cmd.Parameters.AddWithValue("@municipality_id", municipalityID);
-                    cmd.Parameters.AddWithValue("@state_id", stateID);
-                    cmd.Parameters.AddWithValue("@start_date", startDate);
-                    cmd.Parameters.AddWithValue("@end_date", endDate);
-                    cmd.Parameters.AddWithValue("@description", description);
+                    cmd.Parameters.AddWithValue("@municipality_id", ValueCleaner(municipalityID));
+                    cmd.Parameters.AddWithValue("@state_id", ValueCleaner(stateID));
+                    cmd.Parameters.AddWithValue("@start_date", ValueCleaner(startDate));
+                    cmd.Parameters.AddWithValue("@end_date", ValueCleaner(endDate));
+                    cmd.Parameters.AddWithValue("@description", ValueCleaner(description));
                     return cmd.ExecuteNonQuery();//rows affected
                 }
             }
@@ -878,7 +880,7 @@ namespace SCCPP1
         {
             int educationTypeID = SaveEducationType(educationType),
                 institutionID = SaveInstitution(institutionName);
-            Thread.Sleep(1);
+            //Thread.Sleep(1);
             if (ExistsEducationHistory(id))
                 return UpdateEducationHistory(id, colleagueID, educationTypeID, institutionID, municipalityID, stateID, startDate, endDate, description) >= 0;
             return InsertEducationHistory(colleagueID, educationTypeID, institutionID, municipalityID, stateID, startDate, endDate, description) >= 0;
@@ -886,8 +888,17 @@ namespace SCCPP1
 
         public static bool SaveEducationHistory(EducationData ed)
         {
-            return SaveEducationHistory(ed.RecordID, ed.Owner.RecordID, ed.EducationType, ed.Institution, ed.Location.MunicipalityID, ed.Location.StateID, ed.StartDate, ed.EndDate, ed.Description);
+
+            ed.EducationTypeID = SaveEducationType(ed.EducationType);
+            ed.InstitutionID =  SaveInstitution(ed.Institution);
+
+            //Thread.Sleep(1);
+            if (ExistsEducationHistory(ed.RecordID))
+                return UpdateEducationHistory(ed) >= 0;
+            return (ed.RecordID = InsertEducationHistory(ed)) >= 0;
+            //return SaveEducationHistory(ed.RecordID, ed.Owner.RecordID, ed.EducationType, ed.Institution, ed.Location.MunicipalityID, ed.Location.StateID, ed.StartDate, ed.EndDate, ed.Description);
         }
+        
 
         #region Education Type
         public static int GetEducationTypeID(string educationType)
@@ -946,11 +957,13 @@ namespace SCCPP1
                 {
                     cmd.Parameters.AddWithValue("@type", type);
 
+                    Console.WriteLine($"Inserted education_type: {type}");
 
                     object? educationTypeID = cmd.ExecuteScalar();
 
                     if (educationTypeID == null)
                         return -1;
+                    Console.WriteLine($"Inserted education_type: id:{Convert.ToInt32(educationTypeID)}, {type}");
 
                     return Convert.ToInt32(educationTypeID);//return record ID
                 }
@@ -1025,12 +1038,15 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@name", name);
+                    Console.WriteLine($"Inserting institution: {name}");
 
 
                     object? institutionID = cmd.ExecuteScalar();
 
                     if (institutionID == null)
                         return -1;
+
+                    Console.WriteLine($"Inserted institution: id:{Convert.ToInt32(institutionID)}, {name}");
 
                     return Convert.ToInt32(institutionID);//return record ID
                 }
@@ -1086,7 +1102,7 @@ namespace SCCPP1
                     {
                         List<string> list = new List<string>();
 
-                        Console.WriteLine($"Attempting to fetch Education record for {colleagueID}");
+                        //Console.WriteLine($"Attempting to fetch Education record for {colleagueID}");
                         string s;
                         while (r.Read())
                         {
@@ -1100,7 +1116,7 @@ namespace SCCPP1
                             s += GetDateOnly(r, 7).ToString() + "\\"; //end date (might be empty)
 
                             s += GetString(r, 8) + "\\"; //description (might be empty)
-                            Console.WriteLine(GetInt32(r, 0) + " record");
+                            //Console.WriteLine(GetInt32(r, 0) + " record");
 
                             list.Add(s);
                         }
@@ -1204,18 +1220,19 @@ namespace SCCPP1
                     cmd.Parameters.AddWithValue("@end_date", ValueCleaner(endDate));
                     cmd.Parameters.AddWithValue("@description", ValueCleaner(description));
 
-                    Console.WriteLine("Saving Work History...");
+                    Console.WriteLine($"Inserting work_history for {colleagueID}...");
                     //TODO fix empty values
                     object? workID = cmd.ExecuteScalar();
 
                     if (workID == null)
                         return -1;
 
-                    Console.WriteLine("Saved Work History!");
+                    Console.WriteLine($"Inserted work_history for {colleagueID}, recordID: {Convert.ToInt32(workID)}");
                     return Convert.ToInt32(workID);//return record ID
                 }
             }
         }
+
 
         public static int InsertWorkHistory(WorkData wd)
         {
@@ -1296,7 +1313,7 @@ namespace SCCPP1
             wd.JobTitleID = SaveJobTitle(wd.JobTitle);
 
             if (ExistsWorkHistory(wd.RecordID))
-                return (wd.RecordID = UpdateWorkHistory(wd)) >= 0;
+                return UpdateWorkHistory(wd) >= 0;
 
             return (wd.RecordID = InsertWorkHistory(wd)) >= 0;
         }
@@ -1356,12 +1373,14 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@name", name);
-                    Console.WriteLine("Inserted:");
+                    Console.WriteLine($"Inserting employer: {name}");
 
                     object? employerID = cmd.ExecuteScalar();
 
                     if (employerID == null)
                         return -1;
+
+                    Console.WriteLine($"Inserted employer: id:{Convert.ToInt32(employerID)}, {name}");
 
                     return Convert.ToInt32(employerID);//return record ID
                 }
@@ -1438,11 +1457,13 @@ namespace SCCPP1
                 {
                     cmd.Parameters.AddWithValue("@title", title);
 
+                    Console.WriteLine($"Inserting job_title: {title}");
 
                     object? jobTitleID = cmd.ExecuteScalar();
 
                     if (jobTitleID == null)
                         return -1;
+                    Console.WriteLine($"Inserted job_title: id:{Convert.ToInt32(jobTitleID)}, {title}");
 
                     return Convert.ToInt32(jobTitleID);//return record ID
                 }
@@ -1478,7 +1499,7 @@ namespace SCCPP1
                     {
                         List<string> list = new List<string>();
 
-                        Console.WriteLine($"Attempting to fetch Work record for {colleagueID}");
+                        //Console.WriteLine($"Attempting to fetch Work record for {colleagueID}");
                         string s;
                         while (r.Read())
                         {
@@ -1565,7 +1586,7 @@ namespace SCCPP1
                             s = "";
                             for (int i = 0; i < r.FieldCount; i++)
                             {
-                                r.GetOrdinal(r.GetName(i));
+                                //r.GetOrdinal(r.GetName(i));
                                 s += $"{r.GetOrdinal(r.GetName(i))}:{r[i]}\\";
                             }
                             list.Add(s);
@@ -1656,8 +1677,8 @@ namespace SCCPP1
             ed3.StartDate = Utilities.ToDateOnly("August 8 1980");
 
 
-            WorkData wd1 = new WorkData(account, 1),
-                wd2 = new WorkData(account, 2);
+            WorkData wd1 = new WorkData(account),
+                wd2 = new WorkData(account);
 
             wd1.Employer = "The Kern Family Foundation";
             wd1.JobTitle = "Chair Sitting Assistant";
@@ -1680,21 +1701,27 @@ namespace SCCPP1
 
             SaveUser(account);
             //SaveSkill(")
+            Thread.Sleep(1);
+            SaveEducationHistory(ed1);
+            Thread.Sleep(1);
+            SaveEducationHistory(ed2);
+            Thread.Sleep(1);
+            SaveEducationHistory(ed3);
+            Thread.Sleep(1);
             SaveWorkHistory(wd1);
             SaveWorkHistory(wd2);
-            SaveEducationHistory(ed1);
-            SaveEducationHistory(ed2);
-            SaveEducationHistory(ed3);
             Console.WriteLine("Saved!");
-            foreach (string s in GetRawColleagueEducationHistory(account.RecordID))
+            /*foreach (string s in GetRawColleagueEducationHistory(account.RecordID))
                 Console.WriteLine(s);
             foreach (string s in GetRawColleagueWorkHistory(account.RecordID))
                 Console.WriteLine(s);
-
+            */
             foreach (string s in PrintRecords("work_history"))
                 Console.WriteLine(s);
+
             foreach (string s in PrintRecords("education_history"))
                 Console.WriteLine(s);
+
             foreach (string s in PrintRecords("colleagues"))
                 Console.WriteLine(s);
         }
@@ -1710,9 +1737,9 @@ namespace SCCPP1
             account.IntroNarrative = "Brittany Langosh has been a Product Manager...";
             //account.MainProfileID = 0;
 
-            EducationData ed1 = new EducationData(account, 1),
-                ed2 = new EducationData(account, 2),
-                ed3 = new EducationData(account, 3);
+            EducationData ed1 = new EducationData(account),
+                ed2 = new EducationData(account),
+                ed3 = new EducationData(account);
 
             ed1.EducationType = "Masters of Business Administration";
            
@@ -1846,7 +1873,7 @@ namespace SCCPP1
         ///Should only be used if the database is being completely reset or initially created.
         ///</summary>
         private const string dbSQL = @"
-
+        PRAGMA foreign_keys = 0;
         BEGIN TRANSACTION; 
         DROP TABLE IF EXISTS [colleagues];
         DROP TABLE IF EXISTS [municipalities];
@@ -1861,6 +1888,7 @@ namespace SCCPP1
         DROP TABLE IF EXISTS [colleague_skills];
         DROP TABLE IF EXISTS [profiles];
         COMMIT;
+        PRAGMA foreign_keys = 1;
 
         CREATE TABLE colleagues (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1901,7 +1929,7 @@ namespace SCCPP1
           institution_id INTEGER NOT NULL,
           municipality_id INTEGER,
           state_id INTEGER,
-          start_date DATE NOT NULL,
+          start_date DATE,
           end_date DATE,
           description TEXT,
           FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
@@ -1929,7 +1957,7 @@ namespace SCCPP1
           job_title_id INTEGER NOT NULL,
           municipality_id INTEGER,
           state_id INTEGER,
-          start_date DATE NOT NULL,
+          start_date DATE,
           end_date DATE,
           description TEXT,
           FOREIGN KEY (colleague_id) REFERENCES colleagues(id),

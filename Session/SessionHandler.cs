@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using SCCPP1.User;
+using System.Security.Claims;
 
 namespace SCCPP1.Session
 {
@@ -13,6 +14,10 @@ namespace SCCPP1.Session
 
         }
 
+        public Account GetAccount()
+        {
+            return _data.Owner;
+        }
 
         //SessionData accessors
         public int GetID()
@@ -56,19 +61,85 @@ namespace SCCPP1.Session
                 pm.RedirectToPage("/Index");
         }
 
-        public void Login(string username)
+        public string Login(string username, PageModel pm)
         {
+            /*
+        @User.FindFirst("name")
+        ;
+        @User.FindFirst("preferred_username")
+        ;
+        @User.FindFirst("system.security.claims.claimtypes.nameidentifier");*/
+            ClaimsPrincipal cp = pm.User;
+            Claim c = cp.FindFirst("system.security.claims.claimtypes.nameidentifier");
+            username = c.Value;
+            string page = "/Index";
 
             //null/empty string or already signed on
             if (string.IsNullOrEmpty(username) || (_data != null && IsSignedOn()))
-                return;
-
+                return page;
 
             _data = new SessionData(username);
 
             //debug only
-            if (username.ToLower().Equals("debugbrittl"))
-                DatabaseConnector.SaveBrittany(new Account(_data, false));
+            int id;
+            Account acc;
+            if ((id = DatabaseConnector.ExistsUser(username)) < 1)
+            {
+                acc = new Account(_data, false);
+                DatabaseConnector.SaveUser(acc);
+
+                //should be UpdateInfo page or something.
+                page = "/EditMainProfile";
+            }
+            else
+            {
+                acc = DatabaseConnector.GetUser(username);
+                page = "/UserHome";
+            }
+
+            //save account to session.
+            _data.Owner = acc;
+
+            return page;
+        }
+        public string Login(string username)
+        {
+            /*
+        @User.FindFirst("name")
+        ;
+        @User.FindFirst("preferred_username")
+        ;
+        @User.FindFirst("system.security.claims.claimtypes.nameidentifier");*/
+
+            string page = "/Index";
+
+            //null/empty string or already signed on
+            if (string.IsNullOrEmpty(username) || (_data != null && IsSignedOn()))
+                return page;
+
+            _data = new SessionData(username);
+
+            //debug only
+            int id;
+            Account acc;
+            if ((id = DatabaseConnector.ExistsUser(username)) < 1)
+            {
+                acc = new Account(_data, false);
+                DatabaseConnector.SaveUser(acc);
+
+                //should be UpdateInfo page or something.
+                page = "/EditMainProfile";
+            }
+            else
+            {
+                acc = DatabaseConnector.GetUser(username);
+                page = "/UserHome";
+            }
+
+            //save account to session.
+            _data.Owner = acc;
+
+            return page;
         }
 
         public void Logout(PageModel pm)

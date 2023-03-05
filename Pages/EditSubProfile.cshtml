@@ -3,6 +3,170 @@
 @{
     ViewData["Title"] = "Edit Sub Profile";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Edit a preexisting sub profile. Will always open with the data that has already been entered upon initial creation and will allow for either addition and deletion of info.  </p>
+<style>
+
+    .navbar {
+        position: fixed;
+        top: 0;
+    }
+
+    .accordion {
+        background-color: #eee;
+        color: #444;
+        cursor: pointer;
+        padding: 18px;
+        width: 20%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 15px;
+        transition: 0.4s;
+    }
+
+        .active, .accordion:hover {
+            background-color: #ccc;
+        }
+
+    .panel {
+        padding: 0 18px;
+        display: none;
+        background-color: white;
+        overflow: hidden;
+    }
+</style>
+
+<body>
+
+    <h1><b>Edit Your Sub Profile</b></h1>
+
+    <button class="accordion">About</button>
+    <div class="panel">
+        <input type="checkbox" id="aboutme" name="about">
+        <label for="about"> Employee description</label><br>
+    </div>
+    <br>
+
+    <button class="accordion">Skills</button>
+    <div class="panel">
+        <button class="accordion">Experience</button>
+        <div class="panel">
+            <input type="checkbox" id="aboutme" name="about">
+            <label for="about"> Employee description</label><br>
+        </div>
+        <br>
+
+        <button class="accordion">Computer Languages</button>
+        <div class="panel">
+            <input type="checkbox" id="clang" name="clang">
+            <label for="clang"> C#</label>
+            <br>
+
+            <input type="checkbox" id="clang" name="clang">
+            <label for="clang"> HTML </label>
+            <br>
+
+            <input type="checkbox" id="clang" name="clang">
+            <label for="clang"> CSS </label>
+            <br>
+
+            <input type="checkbox" id="clang" name="clang">
+            <label for="clang"> JavaScript </label>
+            <br>
+
+            <input type="checkbox" id="clang" name="clang">
+            <label for="clang"> Python </label>
+        </div>
+        <br>
+
+        <button class="accordion">Operating Systems</button>
+        <div class="panel">
+            <input type="checkbox" id="opsys" name="opsys">
+            <label for="opsys"> Windows </label>
+            <br>
+
+            <input type="checkbox" id="opsys" name="opsys">
+            <label for="opsys"> MacOS </label>
+            <br>
+
+            <input type="checkbox" id="opsys" name="opsys">
+            <label for="opsys"> Android </label>
+            <br>
+
+            <input type="checkbox" id="opsys" name="opsys">
+            <label for="opsys"> Linux </label>
+            <br>
+
+            <input type="checkbox" id="opsys" name="opsys">
+            <label for="opsys"> Ubuntu </label>
+        </div>
+        <br>
+
+        <button class="accordion">Software & Frameworks</button>
+        <div class="panel">
+            <input type="checkbox" id="sandf" name="sandf">
+            <label for="sandf"> ASP.net </label>
+            <br>
+
+            <input type="checkbox" id="sandf" name="sandf">
+            <label for="sandf"> React Native </label>
+            <br>
+
+            <input type="checkbox" id="sandf" name="sandf">
+            <label for="sandf"> AngularJS </label>
+            <br>
+
+            <input type="checkbox" id="sandf" name="sandf">
+            <label for="sandf"> Unity </label>
+            <br>
+
+            <input type="checkbox" id="sandf" name="sandf">
+            <label for="sandf"> Ruby </label>
+        </div>
+    </div>
+    <br>
+
+    <button class="accordion">Education & Certification</button>
+    <div class="panel">
+        <button class="accordion">Degrees</button>
+        <div class="panel">
+            <input type="checkbox" id="educert" name="educert">
+            <label for="educert"> Bachelors in Computer Science </label>
+            <br>
+
+            <input type="checkbox" id="educert" name="educert">
+            <label for="educert"> Masters in Data Analysis </label>
+
+        </div>
+        <br>
+        <button class="accordion">Certification</button>
+        <div class="panel">
+            <input type="checkbox" id="educert" name="educert">
+            <label for="educert"> Cyber Defender </label>
+            <br>
+
+            <input type="checkbox" id="educert" name="educert">
+            <label for="educert"> Comp TIA Security + </label>
+
+        </div>
+
+    </div>
+
+    <script>
+        var acc = document.getElementsByClassName("accordion");
+        var i;
+
+        for (i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+                var panel = this.nextElementSibling;
+                if (panel.style.display === "block") {
+                    panel.style.display = "none";
+                }
+                else { panel.style.display = "block"; }
+            });
+        }</script>
+
+</body>
+
+

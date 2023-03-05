@@ -3,8 +3,128 @@
 @{
     ViewData["Title"] = "Edit Main Profile";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to edit or add new information to your main profile. </p>
+<!-- This page is used to create the user's profile. Will only be seen once upon inital login. -->
+<style>
 
+    .navbar {
+        position: fixed;
+        top: 0;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    input[type=text], select, textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #000000;
+        border-radius: 4px;
+        box-sizing: border-box;
+        margin-top: 6px;
+        margin-bottom: 16px;
+        resize: vertical;
+    }
+
+    input[type=submit] {
+        background-color: white;
+        color: #0062F3;
+        padding: 12px 20px;
+        border: 1px solid #0062F3;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        input[type=submit]:hover {
+            background-color: #0062F3;
+            color: white;
+            border: 1px solid #0062F3;
+        }
+
+    .profile {
+        border-radius: 5px;
+        background-color: white;
+        padding: 20px;
+    }
+</style>
+
+<h1><b>Edit Your Main Profile</b></h1>
+
+<!-- This section is for the About part of the profile -->
+<main>
+    <div class="profile">
+        <form action="/action_page.php">
+            <fieldset>
+                <legend><b>About:</b></legend>
+
+                <label for="fname">First Name</label>
+                <input type="text" id="fname" name="firstname" placeholder="Your first name...">
+                <br>
+
+                <label for="lname">Last Name</label>
+                <input type="text" id="lname" name="lastname" placeholder="Your last name...">
+                <br>
+
+                <label for="mname">Middle Name</label>
+                <input type="text" id="mname" name="middlename" placeholder="Your middle name...">
+                <br>
+
+                <label for="pnumber">Phone</label>
+                <input type="text" id="pnumber" name="phonenumber" placeholder="Ex... (123-456-7891)">
+                <br>
+
+                <label for="lname">Email Address</label>
+                <input type="text" id="lname" name="lastname" placeholder="Your email address...">
+                <br>
+
+                <label for="aboutme">About</label>
+                <textarea id="aboutme" name="about" placeholder="Tell me about yourself..." style="height:200px"></textarea>
+                <br>
+            </fieldset>
+
+            <fieldset>
+                <legend><b>Skills:</b></legend>
+
+                <label for="experience">Experience</label>
+                <textarea id="experience" name="experience" placeholder="Tell us what you know..." style="height:200px"></textarea>
+                <br>
+
+                <label for="clang">Computers Languages</label>
+                <input type="text" id="clang" name="complanguages" placeholder="Tell us what languages you know...">
+                <br>
+
+                <label for="clang">Operating Systems</label>
+                <input type="text" id="opsys" name="operatingsystems" placeholder="Tell us what operating systems you are familiar with...">
+                <br>
+
+                <label for="sandf">Software & Frameworks</label>
+                <input type="text" id="sandf" name="softandframe" placeholder="Tell us what software and frameworks you are familiar with...">
+                <br>
+
+            </fieldset>
+            <fieldset>
+
+                <legend><b>Education/Certification:</b></legend>
+
+                <label for="educert">Education</label>
+                <input type="text" id="educert" name="educationcertification" placeholder="Tell us your education title...">
+                <br>
+
+                <label for="educert">Certification</label>
+                <input type="text" id="educert" name="educationcertification" placeholder="Tell us your certification title...">
+                <br>
+
+                <label for="eduyear">Education Year</label>
+                <input type="text" id="eduyear" name="educationyear" placeholder="When did you get your education/certification......">
+                <br>
+            </fieldset>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</main>
 
