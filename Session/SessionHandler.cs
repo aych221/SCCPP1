@@ -61,24 +61,19 @@ namespace SCCPP1.Session
                 pm.RedirectToPage("/Index");
         }
 
-        public string Login(string username, PageModel pm)
+        public string Login(PageModel pm)
         {
-            /*
-        @User.FindFirst("name")
-        ;
-        @User.FindFirst("preferred_username")
-        ;
-        @User.FindFirst("system.security.claims.claimtypes.nameidentifier");*/
             ClaimsPrincipal cp = pm.User;
-            Claim c = cp.FindFirst("system.security.claims.claimtypes.nameidentifier");
-            username = c.Value;
-            string page = "/Index";
+            string username = cp.FindFirstValue(ClaimTypes.NameIdentifier);
+            string page;
 
-            //null/empty string or already signed on
-            if (string.IsNullOrEmpty(username) || (_data != null && IsSignedOn()))
-                return page;
-
+            Console.WriteLine(username);
+            if (username == null)
+            {
+                username = "brittl";
+            }
             _data = new SessionData(username);
+
 
             //debug only
             int id;
@@ -86,15 +81,20 @@ namespace SCCPP1.Session
             if ((id = DatabaseConnector.ExistsUser(username)) < 1)
             {
                 acc = new Account(_data, false);
+                acc.Email = cp.FindFirstValue("preferred_username");
+                acc.Name = cp.FindFirstValue("name");
                 DatabaseConnector.SaveUser(acc);
+                Console.WriteLine($"Account: {acc.Email}, {acc.Name}, {acc.GetUsername()}");
 
                 //should be UpdateInfo page or something.
-                page = "/EditMainProfile";
+                page = "/CreateMainProfile";
+                Console.WriteLine("[IsReturning = False]");
             }
             else
             {
                 acc = DatabaseConnector.GetUser(username);
                 page = "/UserHome";
+                Console.WriteLine("[IsReturning = True]");
             }
 
             //save account to session.

@@ -19,15 +19,15 @@ namespace SCCPP1.Pages
         [BindProperty]
         public string Username { get; set;}
 
-        public void OnGet()
+        public IActionResult OnGet()
 		{
 
-
-            if (sessionHandler.IsSignedOn())
+            string page = "/UserHome";
+            if (!sessionHandler.IsSignedOn())
             {
-                RedirectToPage("/Profile");
-                return;
+                page = sessionHandler.Login(this);
             }
+            return RedirectToPage(page);
 
             //Username = HttpContext.Session.GetString("Username");
 
@@ -43,7 +43,7 @@ namespace SCCPP1.Pages
             switch (btn.ToLower())
             {
                 case "login":
-                    sessionHandler.Login(Username);
+                    sessionHandler.Login(this);
                     page = "/Profile";
                     break;
 

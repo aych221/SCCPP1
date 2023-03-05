@@ -40,5 +40,45 @@ namespace SCCPP1
             return input.ToDateTime(new TimeOnly(0, 0));
         }
 
+        public static string htmlStripper(string input)
+        {
+            string strippedString = "";
+            bool bracketFlag = false;
+            char[] chars = input.ToCharArray();
+
+
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (chars[i] == '>' && bracketFlag)
+                    bracketFlag = false;
+                else if (chars[i] != '<' && !bracketFlag)
+                    strippedString = strippedString + chars[i];
+                else if (bracketFlag)
+                    continue;
+                else
+                    bracketFlag = true;
+
+
+            }
+
+            return strippedString;
+        }
+
+
+        public static string CodeStripper(string input)
+        {
+            string strippedstring = "";
+            char[] chars = input.ToCharArray();
+
+            for (int i = 0; i < chars.Length; i++)
+            {
+                if (chars[i] == '@')
+                    break;
+                strippedstring += chars[i];
+            }
+
+            return strippedstring;
+        }
+
     }
 }
