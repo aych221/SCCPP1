@@ -6,7 +6,7 @@ namespace SCCPP1.User
     public class Account
     {
 
-        private readonly SessionData _sessionData;
+        private readonly SessionData Data;
 
         //the colleague's database ID
         public int RecordID { get; set; }
@@ -45,13 +45,17 @@ namespace SCCPP1.User
 
         public Account(SessionData sessionData, bool isReturning)
         {
-            this._sessionData = sessionData;
+            this.Data = sessionData;
             this.IsReturning= isReturning;
+
+            this.Email = Data.GetUsersEmail();
+            this.Name = Data.GetUsersName();
+
         }
 
         public string GetUsername()
         {
-            return _sessionData.Username;
+            return Data.Username;
         }
 
     }

@@ -1,7 +1,8 @@
 ﻿@using System.Security.Principal
+@using Session;
 
 <ul class="navbar-nav">
-@if (User.Identity?.IsAuthenticated == true)
+@if (Model.User.Identity.IsAuthenticated)
 {
         <span class="navbar-text text-dark">Hello @User.Identity?.Name!</span>
         <li class="nav-item">

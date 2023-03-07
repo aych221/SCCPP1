@@ -6,7 +6,7 @@ namespace SCCPP1.Session
 {
     public class SessionHandler
     {
-        private SessionData _data { get; set; }
+        private SessionData Data { get; set; }
 
 
         public SessionHandler()
@@ -16,39 +16,40 @@ namespace SCCPP1.Session
 
         public Account GetAccount()
         {
-            return _data.Owner;
+            return Data.Owner;
         }
 
         //SessionData accessors
         public int GetID()
         {
-            if (_data == null)
+            if (Data == null)
                 return -1;
 
-            return _data.ID;
+            return Data.ID;
         }
 
         public string? GetUsername()
         {
-            if (_data == null)
+            if (Data == null)
                 return null;
 
-            return _data.Username;
+            return Data.Username;
         }
 
         public bool IsSignedOn()
         {
-            if (_data == null)
+            if (Data == null)
                 return false;
 
-            return _data.SignedOn;
+
+            return Data.IsAuthenticated();
         }
 
         //probably redundant since IsSignedOn can be used
         [Obsolete]
         public bool HasSession()
         {
-            return _data != null;
+            return Data != null;
         }
 
         
@@ -63,26 +64,18 @@ namespace SCCPP1.Session
 
         public string Login(PageModel pm)
         {
-            ClaimsPrincipal cp = pm.User;
-            string username = cp.FindFirstValue(ClaimTypes.NameIdentifier);
             string page;
+            Data = new SessionData(pm.User);
 
-            Console.WriteLine(username);
-            if (username == null)
-            {
-                username = "brittl";
-            }
-            _data = new SessionData(username);
+            Console.WriteLine(Data.Username);
 
 
             //debug only
-            int id;
             Account acc;
-            if ((id = DatabaseConnector.ExistsUser(username)) < 1)
+
+            if (DatabaseConnector.ExistsUser(Data.Username) < 1)
             {
-                acc = new Account(_data, false);
-                acc.Email = cp.FindFirstValue("preferred_username");
-                acc.Name = cp.FindFirstValue("name");
+                acc = new Account(Data, false);
                 DatabaseConnector.SaveUser(acc);
                 Console.WriteLine($"Account: {acc.Email}, {acc.Name}, {acc.GetUsername()}");
 
@@ -92,13 +85,13 @@ namespace SCCPP1.Session
             }
             else
             {
-                acc = DatabaseConnector.GetUser(username);
+                acc = DatabaseConnector.GetUser(Data.Username);
                 page = "/UserHome";
                 Console.WriteLine("[IsReturning = True]");
             }
 
             //save account to session.
-            _data.Owner = acc;
+            Data.Owner = acc;
 
             return page;
         }
@@ -114,17 +107,17 @@ namespace SCCPP1.Session
             string page = "/Index";
 
             //null/empty string or already signed on
-            if (string.IsNullOrEmpty(username) || (_data != null && IsSignedOn()))
+            if (string.IsNullOrEmpty(username) || (Data != null && IsSignedOn()))
                 return page;
 
-            _data = new SessionData(username);
+            Data = new SessionData(username);
 
             //debug only
             int id;
             Account acc;
             if ((id = DatabaseConnector.ExistsUser(username)) < 1)
             {
-                acc = new Account(_data, false);
+                acc = new Account(Data, false);
                 DatabaseConnector.SaveUser(acc);
 
                 //should be UpdateInfo page or something.
@@ -137,7 +130,7 @@ namespace SCCPP1.Session
             }
 
             //save account to session.
-            _data.Owner = acc;
+            Data.Owner = acc;
 
             return page;
         }
@@ -152,7 +145,7 @@ namespace SCCPP1.Session
             /*pm.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
             pm.Response.Headers["Expires"] = "0";
             pm.Response.Headers["Pragma"] = "no-cache";*/
-            _data.SignedOn = false;
+            Data.SignedOn = false;
             pm.HttpContext.Session.Clear();
 
             pm.RedirectToPage("/Index");

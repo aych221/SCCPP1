@@ -322,7 +322,7 @@ namespace SCCPP1
         public static int SaveUser(string userID, int role, string name, string email, int phone, string address, string introNarrative, int mainProfileID)
         {
             int id = ExistsUser(userID);
-            if (id == -1)
+            if (id < 1)
                 return InsertUser(userID, role, name, email, phone, address, introNarrative, mainProfileID);
             return UpdateUser(id, userID, role, name, email, phone, address, introNarrative, mainProfileID);
         }
@@ -339,7 +339,7 @@ namespace SCCPP1
 
         public static bool ExistsUser(int id)
         {
-            if (id < 0)
+            if (id < 1)
                 return false;
 
             using (SqliteConnection conn = new SqliteConnection(connStr))

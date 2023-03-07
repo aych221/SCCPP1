@@ -13,7 +13,7 @@ internal class Program
     {
         //before site loads
         DatabaseConnector.CreateDatabase();
-        DatabaseConnector.SaveBrittany(new SCCPP1.User.Account(new SessionData("brittl"), false));
+        //DatabaseConnector.SaveBrittany(new SCCPP1.User.Account(new SessionData("brittl"), false));
         var builder = WebApplication.CreateBuilder(args);
 
 

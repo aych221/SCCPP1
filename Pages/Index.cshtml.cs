@@ -22,8 +22,8 @@ namespace SCCPP1.Pages
         public IActionResult OnGet()
 		{
 
-            string page = "/UserHome";
-            if (!sessionHandler.IsSignedOn())
+            string page = "/Index";
+            if (!(User == null) || !(User.Identity == null) || !User.Identity.IsAuthenticated)
             {
                 page = sessionHandler.Login(this);
             }

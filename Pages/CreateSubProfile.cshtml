@@ -23,6 +23,21 @@
             background-color: #fff;
         }
 
+    input[type=submit] {
+        background-color: white;
+        color: #0062F3;
+        padding: 12px 20px;
+        border: 1px solid #0062F3;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        input[type=submit]:hover {
+            background-color: #0062F3;
+            color: white;
+            border: 1px solid #0062F3;
+        }
+
     .panel {
         padding: 0 18px;
         display: none;
@@ -149,19 +164,24 @@
 
     </div>
 
-    <script>
-        var acc = document.getElementsByClassName("accordion");
-        var i;
+    <br>
+    <br>
+    <input type="submit" value="Submit">
 
-        for (i = 0; i < acc.length; i++) {
-            acc[i].addEventListener("click", function () {
-                this.classList.toggle("active");
-                var panel = this.nextElementSibling;
-                if (panel.style.display === "block") {
-                    panel.style.display = "none";
-                }
-                else { panel.style.display = "block"; }
-            });
-        }
-    </script>
+
 </body>
+
+<script>
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function () {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            }
+            else { panel.style.display = "block"; }
+        });
+    }</script>
