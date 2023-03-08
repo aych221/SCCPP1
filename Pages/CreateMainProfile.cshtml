@@ -57,7 +57,7 @@
     <h1>Create Main Profile</h1>
     <br>
     <div class="profile">
-        <form action="/action_page.php">
+        <form method="post">
             <fieldset>
                 <legend><b>About:</b></legend>
 
@@ -127,5 +127,11 @@
             <input type="submit" value="Submit">
 
         </form>
+
+        <!-- Test for whether the user info is saved or not -->
+        <p>
+            @ViewData["UserData"]
+        </p>
+
     </div>
 </body>
