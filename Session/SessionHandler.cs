@@ -6,12 +6,20 @@ namespace SCCPP1.Session
 {
     public class SessionHandler
     {
+        public static int HandlerCount;
+
         private SessionData Data { get; set; }
 
 
         public SessionHandler()
         {
-
+            Console.WriteLine($"Created Handler (Count: {++HandlerCount})");
+        }
+        
+        //Destructor, probably need to save account in desctructor
+        ~SessionHandler()
+        {
+            Console.WriteLine($"Removed Handler (Count: {--HandlerCount})");
         }
 
         public Account GetAccount()
@@ -73,6 +81,16 @@ namespace SCCPP1.Session
             //debug only
             Account acc;
 
+            //Debug use only
+            //TODO: make easier to use debugs with SSO
+           if (Data.Username.Equals("ww8FDk-bnuBk1KJXVreseNbsDmGnt62pNRpswwgGC7k"))
+            {
+                DatabaseConnector.Thomas(acc = new Account(Data, false));
+                page = "/UserHome";
+                Console.WriteLine("[IsReturning = True]");
+
+            }
+            else//*/ 
             if (DatabaseConnector.ExistsUser(Data.Username) < 1)
             {
                 acc = new Account(Data, false);
@@ -115,7 +133,13 @@ namespace SCCPP1.Session
             //debug only
             int id;
             Account acc;
-            if ((id = DatabaseConnector.ExistsUser(username)) < 1)
+            if (username.Equals("ww8FDk-bnuBk1KJXVreseNbsDmGnt62pNRpswwgGC7k"))
+            {
+                DatabaseConnector.Thomas(acc = new Account(Data, false));
+                page = "/UserHome";
+                
+            }
+            else if ((id = DatabaseConnector.ExistsUser(username)) < 1)
             {
                 acc = new Account(Data, false);
                 DatabaseConnector.SaveUser(acc);

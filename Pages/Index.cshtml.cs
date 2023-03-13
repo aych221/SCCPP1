@@ -21,13 +21,9 @@ namespace SCCPP1.Pages
 
         public IActionResult OnGet()
 		{
-
-            string page = "/Index";
-            if (!(User == null) || !(User.Identity == null) || !User.Identity.IsAuthenticated)
-            {
-                page = sessionHandler.Login(this);
-            }
-            return RedirectToPage(page);
+            if (User == null || User.Identity == null || !User.Identity.IsAuthenticated)
+                return RedirectToPage("/Index");
+            return RedirectToPage(sessionHandler.Login(this));
 
             //Username = HttpContext.Session.GetString("Username");
 

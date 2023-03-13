@@ -5,4 +5,35 @@
 }
 <h1>@ViewData["Title"]</h1>
 
-<p> Allows user to view final PDF version of the main/sub profile of their choosing. </p>
+<!--<p> Allows user to view final PDF version of the main/sub profile of their choosing. </p>-->
+<h3>@Html.Raw(@ViewData["FullName"])</h3>
+
+<br />
+<h4>Contact</h4>
+<p>
+    @Html.Raw(ViewData["Contact"])
+</p>
+
+<br />
+<h4>Intro Narrative</h4>
+<p>
+    @Html.Raw(ViewData["Intro"])
+</p>
+
+<br />
+<h4>Education History</h4>
+<p>
+    @Html.Raw(ViewData["Education"])
+</p>
+
+<br />
+<h4>Work History</h4>
+<p>
+    @Html.Raw(ViewData["Work"])
+</p>
+
+<br />
+<h4>Skills</h4>
+<p>
+    @Html.Raw(ViewData["Skills"])
+</p>

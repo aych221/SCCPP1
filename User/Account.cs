@@ -17,10 +17,17 @@ namespace SCCPP1.User
         //Name stored
         public string Name { get; set; }
 
+        public string FirstName { get; set; }
+
+        public string LastName { get; set; }
+
+        public string? MiddleName { get; set; }
+
+
         //Email stored (may not want to use signed on E-mail)
         public string Email { get; set; }
 
-        public int Phone { get; set; }
+        public long Phone { get; set; }
 
         public string Address { get; set; }
 
@@ -41,7 +48,7 @@ namespace SCCPP1.User
         /// <summary>
         /// Are they a returning user?
         /// </summary>
-        public readonly bool IsReturning;
+        public bool IsReturning;
 
         public Account(SessionData sessionData, bool isReturning)
         {

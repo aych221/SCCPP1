@@ -238,7 +238,7 @@ namespace SCCPP1
         }
 
 
-        public static int InsertUser(string userID, int role, string name, string email, int phone, string address, string introNarrative, int mainProfileID)
+        public static int InsertUser(string userID, int role, string name, string email, long phone, string address, string introNarrative, int mainProfileID)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
@@ -250,8 +250,8 @@ namespace SCCPP1
                     cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(userID));
 
                     cmd.Parameters.AddWithValue("@role", role);
-                    cmd.Parameters.AddWithValue("@name", name);
-                    cmd.Parameters.AddWithValue("@email", email);
+                    cmd.Parameters.AddWithValue("@name", ValueCleaner(name));
+                    cmd.Parameters.AddWithValue("@email", ValueCleaner(email));
                     cmd.Parameters.AddWithValue("@phone", ValueCleaner(phone));
                     cmd.Parameters.AddWithValue("@address", ValueCleaner(address));
                     cmd.Parameters.AddWithValue("@intro_narrative", ValueCleaner(introNarrative));
@@ -275,7 +275,7 @@ namespace SCCPP1
             return InsertUser(account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID);
         }
 
-        public static int UpdateUser(int id, string userID, int role, string name, string email, int phone, string address, string introNarrative, int mainProfileID)
+        public static int UpdateUser(int id, string userID, int role, string name, string email, long phone, string address, string introNarrative, int mainProfileID)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
@@ -289,8 +289,8 @@ namespace SCCPP1
                     cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(userID));
 
                     cmd.Parameters.AddWithValue("@role", role);
-                    cmd.Parameters.AddWithValue("@name", name);
-                    cmd.Parameters.AddWithValue("@email", email);
+                    cmd.Parameters.AddWithValue("@name", ValueCleaner(name));
+                    cmd.Parameters.AddWithValue("@email", ValueCleaner(email));
                     cmd.Parameters.AddWithValue("@phone", ValueCleaner(phone));
                     cmd.Parameters.AddWithValue("@address", ValueCleaner(address));
                     cmd.Parameters.AddWithValue("@intro_narrative", ValueCleaner(introNarrative));
@@ -310,7 +310,7 @@ namespace SCCPP1
         //used to save an account if you already have an id.
         //just to be save, it still checks to see if the user exists.
         //put -1 if id is unknown
-        public static bool SaveUser(int id, string userID, int role, string name, string email, int phone, string address, string introNarrative, int mainProfileID)
+        public static bool SaveUser(int id, string userID, int role, string name, string email, long phone, string address, string introNarrative, int mainProfileID)
         {
             if (!ExistsUser(id))
                 return InsertUser(userID, role, name, email, phone, address, introNarrative, mainProfileID) >= 0;
@@ -319,7 +319,7 @@ namespace SCCPP1
 
         //used if you don't have an ID
         //put -1 if id is unknown
-        public static int SaveUser(string userID, int role, string name, string email, int phone, string address, string introNarrative, int mainProfileID)
+        public static int SaveUser(string userID, int role, string name, string email, long phone, string address, string introNarrative, int mainProfileID)
         {
             int id = ExistsUser(userID);
             if (id < 1)
@@ -332,8 +332,9 @@ namespace SCCPP1
         {
             if (account.IsReturning)
                 return SaveUser(account.RecordID, account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID);
-            
-            return (account.RecordID = SaveUser(account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID)) >= 0;
+            account.RecordID = SaveUser(account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID);
+            account.IsReturning = true;
+            return  account.RecordID >= 0;
         }
 
 
@@ -456,7 +457,7 @@ namespace SCCPP1
                         a.Role = GetInt32(r, 1);
                         a.Name = GetString(r, 2);
                         a.Email = GetString(r, 3);
-                        a.Phone = GetInt32(r, 4);
+                        a.Phone = GetInt64(r, 4);
                         a.Address = GetString(r, 5);
                         a.IntroNarrative = GetString(r, 6);
                         a.MainProfileID = GetInt32(r, 7);
@@ -494,7 +495,7 @@ namespace SCCPP1
                         a.Role = GetInt32(r, 2);
                         a.Name = GetString(r, 3);
                         a.Email = GetString(r, 4);
-                        a.Phone = GetInt32(r, 5);
+                        a.Phone = GetInt64(r, 5);
                         a.Address = GetString(r, 6);
                         a.IntroNarrative = GetString(r, 7);
                         a.MainProfileID = GetInt32(r, 8);
@@ -1567,6 +1568,7 @@ namespace SCCPP1
 
 
         #endregion
+
         public static List<string> PrintRecords(string table)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -1602,6 +1604,7 @@ namespace SCCPP1
         #region Debugging
 
         #endregion
+
         public static void TestBrittany()
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -1725,6 +1728,7 @@ namespace SCCPP1
             foreach (string s in PrintRecords("colleagues"))
                 Console.WriteLine(s);
         }
+
         public static void TestBrittany2()
         {
 
@@ -1798,9 +1802,97 @@ namespace SCCPP1
 
         }
 
+
+        public static void Thomas(Account account)
+        {
+            //ww8FDk-bnuBk1KJXVreseNbsDmGnt62pNRpswwgGC7k
+
+            account.Name = "Wall, Thomas Joseph";
+            account.Email = "thwall@augusta.edu";
+            account.Phone = 1231231234;
+            account.Address = "123 Main St";
+            account.IntroNarrative = "klasjdflkjas lkasdnfkljaslk";
+
+            EducationData ed1 = new EducationData(account),
+                ed2 = new EducationData(account),
+                ed3 = new EducationData(account);
+
+            ed1.EducationType = "Masters of Business Administration";
+            ed1.Description = "in Crypto";
+            ed1.Institution = "Harvard";
+            ed1.StartDate = Utilities.ToDateOnly("August 18 1993");
+
+            ed2.EducationType = "Bachelor of Arts";
+            ed2.Description = "in Computer Design";
+            ed2.Institution = "Aiken Technical College";
+            ed2.StartDate = Utilities.ToDateOnly("August 15 1990");
+
+            ed3.EducationType = "Scrum Master";
+            ed3.Description = "in my Mom's Kitchen";
+            ed3.Institution = "North Augusta High School";
+            ed3.StartDate = Utilities.ToDateOnly("August 8 1980");
+
+
+            WorkData wd1 = new WorkData(account),
+                wd2 = new WorkData(account);
+
+            wd1.Employer = "The Kern Family Foundation";
+            wd1.JobTitle = "Chair Sitting Assistant";
+            wd1.StartDate = Utilities.ToDateOnly("September 1 2006");
+            wd1.EndDate = Utilities.ToDateOnly("September 1 2009");
+
+            wd2.Employer = "Management Research Service";
+            wd2.JobTitle = "Social Media Influencer";
+            wd2.StartDate = Utilities.ToDateOnly("October 12 2009");
+            wd2.EndDate = Utilities.ToDateOnly("April 1 2023");
+
+
+            SkillData sd1 = new SkillData(account),
+                sd2 = new SkillData(account),
+                sd3 = new SkillData(account);
+
+            sd1.Skill = "Java";
+            sd2.Skill = "C#";
+            sd3.Skill = "HTML";
+
+            SaveUser(account);
+            //SaveSkill(")
+            Thread.Sleep(1);
+            SaveEducationHistory(ed1);
+            Thread.Sleep(1);
+            SaveEducationHistory(ed2);
+            Thread.Sleep(1);
+            SaveEducationHistory(ed3);
+            Thread.Sleep(1);
+            SaveWorkHistory(wd1);
+            SaveWorkHistory(wd2);
+            Console.WriteLine("Saved!");
+            /*foreach (string s in GetRawColleagueEducationHistory(account.RecordID))
+                Console.WriteLine(s);
+            foreach (string s in GetRawColleagueWorkHistory(account.RecordID))
+                Console.WriteLine(s);
+            */
+            /*foreach (string s in PrintRecords("work_history"))
+                Console.WriteLine(s);
+
+            foreach (string s in PrintRecords("education_history"))
+                Console.WriteLine(s);
+
+            foreach (string s in PrintRecords("colleagues"))
+                Console.WriteLine(s);*/
+        }
+
         private static object ValueCleaner(int val)
         {
-            if (val == 0)
+            if (val == 0 || val == -1)
+                return DBNull.Value;
+
+            return val;
+        }
+
+        private static object ValueCleaner(long val)
+        {
+            if (val == 0 || val == -1)
                 return DBNull.Value;
 
             return val;
@@ -1820,6 +1912,13 @@ namespace SCCPP1
                 return DBNull.Value;
 
             return val;
+        }
+
+        private static long GetInt64(SqliteDataReader r, int ordinal)
+        {
+            if (r.IsDBNull(ordinal))
+                return -1;
+            return r.GetInt64(ordinal);
         }
 
         private static int GetInt32(SqliteDataReader r, int ordinal)

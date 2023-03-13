@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SCCPP1
 {
@@ -40,8 +41,54 @@ namespace SCCPP1
             return input.ToDateTime(new TimeOnly(0, 0));
         }
 
-        public static string htmlStripper(string input)
+
+        public static string[] SplitFullName(string fullName)
         {
+            string[] names = new string[3];
+
+            //first, isolate the lastName
+            string[] splits = fullName.Split(',');
+
+            //Last name (Wall, Thomas Joseph) -> get Wall
+            names[0] = splits[0];
+
+            //First name (Thomas Joseph) -> get Thomas
+            splits = splits[1].Trim().Split(' ');
+
+            names[1] = splits[0];
+
+
+            //Middle name(s) (Thomas Joseph) -> get Joseph
+            if (splits.Length == 1)
+            {
+                names[2] = "";
+            }
+            else
+            {
+                StringBuilder sb = new StringBuilder(splits[1]);
+                for (int i = 2; i < splits.Length; i++)
+                    sb.Append($" {splits[i]}");
+
+                names[2] = sb.ToString();
+            }
+
+            return names;
+        }
+
+        public static long ParsePhoneNumber(string phoneNumber)
+        {
+            //int num = -1;
+
+            //phoneNumber = Regex.Replace(phoneNumber, "[0-9]+", "");
+            //phoneNumber = phoneNumber.Trim().Replace("(", "");
+            //return long.Parse(Regex.Replace(phoneNumber, "[0-9]+", ""));
+            return long.Parse(phoneNumber.Trim().Replace("(", "").Replace(")", "").Replace("-", "").Replace(" ", ""));
+        }
+
+
+        public static string HtmlStripper(string input)
+        {
+            //needs to be StringBuilder
             string strippedString = "";
             bool bracketFlag = false;
             char[] chars = input.ToCharArray();
