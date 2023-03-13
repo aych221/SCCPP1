@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SCCPP1.Models;
 using SCCPP1.Session;
+using SCCPP1.User;
 
 namespace SCCPP1.Pages
 {
@@ -13,11 +14,17 @@ namespace SCCPP1.Pages
             _logger = logger;
         }
 
-
-
-
         [BindProperty]
         public Colleague? Colleague { get; set; }
+
+        [BindProperty]
+        public Work? Work { get; set; }
+
+        [BindProperty]
+        public Skill? Skill { get; set; }
+
+        [BindProperty]
+        public Education? Education { get; set; }
 
         public IActionResult OnGet()
         {
@@ -35,13 +42,9 @@ namespace SCCPP1.Pages
             Colleague.FirstName = names[1];
             Colleague.LastName= names[0];
             Colleague.MiddleName = names[2];
-
             Colleague.PhoneNumber = Account.Phone.ToString();
-
             Colleague.IntroNarrative = Account.IntroNarrative;
-
             Colleague.EmailAddress = Account.Email;
-
 
             return Page();
         }
@@ -69,13 +72,11 @@ namespace SCCPP1.Pages
                 {
                     Console.WriteLine("Could not save");
                     ViewData["UserData"] = "Error Saving";
-
                 }
 
             }
 
             return Page();
         }
-
     }
 }

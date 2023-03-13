@@ -6,7 +6,6 @@
 
 <!-- This page is used to create the user's profile. Will only be seen once upon inital login. -->
 <style>
-
     body {
         font-family: Arial, Helvetica, sans-serif;
     }
@@ -35,10 +34,10 @@
         cursor: pointer;
     }
 
-    input[type=submit]:hover {
-        background-color: #0062F3;
-        color: white;
-        border: 1px solid #0062F3;
+        input[type=submit]:hover {
+            background-color: #0062F3;
+            color: white;
+            border: 1px solid #0062F3;
         }
 
     .profile {
@@ -53,123 +52,102 @@
         justify-content: flex-start;
     }
 
-    .input-categories ul {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-start;
-        list-style-type: none;
-        flex-wrap: wrap;
-    }
-
-    .input-categories li {
-        border: 1px solid black;
-        border-radius: 2px;
-        padding: 1px;
-        margin: 1px;
+        .input-categories ul {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            list-style-type: none;
+            flex-wrap: wrap;
         }
 
-    .input-categories input {
-        flex: 1 1 auto;
-        align-self: flex-start;
-    }
+        .input-categories li {
+            border: 1px solid black;
+            border-radius: 2px;
+            padding: 1px;
+            margin: 1px;
+        }
 
+        .input-categories input {
+            flex: 1 1 auto;
+            align-self: flex-start;
+        }
 </style>
 
 <!-- This section is for the About part of the profile -->
 <body>
-
-    <br>
     <h1>Create Main Profile</h1>
-    <br>
+    <br />
     <div class="profile">
-        <form action="javascript:void(0)" method="post"> <!--Action stops page from being submitted every time user presses enter-->
+        <!-- action="javascript:void(0)" stops page from being submitted every time user presses enter -->
+        <form method="post"> 
+            <legend><b>About:</b></legend>
 
-            <fieldset>
-                <legend><b>About:</b></legend>
+            <label for="FirstName">First Name</label>
+            <input type="text" asp-for="Colleague!.FirstName" placeholder="Ex. John" />
+            <br />
 
-                <label for="FirstName">First Name</label>
-                <input asp-for="Colleague!.FirstName" placeholder="Your first name..." />
-                <br />
+            <label for="LastName">Last Name</label>
+            <input type="text" asp-for="Colleague!.LastName" placeholder="Ex. Smith" />
+            <br />
 
-                <label for="LastName">Last Name</label>
-                <input asp-for="Colleague!.LastName" placeholder="Your last name..." />
-                <br />
+            <label for="MiddleName">Middle Name</label>
+            <input type="text" asp-for="Colleague!.MiddleName" placeholder="Ex. Robert" />
+            <br />
 
-                <label for="MiddleName">Middle Name</label>
-                <input asp-for="Colleague!.MiddleName" placeholder="Your middle name..." />
-                <br />
+            <label for="PhoneNumber">Phone</label>
+            <input type="text" asp-for="Colleague!.PhoneNumber" placeholder="Ex. (987)-654-3210" />
+            <br />
 
-                <label for="PhoneNumber">Phone</label>
-                <input asp-for="Colleague!.PhoneNumber" id="helllllo" placeholder="Ex... (123-456-7891)" />
-                <br />
+            <label for="EmailAddress">Email Address</label>
+            <input type="text" asp-for="Colleague!.EmailAddress" placeholder="Ex. jsmith@example.com" />
+            <br />
 
-                <label for="EmailAddress">Email Address</label>
-                <input id="hello" asp-for="Colleague!.EmailAddress" placeholder="Your email address..." />
-                <br />
+            <label for="IntroNarrative">About</label>
+            <textarea asp-for="Colleague!.IntroNarrative" placeholder="Introduce yourself..." style="height:200px"></textarea>
+            <br />
 
-                <label for="IntroNarrative">About</label>
-                <textarea asp-for="Colleague!.IntroNarrative" placeholder="Tell me about yourself..." style="height:200px"></textarea>
-                <br />
-            </fieldset>
+            <legend><b>Experience:</b></legend>
+            <label for="Experience">Experience</label>
+            <textarea asp-for="Work!.Experience" name="experience" placeholder="Tell me about your work experience..." style="height:200px"></textarea>
+            <br />
 
+            <legend><b>Skills:</b></legend>
 
-            <fieldset>
-                <legend><b>Skills:</b></legend>
+            <label for="ProgLang">Programming Languages</label>
+            <div class="input-categories">
+                <input type="text" asp-for="Skill!.ProgLang" placeholder="What languages do you know?... (Press enter to save language)" />
+                &nbsp;
+                <ul></ul>
+            </div>
+            <br />
 
-                <label for="experience">Experience</label>
-                <textarea id="experience" name="experience" placeholder="Tell us what you know..." style="height:200px"></textarea>
-                <br>
+            <label for="OS">Operating Systems</label>
+            <input type="text" asp-for="Skill!.OS" placeholder="What operating systems do you know?..." />
+            <br />
 
-                <label for="clang">Programming Languages</label>
-                <div class="input-categories">
-                    <input type="text" id="clang" name="complanguages" placeholder="Tell us what languages you know...(Press enter to save language)">
-                    &nbsp;
-                    <ul>
-                    </ul>
-                    </input>
-                </div>
-                <br>
+            <label for="SoftAndFrame">Software & Frameworks</label>
+            <input type="text" asp-for="Skill!.SoftAndFrame" placeholder="What softwares and frameworks do you know?...">
+            <br />
 
-                <label for="clang">Operating Systems</label>
-                <input type="text" id="opsys" name="operatingsystems" placeholder="Tell us what operating systems you are familiar with...">
-                <br>
+            <legend><b>Education/Certification:</b></legend>
 
-                <label for="sandf">Software & Frameworks</label>
-                <input type="text" id="sandf" name="softandframe" placeholder="Tell us what software and frameworks you are familiar with...">
-                <br>
+            <label for="EduCert">Education</label>
+            <input type="text" asp-for="Education!.EduCert" placeholder="Ex. Master of Business Administration (M.B.A.)">
+            <br />
 
-            </fieldset>
+            <label for="EduCert">Certification</label>
+            <input type="text" asp-for="Education!.EduCert" placeholder="Ex. Advanced Cyber Defender Certificate">
+            <br />
 
-            <fieldset>
-
-                <legend><b>Education/Certification:</b></legend>
-
-                <label for="educert">Education</label>
-                <input type="text" id="educert" name="educationcertification" placeholder="Tell us your education title...">
-                <br>
-
-                <label for="educert">Certification</label>
-                <input type="text" id="educert" name="educationcertification" placeholder="Tell us your certification title...">
-                <br>
-
-                <label for="eduyear">Education Year</label>
-                <input type="text" id="eduyear" name="educationyear" placeholder="When did you get your education/certification......">
-                <br>
-            </fieldset>
-
+            <label for="EduYear">Education Year</label>
+            <input type="text" asp-for="Education!.EduYear" placeholder="When did you get your education/certification?...">
+            <br />
+            
             <input type="submit" value="Submit" />
             <input type="submit" value="Save as Draft">
-
         </form>
-
-        <!-- Test for whether the user info is saved or not -->
-        <p>
-            @ViewData["UserData"]
-        </p>
-
     </div>
 </body>
-
 
 <script>
     /* Script for adding a input for specific fields https://stackoverflow.com/questions/10839570/how-does-stackoverflow-make-its-tag-input-field */
@@ -191,4 +169,3 @@
         }
     }
 </script>
-

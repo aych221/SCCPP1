@@ -18,12 +18,9 @@ namespace SCCPP1.Models
         [Required]
         public string? PhoneNumber { get; set; }
 
-
         [Required]
         public string? EmailAddress { get; set; }
 
-
         public string? IntroNarrative { get; set; }
     }
-
 }

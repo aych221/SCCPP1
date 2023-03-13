@@ -9,5 +9,4 @@ namespace SCCPP1.Models
         [Required, StringLength(10)]
         public string? Name { get; set; }
     }
-
 }
