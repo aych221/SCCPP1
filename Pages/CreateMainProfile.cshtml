@@ -112,7 +112,7 @@
                 <br />
             </fieldset>
 
-            <!--
+
             <fieldset>
                 <legend><b>Skills:</b></legend>
 
@@ -121,7 +121,13 @@
                 <br>
 
                 <label for="clang">Programming Languages</label>
-                <input type="text" id="clang" name="complanguages" placeholder="Tell us what languages you know...">
+                <div class="input-categories">
+                    <input type="text" id="clang" name="complanguages" placeholder="Tell us what languages you know...(Press enter to save language)">
+                    &nbsp;
+                    <ul>
+                    </ul>
+                    </input>
+                </div>
                 <br>
 
                 <label for="clang">Operating Systems</label>
@@ -149,16 +155,7 @@
                 <label for="eduyear">Education Year</label>
                 <input type="text" id="eduyear" name="educationyear" placeholder="When did you get your education/certification......">
                 <br>
-            </fieldset> -->
-            <label for="clang">Programming Languages</label>
-            <div class="input-categories">
-                <input type="text" id="clang" name="complanguages" placeholder="Tell us what languages you know...(Press enter to save language)">
-                &nbsp;
-                <ul>
-                </ul>
-                </input>
-            </div>
-            <br>
+            </fieldset>
 
             <input type="submit" value="Submit" />
             <input type="submit" value="Save as Draft">
