@@ -82,7 +82,7 @@
     <h1>Create Main Profile</h1>
     <br>
     <div class="profile">
-        <form method="post">
+        <form action="javascript:void(0)" method="post"> <!--Action stops page from being submitted every time user presses enter-->
 
             <fieldset>
                 <legend><b>About:</b></legend>
@@ -100,11 +100,11 @@
                 <br />
 
                 <label for="PhoneNumber">Phone</label>
-                <input asp-for="Colleague!.PhoneNumber" placeholder="Ex... (123-456-7891)" />
+                <input asp-for="Colleague!.PhoneNumber" id="helllllo" placeholder="Ex... (123-456-7891)" />
                 <br />
 
                 <label for="EmailAddress">Email Address</label>
-                <input asp-for="Colleague!.EmailAddress" placeholder="Your email address..." />
+                <input id="hello" asp-for="Colleague!.EmailAddress" placeholder="Your email address..." />
                 <br />
 
                 <label for="IntroNarrative">About</label>

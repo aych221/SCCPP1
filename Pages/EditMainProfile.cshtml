@@ -55,7 +55,7 @@
     <h1>Edit Main Your Profile</h1>
     <br>
     <div class="profile">
-        <form method="post">
+        <form action="javascript:void(0)" method="post"> <!--Action stops page from being submitted every time user presses enter-->
 
             <fieldset>
                 <legend><b>About:</b></legend>
@@ -85,7 +85,6 @@
                 <br>
             </fieldset>
 
-            <!--
             <fieldset>
                 <legend><b>Skills:</b></legend>
 
@@ -122,9 +121,10 @@
                 <input type="text" id="eduyear" name="educationyear" placeholder="When did you get your education/certification......">
                 <br>
             </fieldset>
-            -->
+
 
             <input type="submit" value="Submit">
+            <input type="submit" value="Save as Draft">
         </form>
     </div>
 </body>
