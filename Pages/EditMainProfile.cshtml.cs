@@ -14,6 +14,7 @@ namespace SCCPP1.Pages
             _logger = logger;
         }
 
+        // The [BindProperty] attribute, takes the data from the POST request and maps it to our Model which can then be intereacted with our database.
         [BindProperty]
         public Colleague? Colleague { get; set; }
 
@@ -26,10 +27,12 @@ namespace SCCPP1.Pages
         [BindProperty]
         public Education? Education { get; set; }
 
+        // When this page is initialize OnGet() starts before the instance of the user is created, therefore within our OnGet(),
+        // We create a instance of the user and pull the saved data from the database to be displayed.
         public IActionResult OnGet()
         {
             Console.WriteLine("EditMainProfile.OnGet() Called");
-            //invalid model state or the account is new
+            // invalid model state or the account is new
             if (!ModelState.IsValid || !Account.IsReturning)
                 return Page();
 
@@ -37,7 +40,7 @@ namespace SCCPP1.Pages
                 Colleague = new Colleague();
 
             Console.WriteLine("Model State is valid and Account is returning");
-            //TODO: add name fields in DB
+            // TODO: add name fields in DB
             string[] names = Utilities.SplitFullName(Account.Name);
             Colleague.FirstName = names[1];
             Colleague.LastName= names[0];
@@ -49,7 +52,10 @@ namespace SCCPP1.Pages
             return Page();
         }
 
-        //TODO: should probably make EditMain and CreateMain same page and just change name.
+        // When the Submit button on the form is pressed on, OnPost() starts, grabs the information the user typed and then saves it into the database.
+        // If it is successfully saved into the database, redirect the user to "/UserHome", if it fails, return this page.
+        // Currently, we have the user stay on this page after they, Submit, but for testing purposes we are leaving it on this page.
+        // We are also considering making CreateMainProfile and EditMainProfile as just one page, but that is still to be decided.
         public IActionResult OnPost()
         {
             Console.WriteLine("EditMainProfile.OnPost() Called");
@@ -73,7 +79,6 @@ namespace SCCPP1.Pages
                     Console.WriteLine("Could not save");
                     ViewData["UserData"] = "Error Saving";
                 }
-
             }
 
             return Page();

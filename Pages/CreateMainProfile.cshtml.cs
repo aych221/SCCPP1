@@ -16,6 +16,7 @@ namespace SCCPP1.Pages
             _logger = logger;
         }
 
+        // The [BindProperty] attribute, takes the data from the POST request and maps it to our Model which can then be intereacted with our database.
         [BindProperty]
         public Colleague? Colleague { get; set; }
 
@@ -28,6 +29,8 @@ namespace SCCPP1.Pages
         [BindProperty]
         public Education? Education { get; set; }
 
+        // When the Submit button on the form is pressed on, OnPost() starts, grabs the information the user typed and then saves it into the database.
+        // If it is successfully saved into the database, redirect the user to "/UserHome", if it fails, return this page.
         public IActionResult OnPost()
         {
             if (!ModelState.IsValid)
@@ -51,7 +54,6 @@ namespace SCCPP1.Pages
                 {
                     Console.WriteLine("Could not save");
                     ViewData["UserData"] = "Error Saving";
-
                 }
             }
 

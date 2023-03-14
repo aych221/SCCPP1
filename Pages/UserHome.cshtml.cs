@@ -10,9 +10,9 @@ namespace SCCPP1.Pages
 {
 	public class UserHomeModel : SessionModel
     {
-        private readonly ILogger<PrivacyModel> _logger;
+        private readonly ILogger<UserHomeModel> _logger;
 
-        public UserHomeModel(SessionHandler sessionHandler, ILogger<PrivacyModel> logger) : base(sessionHandler)
+        public UserHomeModel(SessionHandler sessionHandler, ILogger<UserHomeModel> logger) : base(sessionHandler)
         {
             _logger = logger;
         }
