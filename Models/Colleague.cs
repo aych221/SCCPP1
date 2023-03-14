@@ -2,6 +2,8 @@
 
 namespace SCCPP1.Models
 {
+    // Here we have our Colleague class, with the getters and setters for the "About" section of the Colleague
+    // ie. First Name, Last Name, Number etc.
     public class Colleague
     {
         public int Id { get; set; }
