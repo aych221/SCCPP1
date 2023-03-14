@@ -20,22 +20,23 @@ namespace SCCPP1
             }
             return s.ToString();
         }
-
+        
+        //changes format of date
         public static DateOnly ToDateOnly(string input)
         {
             DateOnly date = new DateOnly();
-            bool pass = DateOnly.TryParse(input, out date); //need to set a fail condition
+            bool pass = DateOnly.TryParse(input, out date); //Fail condition rendered unnecessary by using date HTML input
             return date;
         }
 
-        //TODO
+        //Using datetime to transform to date
         public static DateOnly ToDateOnly(DateTime input)
         {
             //DateOnly date = DateOnly.FromDateTime(input);
             return DateOnly.FromDateTime(input);
         }
 
-        //TODO
+        //reverse to DateTime
         public static DateTime FromDateOnly(DateOnly input)
         {
             return input.ToDateTime(new TimeOnly(0, 0));
@@ -75,6 +76,7 @@ namespace SCCPP1
             return names;
         }
 
+        //to be rendered unnecessary by using HTML Phone input
         public static long ParsePhoneNumber(string phoneNumber)
         {
             //int num = -1;
@@ -86,9 +88,9 @@ namespace SCCPP1
         }
 
 
+        // Prevent injection & fascilitate auto-input of data by preventing HTML code from being inserted
         public static string HtmlStripper(string input)
         {
-            //needs to be StringBuilder
             string strippedString = "";
             bool bracketFlag = false;
             char[] chars = input.ToCharArray();
@@ -112,6 +114,7 @@ namespace SCCPP1
         }
 
 
+        //Prevents any CS from running by stripping anything with @
         public static string CodeStripper(string input)
         {
             string strippedstring = "";
