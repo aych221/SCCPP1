@@ -2,6 +2,9 @@
 @using Session;
 
 <ul class="navbar-nav">
+
+
+ <!--Used to add the signed in user's name & sign in/out; modeled after guide in Microsoft's documentation -->
 @if (Model.User.Identity.IsAuthenticated)
 {
         <span class="navbar-text text-dark">Hello @User.Identity?.Name!</span>

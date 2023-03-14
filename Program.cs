@@ -17,16 +17,17 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
 
 
-        // Add services to the container.
+        // Sets up MS web identity using Microsoft's identity packages
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 
         builder.Services.AddAuthorization(options =>
         {
-            // By default, all incoming requests will be authorized according to the default policy.
             options.FallbackPolicy = options.DefaultPolicy;
         });
         builder.Services.AddRazorPages().AddMicrosoftIdentityUI();
+
+        //these allow the session classes to be used without conflicting with the MS Identity's packages
         builder.Services.AddSingleton<SessionHandler>();
         builder.Services.AddSingleton<SessionModel>();
 
@@ -45,6 +46,7 @@ internal class Program
 
         app.UseRouting();
 
+        //enable auth
         app.UseAuthentication();
         app.UseAuthorization();
 
