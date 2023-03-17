@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SCCPP1.Models;
 using SCCPP1.Session;
+using SCCPP1.User.Data;
 
 namespace SCCPP1.Pages
 {
@@ -39,7 +40,7 @@ namespace SCCPP1.Pages
             ViewData["FullName"] = $"{names[0]}, {names[1]}";
 
             //<br /> does not work
-            ViewData["Contact"] = $"Email: {Account.Email}<br>Phone: {Account.Phone}";
+            ViewData["Contact"] = $"Email: {Account.EmailAddress}<br>Phone: {Account.PhoneNumber}";
 
             ViewData["Intro"] = Account.IntroNarrative;
 
@@ -63,9 +64,15 @@ namespace SCCPP1.Pages
             sb.Clear();
 
 
+            if (!DatabaseConnector.LoadColleagueSkills(Account))
+            {
+                ViewData["Skills"] = "Failed to load skills";
+                return Page();
+            }
+
             //skills
-            foreach (string s in DatabaseConnector.GetRawColleagueSkills(Account))
-                sb.Append($"{s}<br>");
+            foreach (SkillData sd in Account.Skills)
+                sb.Append($"{sd.SkillName}<br>");
             ViewData["Skills"] = sb.ToString();
 
 
@@ -82,8 +89,8 @@ namespace SCCPP1.Pages
             if (Colleague != null)
             {
                 Account.Name = $"{Colleague.LastName}, {Colleague.FirstName} {Colleague.MiddleName?.ToString()}";
-                Account.Email = Colleague.EmailAddress;
-                Account.Phone = Utilities.ParsePhoneNumber(Colleague.PhoneNumber);
+                Account.EmailAddress = Colleague.EmailAddress;
+                Account.PhoneNumber = Utilities.ParsePhoneNumber(Colleague.PhoneNumber);
                 Account.IntroNarrative = Colleague.IntroNarrative;
 
                 if (DatabaseConnector.SaveUser(Account))

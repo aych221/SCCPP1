@@ -1,27 +1,106 @@
 ﻿namespace SCCPP1.User.Data
 {
-    public class WorkData : AccountRecordData
+    public class WorkData : OwnerRecordData
     {
-        public string Employer { get; set; }
 
+        private string employer;
+        public string Employer
+        {
+            get { return employer; }
+            set { SetField(ref employer, value); }
+        }
         public int EmployerID { get; set; }
 
-        public Location Location { get; set; }
 
-        public string JobTitle { get; set; }
-
+        private string jobTitle;
+        public string JobTitle
+        {
+            get { return jobTitle; }
+            set { SetField(ref jobTitle, value); }
+        }
         public int JobTitleID { get; set; }
 
-        public DateOnly StartDate { get; set; }
 
-        public DateOnly EndDate { get; set; }
+        private string description;
+        public string Description
+        {
+            get { return description; }
+            set { SetField(ref description, value); }
+        }
 
-        public string Description { get; set; }
+
+        private Location location;
+        public Location Location
+        {
+            get { return location; }
+            set { SetField(ref location, value); }
+        }
 
 
-        public WorkData(Account owner, int id = -1) : base(owner, id)
+        private DateOnly startDate;
+        public DateOnly StartDate
+        {
+            get { return startDate; }
+            set { SetField(ref startDate, value); }
+        }
+
+
+        private DateOnly endDate;
+        public DateOnly EndDate
+        {
+            get { return endDate; }
+            set { SetField(ref endDate, value); }
+        }
+
+
+
+
+        public WorkData(Account owner, int recordID = -1) : base(owner, recordID)
         {
 
         }
+
+        public WorkData(Account owner, int recordID, string employer, int employerID, string jobTitle, int jobTitleID, string description, Location location, DateOnly startDate, DateOnly endDate) : this(owner, recordID)
+        {
+            this.Employer = employer;
+            this.EmployerID = employerID;
+            this.Location = location;
+            this.JobTitle = jobTitle;
+            this.JobTitleID = jobTitleID;
+            this.StartDate = startDate;
+            this.EndDate = endDate;
+            this.Description = description;
+
+            this.IsUpdated = true;
+            
+        }
+
+
+        //for user creation
+        public WorkData(Account owner, string employer, string jobTitle, string description, Location location, DateOnly startDate, DateOnly endDate) : 
+            this(owner, -1, employer, -1, jobTitle, -1, description, location, startDate, endDate)
+        {
+            this.NeedsSave = true;
+        }
+
+
+        //for loading from db
+        public WorkData(Account owner, int recordID, int employerID, int jobTitleID, string description, Location location, DateOnly startDate, DateOnly endDate) :
+            this(owner, recordID, null, employerID, null, jobTitleID, description, location, startDate, endDate)
+        {
+            this.NeedsSave = false;
+            //maybe use IsUpdated = false flag to let DB know we need null values filled?
+        }
+
+
+        public override bool Save()
+        {
+            //save resources if we don't need to save.
+            if (!this.NeedsSave)
+                return true;
+
+            return DatabaseConnector.SaveWorkHistory(this);
+        }
+
     }
 }

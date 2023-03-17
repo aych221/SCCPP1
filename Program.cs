@@ -9,6 +9,7 @@ using SCCPP1.Session;
 
 internal class Program
 {
+
     private static void Main(string[] args)
     {
         //before site loads

@@ -39,8 +39,8 @@ namespace SCCPP1.Pages
             if (Colleague != null)
             {
                 Account.Name = $"{Colleague.LastName}, {Colleague.FirstName} {Colleague.MiddleName?.ToString()} ";
-                Account.Email = Colleague.EmailAddress;
-                Account.Phone = Utilities.ParsePhoneNumber(Colleague.PhoneNumber);
+                Account.EmailAddress = Colleague.EmailAddress;
+                Account.PhoneNumber = Utilities.ParsePhoneNumber(Colleague.PhoneNumber);
                 Account.IntroNarrative = Colleague.IntroNarrative;
 
                 if (DatabaseConnector.SaveUser(Account))

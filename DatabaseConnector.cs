@@ -11,6 +11,7 @@ using Microsoft.Identity.Web.UI;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using SCCPP1.Models;
 
 namespace SCCPP1
 {
@@ -21,18 +22,18 @@ namespace SCCPP1
 
         //load these tables in memory to reduce CPU usage
         //may not need to do this
-        private static Dictionary<int, string> skills = new Dictionary<int, string>();
-        private static Dictionary<int, string> education_types = new Dictionary<int, string>();
-        private static Dictionary<int, string> institutions = new Dictionary<int, string>();
-        private static Dictionary<int, string> municipalities = new Dictionary<int, string>();
+        private static Dictionary<int, string> skills;
+        private static Dictionary<int, string> education_types;
+        private static Dictionary<int, string> institutions;
+        private static Dictionary<int, string> municipalities;
 
         //states are saved as abbreviation on first two chars and the other chars are the full name
-        private static Dictionary<int, string> states = new Dictionary<int, string>();
-        private static Dictionary<int, string> employers = new Dictionary<int, string>();
-        private static Dictionary<int, string> job_titles = new Dictionary<int, string>();
+        private static Dictionary<int, string> states;
+        private static Dictionary<int, string> employers;
+        private static Dictionary<int, string> job_titles;
 
 
-        public static void CreateDatabase()
+        public static void CreateDatabase(bool loadCaches = false)
         {
 
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -41,6 +42,10 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(dbSQL, conn))
                 {
                     cmd.ExecuteNonQuery();
+
+                    
+                    if (loadCaches)
+                        LoadCaches();
                 }
             }
             
@@ -49,26 +54,27 @@ namespace SCCPP1
 
         #region Dictionary Loaders
         //Dictionary loaders
-        public static void LoadSkills()
+        private static void LoadCacheSkills()
         {
             skills = LoadTwoColumnTable("skills");
         }
 
-        public static void LoadEducationTypes()
+        private static void LoadCacheEducationTypes()
         {
             education_types = LoadTwoColumnTable("education_types");
         }
-        public static void LoadInstitutions()
+        private static void LoadCacheInstitutions()
         {
             institutions = LoadTwoColumnTable("institutions");
         }
 
-        public static void LoadMunicipalities()
+        private static void LoadCacheMunicipalities()
         {
             municipalities = LoadTwoColumnTable("municipalities");
         }
 
-        public static void LoadStates()
+        //maybe don't need, could just hard code
+        private static void LoadCacheStates()
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
@@ -97,16 +103,26 @@ namespace SCCPP1
             }
         }
 
-        public static void LoadEmployers()
+        private static void LoadCacheEmployers()
         {
             employers = LoadTwoColumnTable("employers");
         }
 
-        public static void LoadJobTitles()
+        private static void LoadCacheJobTitles()
         {
             job_titles = LoadTwoColumnTable("job_titles");
         }
 
+        private static void LoadCaches()
+        {
+            LoadCacheSkills();
+            LoadCacheInstitutions();
+            LoadCacheEducationTypes();
+            LoadCacheMunicipalities();
+            LoadCacheStates();
+            LoadCacheEmployers();
+            LoadCacheJobTitles();
+        }
 
         private static Dictionary<int, string> LoadTwoColumnTable(string tableName)
         {
@@ -137,55 +153,85 @@ namespace SCCPP1
 
         #region Dictionary Getters
         //Dictionary getters
-        public static string? GetCachedSkill(int id)
+        private static string? GetCachedSkill(int id)
         {
-            return GetCachedValue(id, skills);
+            return GetCachedValue(skills, id);
         }
 
-        //first searches the dictionary for the skill,
-        //if not found, it will search the database
-        //if nothing is found, it will return null.
-        public static string? TryGetSkill(int id)
+        private static string[] GetCachedSkills(params int[] ids)
         {
-            string? s;
-            if ((s = GetCachedSkill(id)) == null)
-                return GetCachedSkill(id);
-
-            return s;
+            return GetCachedValues(skills, ids);
         }
 
-        public static string? GetCachedEducationType(int id)
+
+        private static string? GetCachedEducationType(int id)
         {
-            return GetCachedValue(id, education_types);
+            return GetCachedValue(education_types, id);
         }
 
-        public static string? GetCachedInstitution(int id)
+        private static string[] GetCachedEducationTypes(params int[] ids)
         {
-            return GetCachedValue(id, institutions);
+            return GetCachedValues(education_types, ids);
         }
+
+
+        private static string? GetCachedInstitution(int id)
+        {
+            return GetCachedValue(institutions, id);
+        }
+
+        private static string[] GetCachedInstitutions(params int[] ids)
+        {
+            return GetCachedValues(institutions, ids);
+        }
+
 
         public static string? GetCachedMunicipality(int id)
         {
-            return GetCachedValue(id, municipalities);
+            return GetCachedValue(municipalities, id);
         }
+
+        public static string[] GetCachedMunicipalities(params int[] ids)
+        {
+            return GetCachedValues(municipalities, ids);
+        }
+
 
         public static string? GetCachedState(int id)
         {
-            return GetCachedValue(id, states);
+            return GetCachedValue(states, id);
         }
 
-        public static string? GetCachedEmployer(int id)
+        public static string[] GetCachedStates(params int[] ids)
         {
-            return GetCachedValue(id, employers);
+            return GetCachedValues(states, ids);
         }
-        
-        public static string? GetCachedJobTitle(int id)
+
+
+        private static string? GetCachedEmployer(int id)
         {
-            return GetCachedValue(id, job_titles);
+            return GetCachedValue(employers, id);
+        }
+
+        private static string[] GetCachedEmployers(params int[] ids)
+        {
+            return GetCachedValues(employers, ids);
         }
 
 
-        private static string? GetCachedValue(int id, Dictionary<int, string> table)
+        private static string? GetCachedJobTitle(int id)
+        {
+            return GetCachedValue(job_titles, id);
+        }
+
+        private static string[] GetCachedJobTitles(params int[] ids)
+        {
+            return GetCachedValues(job_titles, ids);
+        }
+
+
+
+        private static string? GetCachedValue(Dictionary<int, string> table, int id)
         {
             string? s;
 
@@ -194,6 +240,43 @@ namespace SCCPP1
 
             return null;
         }
+
+        private static string[] GetCachedValues(Dictionary<int, string> table, params int[] ids)
+        {
+            string[] arr = new string[ids.Length];
+            string s;
+
+            for (int i = 0; i < arr.Length; i ++)
+
+                //value was found
+                if (table.TryGetValue(ids[i], out s))
+                    arr[i] = s;
+
+            return arr;
+        }
+
+
+
+
+        //first searches the dictionary for the skill,
+        //if not found, it will search the database
+        //if nothing is found, it will return null.
+        private static string? TryGetCachedSkill(int id)
+        {
+            //check cache, if not there, reload cache
+            if (GetCachedSkill(id) == null)
+                LoadCacheSkills();
+
+            return GetCachedSkill(id);
+        }
+
+        //may not use
+        private static string[] TryGetCachedSkills(params int[] ids)
+        {
+            return GetCachedSkills(ids);
+        }
+
+
         #endregion
 
         #region User Data
@@ -227,7 +310,7 @@ namespace SCCPP1
                         a.RecordID = GetInt32(r, 0);
                         a.Role = GetInt32(r, 1);
                         a.Name = GetString(r, 2);
-                        a.Email = GetString(r, 3);
+                        a.EmailAddress = GetString(r, 3);
 
                         sessionData.Owner = a;
 
@@ -272,7 +355,7 @@ namespace SCCPP1
 
         public static int InsertUser(Account account)
         {
-            return InsertUser(account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID);
+            return InsertUser(account.GetUsername(), account.Role, account.Name, account.EmailAddress, account.PhoneNumber, account.StreetAddress, account.IntroNarrative, account.MainProfileID);
         }
 
         public static int UpdateUser(int id, string userID, int role, string name, string email, long phone, string address, string introNarrative, int mainProfileID)
@@ -303,7 +386,7 @@ namespace SCCPP1
 
         public static int UpdateUser(Account account)
         {
-            return UpdateUser(account.RecordID, account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID);
+            return UpdateUser(account.RecordID, account.GetUsername(), account.Role, account.Name, account.EmailAddress, account.PhoneNumber, account.StreetAddress, account.IntroNarrative, account.MainProfileID);
         }
 
 
@@ -331,8 +414,8 @@ namespace SCCPP1
         public static bool SaveUser(Account account)
         {
             if (account.IsReturning)
-                return SaveUser(account.RecordID, account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID);
-            account.RecordID = SaveUser(account.GetUsername(), account.Role, account.Name, account.Email, account.Phone, account.Address, account.IntroNarrative, account.MainProfileID);
+                return SaveUser(account.RecordID, account.GetUsername(), account.Role, account.Name, account.EmailAddress, account.PhoneNumber, account.StreetAddress, account.IntroNarrative, account.MainProfileID);
+            account.RecordID = SaveUser(account.GetUsername(), account.Role, account.Name, account.EmailAddress, account.PhoneNumber, account.StreetAddress, account.IntroNarrative, account.MainProfileID);
             account.IsReturning = true;
             return  account.RecordID >= 0;
         }
@@ -456,9 +539,9 @@ namespace SCCPP1
                         a.RecordID = GetInt32(r, 0);
                         a.Role = GetInt32(r, 1);
                         a.Name = GetString(r, 2);
-                        a.Email = GetString(r, 3);
-                        a.Phone = GetInt64(r, 4);
-                        a.Address = GetString(r, 5);
+                        a.EmailAddress = GetString(r, 3);
+                        a.PhoneNumber = GetInt64(r, 4);
+                        a.StreetAddress = GetString(r, 5);
                         a.IntroNarrative = GetString(r, 6);
                         a.MainProfileID = GetInt32(r, 7);
 
@@ -494,9 +577,9 @@ namespace SCCPP1
                         a.RecordID = GetInt32(r, 1);
                         a.Role = GetInt32(r, 2);
                         a.Name = GetString(r, 3);
-                        a.Email = GetString(r, 4);
-                        a.Phone = GetInt64(r, 5);
-                        a.Address = GetString(r, 6);
+                        a.EmailAddress = GetString(r, 4);
+                        a.PhoneNumber = GetInt64(r, 5);
+                        a.StreetAddress = GetString(r, 6);
                         a.IntroNarrative = GetString(r, 7);
                         a.MainProfileID = GetInt32(r, 8);
 
@@ -511,7 +594,13 @@ namespace SCCPP1
         #region Skill Data
 
         //TODO, do we need to care about case?
-        public static int SaveSkill(string skillName)
+        private static int SaveSkill(SkillData skill)
+        {
+            return SaveSkill(skill.SkillName);
+        }
+
+        //TODO, do we need to care about case?
+        private static int SaveSkill(string skillName)
         {
             int id = GetSkillID(skillName);
 
@@ -521,25 +610,17 @@ namespace SCCPP1
             return id;
         }
 
-        public static int[] SaveSkills(params string[] skillNames)
+        private static int[] SaveSkills(params SkillData[] skills)
         {
-            int[] skillIDs;
+            string[] skillNames = new string[skills.Length];
+            for (int i = 0; i < skillNames.Length; i++)
+                skillNames[i] = skills[i].SkillName;
+            return SaveSkills(skillNames);
+        }
 
-            //return if all skills were found and "saved"
-            if (GetSkillIDs(out skillIDs, skillNames))
-                return skillIDs;
-            
-            //else, we need to add the missing skills
-            StringBuilder skills = new StringBuilder();
-
-            for (int i = 0; i < skillIDs.Length; i ++)
-                if (skillIDs[i] == -1)
-                    skills.Append($"{skillNames[i]}");
-
-            //not recommended to concat arrays, but these may be relatively small
-            //might end up using ArrayLists
-            return skillIDs.Concat(InsertSkills(skills.ToString())).ToArray();
-
+        private static int[] SaveSkills(params string[] skillNames)
+        {
+            return InsertSkills(skillNames);
         }
 
         /// <summary>
@@ -569,36 +650,47 @@ namespace SCCPP1
         }
 
         
+        /// <summary>
+        /// Inserts skill names into the skills table. This will insert all unique skill names.
+        /// </summary>
+        /// <param name="skillNames">the skills to be inserted</param>
+        /// <returns>GetSkillIDs(skillNames)</returns>
         public static int[] InsertSkills(params string[] skillNames)
         {
-            int[] insertedSkillIDs = new int[skillNames.Length];
+            if (skillNames.Length < 1)
+                return null;
+
+
+            StringBuilder sb = new StringBuilder("INSERT OR IGNORE INTO skills(name) VALUES (@skillName0)");
+            
+            for (int i = 1; i < skillNames.Length; i++)
+            {
+                sb.Append(',');
+                sb.Append($"(@skillName{i})");
+            }
+            sb.Append(';');
+            string sql = sb.ToString();
+
+            Console.WriteLine(sql);//skillsList.ToString());
 
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-                //not sure if this is the most efficient solution for this table
-                //will need to run tests
-                string sql = @"INSERT OR IGNORE INTO skills(name) VALUES (@name);
-                       SELECT id FROM skills WHERE name = @name;";
+
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
+
                     for (int i = 0; i < skillNames.Length; i++)
-                    {
-                        cmd.Parameters.Clear(); //ensure @name is cleared and updated.
-                        cmd.Parameters.AddWithValue("@name", skillNames[i]);
+                        cmd.Parameters.AddWithValue($"@skillName{i}", ValueCleaner(skillNames[i]));
 
-                        object? skillID = cmd.ExecuteScalar();
-
-                        if (skillID != null)
-                            insertedSkillIDs[i] = Convert.ToInt32(skillID);
-                        else
-                            insertedSkillIDs[i] = InsertSkill(skillNames[i]);
-                    }
+                    Console.WriteLine("Rows effected: " + cmd.ExecuteNonQuery());
                 }
             }
 
-            return insertedSkillIDs;
+            return GetSkillIDs(skillNames);
+
         }
+
 
 
         /// <summary>
@@ -627,6 +719,33 @@ namespace SCCPP1
         }
 
         /// <summary>
+        /// Retrieves the skill name(s) based on the ids.
+        /// </summary>
+        /// <param name="id">the skill id</param>
+        /// <returns>null if skill id does not exist, otherwise returns skill name</returns>
+        public static string[] GetSkillNames(params int[] ids)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+                //not much concern with SQL injection since only ints are being inserted.
+                string sql = $"SELECT name FROM skills WHERE id IN ({string.Join(",", ids)});";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
+                    {
+                        List<string> skillNames = new List<string>();
+                        while (r.Read())
+                            skillNames.Add(GetString(r, 0));
+
+                        return skillNames.ToArray();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Retrieves the ID for a skill if it exists.
         /// </summary>
         /// <param name="skillName"></param>
@@ -639,7 +758,7 @@ namespace SCCPP1
                 string sql = @"SELECT id FROM skills WHERE (name=@name);";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@name", skillName);
+                    cmd.Parameters.AddWithValue("@name", ValueCleaner(skillName));
                     using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
                     {
                         if (r.Read())
@@ -652,36 +771,58 @@ namespace SCCPP1
         }
 
         //will work great for large amounts of skills, not so sure if it's better for small amount of skills
-        public static int[] GetSkillIDs(params string[] skillNames)
+        public static int[]? GetSkillIDs(params string[] skillNames)
         {
+            if (skillNames.Length < 1)
+                return null;
+
             Dictionary<string, int> skillNameResults = new Dictionary<string, int>(skillNames.Length);
             int[] skillIDs = new int[skillNames.Length];
 
             //create skills list
-            StringBuilder skillsList = new StringBuilder(skillNames[0]);
+            StringBuilder sb = new StringBuilder("SELECT name, id FROM skills WHERE name IN(@skillName0");
+            skillNameResults.Add(skillNames[0], -1);
 
-            for (int i = 1; i < skillNames.Length; i ++)
+
+            for (int i = 1; i < skillNames.Length; i++)
             {
-                skillsList.Append($", {skillNames[i]}");
+                sb.Append(',');
+                sb.Append($"@skillName{i}");
 
                 //fill with -1's initially to indicate not found
                 skillNameResults.Add(skillNames[i], -1);
+                skillIDs[i] = -1;
             }
+            sb.Append(");");
 
+            string sql = sb.ToString();
+
+            //execute select query
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-                string sql = @"SELECT name, id FROM skills WHERE name IN (@skillsList)";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@skillsList", skillsList.ToString());
+
+                    for (int i = 0; i < skillNames.Length; i++)
+                    {
+                        cmd.Parameters.AddWithValue($"@skillName{i}", ValueCleaner(skillNames[i]));
+                    }
+                    Console.WriteLine(cmd.CommandText);
+
                     using (SqliteDataReader r = cmd.ExecuteReader())
                     {
+                        //put results in dictionary
                         while (r.Read())
                             skillNameResults[GetString(r, 0)] = GetInt32(r, 1);
 
+
+                        //refresh skillIds with dictionary data
                         for (int i = 0; i < skillNames.Length; i++)
                             skillIDs[i] = skillNameResults[skillNames[i]];
+
+                        Console.Write("SkillIDs: ");
+                        Console.WriteLine(string.Join(",", skillIDs));
 
                         return skillIDs;
                     }
@@ -689,32 +830,27 @@ namespace SCCPP1
             }
         }
 
-        public static bool GetSkillIDs(out int[] skillIDs, params string[] skillNames)
-        {
-            //is set to true if any one of the records ends up being -1
-            bool hasMissingRecord = false;
 
-            Dictionary<string, int> skillNameResults = new Dictionary<string, int>(skillNames.Length);
+        /*public static bool GetSkillIDs(out int[] skillIDs, params string[] skillNames)
+        {
+
             skillIDs = new int[skillNames.Length];
 
             //create skills list
-            StringBuilder skillsList = new StringBuilder(skillNames[0]);
+            StringBuilder skillsList = new StringBuilder("@name0");
 
             for (int i = 1; i < skillNames.Length; i++)
-            {
-                skillsList.Append($", {skillNames[i]}");
-
-                //fill with -1's initially to indicate not found
-                skillNameResults.Add(skillNames[i], -1);
-            }
+                skillsList.Append($", @name{i}");
 
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-                string sql = @"SELECT name, id FROM skills WHERE name IN (@skillsList)";
+                string sql = $"SELECT id, name FROM skills WHERE name IN ({skillsList.ToString()})";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
-                    cmd.Parameters.AddWithValue("@skillsList", skillsList.ToString());
+
+                    for (int i = 0; i < skillNames.Length; i++)
+                        cmd.Parameters.AddWithValue($"@name{i}", ValueCleaner(skillNames[i]));
                     using (SqliteDataReader r = cmd.ExecuteReader())
                     {
                         while (r.Read())
@@ -731,38 +867,250 @@ namespace SCCPP1
                     }
                 }
             }
-        }
+        }//*/
 
-        /*
-        public static int[] GetSkillIDs(params string[] skillNames)
+        /*       /// <summary>
+               /// Saves Colleage's skills,
+               /// </summary>
+               /// <param name="account"></param>
+               /// <returns>true if it was successful, false otherwise</returns>
+               public static bool SaveColleageSkills(Account account)
+               {
+                   //toInsert are skills with -1 ids, toUpdate are skills with existing ids
+                   List<string> toInsert = new List<string>(), updateCases = new List<string>();
+
+                   //ids to update
+                   List<int> updateIDs = new List<int>();
+
+                   List<SkillData> skills = account.Skills;
+
+                   //for SaveSkills method
+                   string[] skillNames = new string[skills.Count];
+
+                   for (int i = 0; i < skills.Count; i++)
+                   {
+                       skillNames[i] = skills[i].Name;
+
+                       //toUpdate
+                       if (skills[i].RecordID > 0)
+                       {
+                           updateIDs.Add(skills[i].RecordID);
+                           updateCases.Add($"WHEN {skills[i].RecordID} THEN {skills[i].Rating}");
+                       }
+                   }
+
+
+                   //insert skills and get ids
+                   int[] ids = SaveSkills(skillNames);
+                   foreach (int id in ids)
+                       toInsert.Add($"({account.RecordID},{id})");
+
+                   using (SqliteConnection conn = new SqliteConnection(connStr))
+                   {
+                       conn.Open();
+                       //not sure if this is the most efficient solution for this table
+                       //will need to run tests
+                       string sql = @"INSERT OR IGNORE INTO colleague_skills(colleague_id, skill_id) VALUES @toInsert;";
+                       using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                       {
+                           //first do inserts
+                           cmd.Parameters.AddWithValue("@toInsert", ValueCleaner(string.Join(",", toInsert)));
+                           cmd.ExecuteNonQuery();
+
+                           //now do updates
+                           sql = @"UPDATE colleague_skills
+                                   SET rating = CASE id
+                                                   @updateCases
+                                               END
+                                   WHERE id IN (@updateIDs);";
+
+                           cmd.Parameters.AddWithValue("@updateCases", ValueCleaner(string.Join(Environment.NewLine, updateCases)));
+                           cmd.Parameters.AddWithValue("@updateIDs", ValueCleaner(string.Join(",", updateIDs)));
+                           cmd.ExecuteNonQuery();
+
+
+                           return true;
+                       }
+                   }
+
+                   return false;
+               }//*/
+
+        public static bool SaveColleageSkills(Account account)
         {
-            int[] insertedSkillIDs = new int[skillNames.Length];
+            //toInsert are skills with -1 ids, toUpdate are skills with existing ids
+            List<string> toInsert = new List<string>(), updateCases = new List<string>();
+
+            //ids to update
+            List<int> updateIDs = new List<int>(), updateRatings = new List<int>();
+
+            List<SkillData> skills = account.Skills;
+
+            //for SaveSkills method
+            string[] skillNames = new string[skills.Count];
+
+            for (int i = 0; i < skills.Count; i++)
+            {
+                skillNames[i] = skills[i].SkillName;
+
+                //toUpdate
+                if (skills[i].RecordID > 0)
+                {
+                    updateIDs.Add(skills[i].RecordID);
+                    updateRatings.Add(skills[i].Rating);
+                    updateCases.Add($"WHEN {skills[i].RecordID} THEN @rating{i}");
+                }
+                else
+                {
+                    toInsert.Add($"({account.RecordID},@skillID{i})");
+                }
+            }
+
+
+            //insert skills and get ids
+            int[] ids = SaveSkills(skillNames);
+
 
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
                 //not sure if this is the most efficient solution for this table
                 //will need to run tests
-                string sql = @"SELECT id FROM skills WHERE (name = @name);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                string sql;
+
+                //inserts first
+                if (toInsert.Count > 0)
                 {
-                    for (int i = 0; i < skillNames.Length; i++)
+                    sql = $"INSERT OR IGNORE INTO colleague_skills(colleague_id, skill_id) VALUES {ValueCleaner(string.Join(",", toInsert))};";
+                    using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                     {
-                        cmd.Parameters.Clear(); //ensure @name is cleared and updated.
-                        cmd.Parameters.AddWithValue("@name", skillNames[i]);
+                        for (int i = 0; i < ids.Length; i++)
+                        {
+                            cmd.Parameters.AddWithValue($"@skillID{i}", ids[i]);
+                        }
+                        cmd.ExecuteNonQuery();
 
-                        object? skillID = cmd.ExecuteScalar();
-
-                        if (skillID != null)
-                            insertedSkillIDs[i] = Convert.ToInt32(skillID);
-                        else
-                            insertedSkillIDs[i] = InsertSkill(skillNames[i]);
                     }
+                }
+
+                if (updateIDs.Count > 0)
+                {
+                    //now do updates
+                    sql = $@"UPDATE colleague_skills
+                            SET rating = CASE id {ValueCleaner(string.Join(Environment.NewLine, updateCases))} END
+                            WHERE id IN ({ValueCleaner(string.Join(",", updateIDs))});";
+
+                    using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                    {
+                        for (int i = 0; i < ids.Length; i++)
+                        {
+                            cmd.Parameters.AddWithValue($"@rating{i}", updateRatings[i]);
+                        }
+                        cmd.ExecuteNonQuery();
+
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool SaveColleageSkills(params SkillData[] skills)
+        {
+            //toInsert are skills with -1 ids, toUpdate are skills with existing ids
+            List<string> toInsert = new List<string>(), updateCases = new List<string>();
+
+            //ids to update
+            List<int> updateIDs = new List<int>(), updateRatings = new List<int>();
+
+
+            //for SaveSkills method
+            string[] skillNames = new string[skills.Length];
+
+            for (int i = 0; i < skills.Length; i++)
+            {
+                skillNames[i] = skills[i].SkillName;
+
+                //toUpdate
+                if (skills[i].RecordID > 0)
+                {
+                    updateIDs.Add(skills[i].RecordID);
+                    updateRatings.Add(skills[i].Rating);
+                    updateCases.Add($"WHEN {skills[i].RecordID} THEN @rating{i}");
+                }
+                else
+                {
+                    toInsert.Add($"({skills[i].Owner.RecordID},@skillID{i})");
                 }
             }
 
-            return insertedSkillIDs;
-        }*/
+
+            //insert skills and get ids
+            int[] ids = SaveSkills(skillNames);
+
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                //not sure if this is the most efficient solution for this table
+                //will need to run tests
+                string sql;
+
+                //inserts first
+                if (toInsert.Count > 0)
+                {
+                    sql = $"INSERT OR IGNORE INTO colleague_skills(colleague_id, skill_id) VALUES {ValueCleaner(string.Join(",", toInsert))};";
+                    using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                    {
+                        for (int i = 0; i < ids.Length; i++)
+                        {
+                            cmd.Parameters.AddWithValue($"@skillID{i}", ids[i]);
+                        }
+                        Console.WriteLine(cmd.CommandText);
+                        cmd.ExecuteNonQuery();
+
+                    }
+                }
+
+                if (updateIDs.Count > 0)
+                {
+                    //now do updates
+                    sql = $@"UPDATE colleague_skills
+                            SET rating = CASE id {ValueCleaner(string.Join(Environment.NewLine, updateCases))} END
+                            WHERE id IN ({ValueCleaner(string.Join(",", updateIDs))});";
+
+                    using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                    {
+                        for (int i = 0; i < ids.Length; i++)
+                        {
+                            cmd.Parameters.AddWithValue($"@rating{i}", updateRatings[i]);
+                        }
+                        Console.WriteLine(cmd.CommandText);
+                        cmd.ExecuteNonQuery();
+
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+        /* public static bool SaveColleageSkills(params SkillData[] skills)
+         {
+             string[] skillNames = new string[account.Skills.Count];
+             for (int i = 0; i < skillNames.Length; i++)
+                 skillNames[i] = account.Skills[i].Name;
+
+             //insert skills and get ids
+             int[] ids = SaveSkills(skillNames);
+
+
+             return SaveColleageSkills(skillNames);
+         }*/
+
 
         //TODO: may need to change skills to be a csv string
         /// <summary>
@@ -801,6 +1149,137 @@ namespace SCCPP1
                     }
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Returns all of the saved colleague skills.
+        /// </summary>
+        /// <param name="account">The account associated with the skills</param>
+        /// <returns>a list of SkillData that stores the record in memory</returns>
+        public static List<SkillData>? GetColleagueSkills(Account account)
+        {
+            //session must've not had an account, so user must not exist
+            if (account == null)
+                return null;
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT * FROM colleague_skills WHERE (colleague_id=@id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", account.RecordID);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        List<SkillData> list = new List<SkillData>();
+
+                        SkillData sd;
+                        while (r.Read())
+                        {
+
+                            sd = new SkillData(account, GetInt32(r, 0));
+                            sd.SkillID  = GetInt32(r, 2);
+                            sd.Rating = GetInt32(r, 3);
+
+                            list.Add(sd);
+                        }
+
+                        return list;
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Returns all of the saved colleague skills.
+        /// </summary>
+        /// <param name="account">The account associated with the skills</param>
+        /// <param name="skillIds">array of skill ids in order of loading</param>
+        /// <returns>a list of SkillData that stores the record in memory</returns>
+        public static List<SkillData>? GetColleagueSkills(Account account, out List<int>? skillIds)
+        {
+            //session must've not had an account, so user must not exist
+            if (account == null)
+            {
+                skillIds = null;
+                return null;
+            }
+
+                using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT * FROM colleague_skills WHERE (colleague_id=@id);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", account.RecordID);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        List<SkillData> list = new List<SkillData>();
+
+                        //this is used so that we don't need to open and close multiple sessions
+                        //and so we don't have to run a loop more than once when populating skillNames
+                        skillIds = new List<int>();
+
+                        SkillData sd;
+
+                        while (r.Read())
+                        {
+
+                            sd = new SkillData(account, GetInt32(r, 0));
+                            skillIds.Add(sd.SkillID = GetInt32(r, 2));
+                            sd.Rating = GetInt32(r, 3);
+
+                            list.Add(sd);
+                        }
+
+                        return list;
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Loads the colleague's skills into the Account class. This will populate the Account.Skills list.
+        /// </summary>
+        /// <param name="account">The account associated with the skills</param>
+        /// <param name="useCache">optional param</param>
+        /// <returns>true if skills could be loaded, false if not</returns>
+        public static bool LoadColleagueSkills(Account account, bool useCache = false)
+        {
+            //session must've not had an account, so user must not exist
+            if (account == null)
+                return false;
+
+            List<int> skillIds;
+
+            //load skills, return false if failed
+            if ((account.Skills = GetColleagueSkills(account, out skillIds)) == null || skillIds == null)
+                return false;
+
+            string[] skillNames;
+
+            //update the skillnames in the SkillData
+            if (useCache)
+            {
+                skillNames = GetCachedSkills(skillIds.ToArray());
+                int i = 0;
+                foreach (SkillData sd in account.Skills)
+                    sd.SkillName = skillNames[i++];
+
+            }
+            else
+            {
+                skillNames = GetSkillNames(skillIds.ToArray());
+                int i = 0;
+                foreach (SkillData sd in account.Skills)
+                    sd.SkillName = skillNames[i++];
+            }
+
+            return true;
+
         }
         #endregion
 
@@ -1655,9 +2134,9 @@ namespace SCCPP1
         public static void SaveBrittany(Account account)
         {
             account.Name = "Brittany Langosh";
-            account.Email = "lbrittany02@rsi.com";
-            account.Phone = 1231231234;
-            account.Address = "123 Main St";
+            account.EmailAddress = "lbrittany02@rsi.com";
+            account.PhoneNumber = 1231231234;
+            account.StreetAddress = "123 Main St";
             account.IntroNarrative = "Brittany Langosh has been a Product Manager...";
 
             EducationData ed1 = new EducationData(account),
@@ -1698,9 +2177,9 @@ namespace SCCPP1
                 sd2 = new SkillData(account),
                 sd3 = new SkillData(account);
 
-            sd1.Skill = "Java";
-            sd2.Skill = "C#";
-            sd3.Skill = "HTML";
+            sd1.SkillName = "Java";
+            sd2.SkillName = "C#";
+            sd3.SkillName = "HTML";
 
             SaveUser(account);
             //SaveSkill(")
@@ -1735,9 +2214,9 @@ namespace SCCPP1
 
             Account account = new Account(null, false);
             account.Name = "Brittany Langosh";
-            account.Email = "lbrittany02@rsi.com";
-            account.Phone = 1231231234;
-            account.Address = "123 Main St";
+            account.EmailAddress = "lbrittany02@rsi.com";
+            account.PhoneNumber = 1231231234;
+            account.StreetAddress = "123 Main St";
             account.IntroNarrative = "Brittany Langosh has been a Product Manager...";
             //account.MainProfileID = 0;
 
@@ -1782,9 +2261,9 @@ namespace SCCPP1
                 sd2 = new SkillData(account, 2),
                 sd3 = new SkillData(account, 3);
 
-            sd1.Skill = "Java";
-            sd2.Skill = "C#";
-            sd3.Skill = "HTML";
+            sd1.SkillName = "Java";
+            sd2.SkillName = "C#";
+            sd3.SkillName = "HTML";
 
             /*InsertUser("Britt", 0, "Brittany Langosh", "Britt@noemail.com", 1231231234, "123 Main St", "Brittany Langosh has been a Product Manager...", 0);
             InsertEducationHistory(0, 0, 0, 0, 0, Utilities.ToDateOnly("July 1 2022"), Utilities.ToDateOnly("July 5 2022"), "Masters of Business Admin");
@@ -1808,9 +2287,9 @@ namespace SCCPP1
             //ww8FDk-bnuBk1KJXVreseNbsDmGnt62pNRpswwgGC7k
 
             account.Name = "Wall, Thomas Joseph";
-            account.Email = "thwall@augusta.edu";
-            account.Phone = 1231231234;
-            account.Address = "123 Main St";
+            account.EmailAddress = "thwall@augusta.edu";
+            account.PhoneNumber = 1231231234;
+            account.StreetAddress = "123 Main St";
             account.IntroNarrative = "klasjdflkjas lkasdnfkljaslk";
 
             EducationData ed1 = new EducationData(account),
@@ -1851,9 +2330,11 @@ namespace SCCPP1
                 sd2 = new SkillData(account),
                 sd3 = new SkillData(account);
 
-            sd1.Skill = "Java";
-            sd2.Skill = "C#";
-            sd3.Skill = "HTML";
+            
+
+            sd1.SkillName = "Java";
+            sd2.SkillName = "C#";
+            sd3.SkillName = "HTML";
 
             SaveUser(account);
             //SaveSkill(")
@@ -1866,6 +2347,8 @@ namespace SCCPP1
             Thread.Sleep(1);
             SaveWorkHistory(wd1);
             SaveWorkHistory(wd2);
+            SaveColleageSkills(sd1, sd2, sd3);
+            //account.Skills = GetColleagueSkills(account);
             Console.WriteLine("Saved!");
             /*foreach (string s in GetRawColleagueEducationHistory(account.RecordID))
                 Console.WriteLine(s);
@@ -2002,7 +2485,7 @@ namespace SCCPP1
 
         CREATE TABLE municipalities (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL
+          name TEXT UNIQUE NOT NULL
         );
 
         CREATE TABLE states (
@@ -2013,12 +2496,12 @@ namespace SCCPP1
 
         CREATE TABLE institutions (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL
+          name TEXT UNIQUE NOT NULL
         );
 
         CREATE TABLE education_types (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          type TEXT NOT NULL
+          type TEXT UNIQUE NOT NULL
         );
 
         CREATE TABLE education_history (
@@ -2041,12 +2524,12 @@ namespace SCCPP1
 
         CREATE TABLE employers (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL
+          name TEXT UNIQUE NOT NULL
         );
 
         CREATE TABLE job_titles (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          title TEXT NOT NULL
+          title TEXT UNIQUE NOT NULL
         );
 
         CREATE TABLE work_history (
@@ -2068,7 +2551,7 @@ namespace SCCPP1
 
         CREATE TABLE skills (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL
+          name TEXT UNIQUE NOT NULL
         );
 
         CREATE TABLE colleague_skills (

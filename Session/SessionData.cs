@@ -53,7 +53,7 @@ namespace SCCPP1.Session
         public string GetUsersEmail()
         {
             if (User == null)
-                return Owner.Email;
+                return Owner.EmailAddress;
             //return User.FindFirstValue(ClaimTypes.Email);
             return User.FindFirstValue("preferred_username");
         }

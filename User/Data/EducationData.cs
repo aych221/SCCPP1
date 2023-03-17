@@ -1,26 +1,101 @@
-﻿namespace SCCPP1.User.Data
+﻿using System.Security.Cryptography;
+
+namespace SCCPP1.User.Data
 {
-    public class EducationData : AccountRecordData
+    public class EducationData : OwnerRecordData
     {
 
-        public string EducationType { get; set; }
-        public int EducationTypeID { get; set; }
+        private string institution;
+        public string Institution
+        { 
+            get { return institution; } 
+            set
+            { SetField(ref institution, value); } 
+        }
 
-        public string Institution { get; set; }
         public int InstitutionID { get; set; }
 
-        public Location Location { get; set; }
+        private string educationType;
+        public string EducationType
+        {
+            get { return educationType; }
+            set { SetField(ref educationType, value); }
+        }
 
-        public DateOnly StartDate { get; set; }
+        public int EducationTypeID { get; set; }
 
-        public DateOnly EndDate { get; set; }
+        private string description;
+        public string Description
+        {
+            get { return description; }
+            set { SetField(ref description, value); }
+        }
 
-        public string Description { get; set; }
+        private Location location;
+        public Location Location
+        {
+            get { return location; }
+            set { SetField(ref location, value); }
+        }
+
+        private DateOnly startDate;
+        public DateOnly StartDate
+        {
+            get { return startDate; }
+            set { SetField(ref startDate, value); }
+        }
+
+        private DateOnly endDate;
+        public DateOnly EndDate
+        {
+            get { return endDate; }
+            set { SetField(ref endDate, value); }
+        }
 
 
-        public EducationData(Account owner, int id = -1) : base(owner, id)
+        public EducationData(Account owner, int recordID = -1) : base(owner, recordID)
         {
 
+        }
+
+
+        public EducationData(Account owner, int recordID, string institution, int institutionID, string educationType, int educationTypeID, string description, Location location, DateOnly startDate, DateOnly endDate) : this(owner, recordID)
+        {
+            this.Institution = institution;
+            this.InstitutionID = institutionID;
+            this.EducationType = educationType;
+            this.EducationTypeID = educationTypeID;
+            this.Description = description;
+            this.Location = location;
+            this.StartDate = startDate;
+            this.EndDate = endDate;
+
+            this.IsUpdated = true;
+        }
+
+        //for creating from user input
+        public EducationData(Account owner, string institution, string educationType, string description, Location location, DateOnly startDate, DateOnly endDate) : 
+            this(owner, -1, institution, -1, educationType, -1, description, location, startDate, endDate)
+        {
+            this.NeedsSave = true;
+        }
+
+        //for loading from db
+        public EducationData(Account owner, int recordID, int institutionID, int educationTypeID, string description, Location location, DateOnly startDate, DateOnly endDate) :
+            this(owner, recordID, null, institutionID, null, educationTypeID, description, location, startDate, endDate)
+        {
+            this.NeedsSave = false;
+            //maybe use IsUpdated = false flag to let DB know we need null values filled?
+        }
+
+
+        public override bool Save()
+        {
+            //save resources if we don't need to save.
+            if (!this.NeedsSave)
+                return true;
+
+            return DatabaseConnector.SaveEducationHistory(this);
         }
 
     }

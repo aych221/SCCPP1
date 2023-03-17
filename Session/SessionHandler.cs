@@ -95,7 +95,7 @@ namespace SCCPP1.Session
             {
                 acc = new Account(Data, false);
                 DatabaseConnector.SaveUser(acc);
-                Console.WriteLine($"Account: {acc.Email}, {acc.Name}, {acc.GetUsername()}");
+                Console.WriteLine($"Account: {acc.EmailAddress}, {acc.Name}, {acc.GetUsername()}");
 
                 //should be UpdateInfo page or something.
                 page = "/CreateMainProfile";

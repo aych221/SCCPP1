@@ -3,37 +3,97 @@ using SCCPP1.User.Data;
 
 namespace SCCPP1.User
 {
-    public class Account
+    public class Account : RecordData
     {
 
-        private readonly SessionData Data;
+        protected readonly SessionData Data;
 
-        //the colleague's database ID
-        public int RecordID { get; set; }
 
         //0 = admin, 1 = normal user
-        public int Role { get; set; }
+        private int role;
+        public int Role
+        {
+            get { return role; }
+            set { SetField(ref role, value); }
+        }
+
 
         //Name stored
-        public string Name { get; set; }
+        private string name;
+        public string Name
+        {
+            get { return name; }
+            set { SetField(ref name, value); }
+        }
 
-        public string FirstName { get; set; }
+        private string firstName;
+        public string FirstName
+        {
+            get { return firstName; }
+            set { SetField(ref firstName, value); }
+        }
 
-        public string LastName { get; set; }
+        private string lastName;
+        public string LastName
+        {
+            get { return lastName; }
+            set { SetField(ref lastName, value); }
+        }
 
-        public string? MiddleName { get; set; }
+        private string? middleName;
+        public string? MiddleName
+        {
+            get { return middleName; }
+            set { SetField(ref middleName, value); }
+        }
 
 
         //Email stored (may not want to use signed on E-mail)
-        public string Email { get; set; }
+        private string emailAddress;
+        public string EmailAddress
+        {
+            get { return emailAddress; }
+            set { SetField(ref emailAddress, value); }
+        }
 
-        public long Phone { get; set; }
+        private long phoneNumber;
+        public long PhoneNumber
+        {
+            get { return phoneNumber; }
+            set { SetField(ref phoneNumber, value); }
+        }
 
-        public string Address { get; set; }
 
-        public string IntroNarrative { get; set; }
+        private string streetAddress;
+        public string StreetAddress
+        {
+            get { return streetAddress; }
+            set { SetField(ref streetAddress, value); }
+        }
 
-        public int MainProfileID { get; set; }
+
+        private Location location;
+        public Location Location
+        {
+            get { return location; }
+            set { SetField(ref location, value); }
+        }
+
+
+        private string introNarrative;
+        public string IntroNarrative
+        {
+            get { return introNarrative; }
+            set { SetField(ref introNarrative, value); }
+        }
+
+
+        private int mainProfileID;
+        public int MainProfileID
+        {
+            get { return mainProfileID; }
+            set { SetField(ref mainProfileID, value); }
+        }
 
 
 
@@ -50,20 +110,116 @@ namespace SCCPP1.User
         /// </summary>
         public bool IsReturning;
 
-        public Account(SessionData sessionData, bool isReturning)
+
+
+        public Account(SessionData sessionData, bool isReturning) : base()
         {
             this.Data = sessionData;
             this.IsReturning= isReturning;
 
-            this.Email = Data.GetUsersEmail();
+            this.EmailAddress = Data.GetUsersEmail();
             this.Name = Data.GetUsersName();
 
         }
+
+
+        #region Add/Update data methods
+        public void UpdateData(string firstName, string middleName, string lastName, string emailAddress, long phoneNumber, string streetAddress, Location location, string introNarrative)
+        {
+            FirstName = firstName;
+            MiddleName = middleName;
+            LastName = lastName;
+            Name = Utilities.ToFullName(firstName, middleName, lastName);
+            EmailAddress = emailAddress;
+            PhoneNumber = phoneNumber;
+            StreetAddress = streetAddress;
+            Location = location;
+            IntroNarrative = introNarrative;
+        }
+
+
+        public void UpdateData(string name, string emailAddress, long phoneNumber, string streetAddress, Location location, string introNarrative)
+        {
+            Name = name;
+            string[] names = Utilities.SplitFullName(Name);
+            UpdateData(names[1], names[2], names[0], emailAddress, phoneNumber, streetAddress, location, introNarrative);
+        }
+
+
+        public void AddSkills(params string[] skillNames)
+        {
+            if (skillNames == null || skillNames.Length == 0)
+                return;
+
+            foreach (string skillName in skillNames)
+                Skills.Add(new SkillData(this, skillName, -1));
+
+            NeedsSave = true;
+        }
+
+        public void RemoveSkill(string skillName)
+        {
+            //TODO, need to make DB methods to remove colleague records that are requested
+        }
+
+        public void AddEducation(string educationName)
+        {
+
+        }
+        #endregion
+
+
+
+
 
         public string GetUsername()
         {
             return Data.Username;
         }
+
+
+        /// <summary>
+        /// Saves the user's direct profile information, does not save associated data.
+        /// </summary>
+        /// <returns>true if changes are saved in database, false otherwise.</returns>
+        public override bool Save()
+        {
+            if (!NeedsSave)
+                return true;
+
+            return DatabaseConnector.SaveUser(this);
+        }
+
+
+        /// <summary>
+        /// Saves everything for the user. All associated data is saved to the database.
+        /// </summary>
+        /// <returns>true if changes are saved in the database, false otherwise.</returns>
+        public bool SaveAll()
+        {
+            bool failed = false;
+
+            //Save user first
+            Save();
+
+            //Batch save skills
+            foreach (SkillData sd in Skills)
+                if (!sd.Save())
+                    failed = true;
+
+            //Batch save education history
+            foreach (EducationData ed in EducationHistory)
+                if (!ed.Save())
+                    failed = true;
+
+            //Batch save work history
+            foreach (WorkData wd in WorkHistory)
+                if (!wd.Save())
+                    failed = true;
+
+            return failed;
+        }
+
 
     }
 }

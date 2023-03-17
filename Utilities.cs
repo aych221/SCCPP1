@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using SCCPP1.Models;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -43,6 +44,11 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Splits a full name from the format of (LastName, FirstName [MiddleName]). If there is no middle name, it will disregard it.
+        /// </summary>
+        /// <param name="fullName">A full name inserted in the format of (LastName, FirstName [MiddleName])</param>
+        /// <returns>An array of 3 strings: [LastName, FirstName, MiddleName]</returns>
         public static string[] SplitFullName(string fullName)
         {
             string[] names = new string[3];
@@ -74,6 +80,10 @@ namespace SCCPP1
             }
 
             return names;
+        }
+        public static string ToFullName(string firstName, string? middleName, string lastName)
+        {
+            return $"{lastName}, {firstName} {middleName?.ToString()}";
         }
 
         //to be rendered unnecessary by using HTML Phone input

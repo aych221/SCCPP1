@@ -1,6 +1,6 @@
 ﻿namespace SCCPP1.User.Data
 {
-    public struct Location
+    public struct Location : IEquatable<Location>
     {
         public string State { get; set; }
         public int StateID { get; set; }
@@ -22,5 +22,12 @@
 
             this.Municipality = DatabaseConnector.GetCachedMunicipality(municipalityID);
         }
+
+
+        public bool Equals(Location other)
+        {
+            return State.Equals(other.State) && Municipality.Equals(other.Municipality);
+        }
+
     }
 }
