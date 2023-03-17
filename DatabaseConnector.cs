@@ -588,6 +588,41 @@ namespace SCCPP1
                 }
             }
         }
+
+        public static bool GetUser(Account acc)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT id, role, name, email, phone, address, intro_narrative, main_profile_id FROM colleagues WHERE (user_hash=@user_hash);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@user_hash", acc.GetUsername());
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleRow))
+                    {
+
+                        //could not find account.
+                        //redirect account to creation page, if any input is entered, save new account to database
+                        if (!r.Read())
+                            return false;
+
+
+                        //load new instance with basic colleague information
+                        acc.IsReturning = true;
+                        acc.RecordID = GetInt32(r, 0);
+                        acc.Role = GetInt32(r, 1);
+                        acc.Name = GetString(r, 2);
+                        acc.EmailAddress = GetString(r, 3);
+                        acc.PhoneNumber = GetInt64(r, 4);
+                        acc.StreetAddress = GetString(r, 5);
+                        acc.IntroNarrative = GetString(r, 6);
+                        acc.MainProfileID = GetInt32(r, 7);
+
+                        return true;
+                    }
+                }
+            }
+        }
         #endregion
 
 
@@ -1834,6 +1869,31 @@ namespace SCCPP1
                             return GetString(r, 0);
 
                         return null;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Retrieves the employer names based on the ids.
+        /// </summary>
+        /// <param name="ids">the employer ids</param>
+        /// <returns>an array with employer ids</returns>
+        public static string[] GetEmployers(params int[] ids)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = $"SELECT name FROM employers WHERE (id={string.Join(",", ids)});";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
+                    {
+                        List<string> employerNames = new List<string>();
+                        while (r.Read())
+                            employerNames.Add(GetString(r, 0));
+
+                        return employerNames.ToArray();
                     }
                 }
             }

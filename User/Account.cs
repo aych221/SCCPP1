@@ -178,6 +178,26 @@ namespace SCCPP1.User
         }
 
 
+        public bool Load()
+        {
+            return DatabaseConnector.GetUser(this);
+        }
+
+        public bool LoadSkills()
+        {
+            return (Skills = DatabaseConnector.GetColleagueSkills(this)) != null;
+        }
+
+        public bool LoadEducationHistory()
+        {
+            return (EducationHistory = DatabaseConnector.GetColleagueEducationHistory(this)) != null;
+        }
+
+        public bool LoadWorkHistory()
+        {
+            return (WorkHistory = DatabaseConnector.GetColleagueWorkHistory(this)) != null;
+        }
+
         /// <summary>
         /// Saves the user's direct profile information, does not save associated data.
         /// </summary>

@@ -4,7 +4,7 @@
     ViewData["Title"] = "Edit Main Profile";
 }
 
-<!-- This page is used to edit the user's profile. -->
+<!-- This page is used to create the user's profile. Will only be seen once upon initial login. -->
 <style>
     body {
         font-family: Arial, Helvetica, sans-serif;
@@ -25,6 +25,7 @@
         resize: vertical;
     }
 
+    /* Submit button styling*/
     input[type=submit] {
         background-color: white;
         color: #0062F3;
@@ -45,15 +46,42 @@
         background-color: white;
         padding: 20px;
     }
+
+    /* Div class styling for tag system*/
+    .input-categories {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+
+        .input-categories ul {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            list-style-type: none;
+            flex-wrap: wrap;
+        }
+
+        .input-categories li {
+            border: 1px solid black;
+            border-radius: 2px;
+            padding: 1px;
+            margin: 1px;
+        }
+
+        .input-categories input {
+            flex: 1 1 auto;
+            align-self: flex-start;
+        }
 </style>
 
-<!-- This section is for the About part of the profile -->
 <body>
-    <h1>Edit Main Your Profile</h1>
+    <h1>Edit Your Main Profile</h1>
     <br />
     <div class="profile">
-        <!-- action="javascript:void(0)" stops page from being submitted every time user presses enter -->
-        <form method="post"> 
+        <!-- Stops page from being submitted every time user presses enter, need to find a different way to do this as it affects where the form is being sent this way-->
+        <!-- action="javascript:void(0)" -->
+        <form method="post">
             <legend><b>About:</b></legend>
 
             <label for="FirstName">First Name</label>
@@ -80,18 +108,16 @@
             <textarea asp-for="Colleague!.IntroNarrative" placeholder="Introduce yourself..." style="height:200px"></textarea>
             <br />
 
-            <legend><b>Experience:</b></legend>
-            <label for="Experience">Experience</label>
-            <textarea asp-for="Work!.Experience" name="experience" placeholder="Tell me about your work experience..." style="height:200px"></textarea>
-            <br />
-
             <legend><b>Skills:</b></legend>
 
-            <label for="ProgLang">Programming Languages</label>
+            <!-- This is an example of how I will be doing the tag system and is not yet finalized.
+              I intend to have the tags remain in the input field and also allow the user to delete any tags they may have created  -->
+            <label for="ProgLang">Programming Languages:</label>
             <div class="input-categories">
                 <input type="text" asp-for="Skill!.ProgLang" placeholder="What languages do you know?... (Press enter to save language)" />
                 &nbsp;
-                <ul></ul>
+                <ul>
+                </ul>
             </div>
             <br />
 
@@ -101,6 +127,12 @@
 
             <label for="SoftAndFrame">Software & Frameworks</label>
             <input type="text" asp-for="Skill!.SoftAndFrame" placeholder="What softwares and frameworks do you know?...">
+            <br />
+
+            <legend><b>Experience:</b></legend>
+
+            <label for="Experience">Experience</label>
+            <textarea asp-for="Work!.Experience" name="experience" placeholder="Tell me about your work experience..." style="height:200px"></textarea>
             <br />
 
             <legend><b>Education/Certification:</b></legend>
@@ -124,7 +156,7 @@
 </body>
 
 <script>
-    /* Script for adding a input for specific fields https://stackoverflow.com/questions/10839570/how-does-stackoverflow-make-its-tag-input-field */
+    /* Script for adding a tag from data input into the input fields https://stackoverflow.com/questions/10839570/how-does-stackoverflow-make-its-tag-input-field */
     var es = document.querySelectorAll('.input-categories');
     for (var i = 0; i < es.length; i++) {
         es[i]._list = es[i].querySelector('ul');

@@ -94,7 +94,7 @@ namespace SCCPP1.Session
             if (DatabaseConnector.ExistsUser(Data.Username) < 1)
             {
                 acc = new Account(Data, false);
-                DatabaseConnector.SaveUser(acc);
+                acc.Save();
                 Console.WriteLine($"Account: {acc.EmailAddress}, {acc.Name}, {acc.GetUsername()}");
 
                 //should be UpdateInfo page or something.

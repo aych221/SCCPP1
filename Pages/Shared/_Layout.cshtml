@@ -10,10 +10,11 @@
     <link rel="stylesheet" href="~/SeniorCapstone.styles.css" asp-append-version="true" />
     <meta name="referrer" content="no-referrer-when-downgrade" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> <!--Home button-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> <!--Home button icon-->
 </head>
 <body>
     <header>
+
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
@@ -23,7 +24,7 @@
                         </li>
                     </ul>
                 </div>
-                <partial name="_LoginPartial" /> <!-- adds login information-->
+                <partial name="_LoginPartial" />
             </div>
         </nav>
     </header>
@@ -46,4 +47,5 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
 

@@ -5,7 +5,7 @@
 }
 
 <style>
-
+    /* accordion dropdown styling */
     .accordion {
         background-color: #eee;
         color: #444;
@@ -23,6 +23,14 @@
             background-color: #fff;
         }
 
+    .panel {
+        padding: 0 18px;
+        display: none;
+        background-color: white;
+        overflow: hidden;
+    }
+
+    /* Submit button styling*/
     input[type=submit] {
         background-color: white;
         color: #0062F3;
@@ -37,14 +45,9 @@
             color: white;
             border: 1px solid #0062F3;
         }
-
-    .panel {
-        padding: 0 18px;
-        display: none;
-        background-color: white;
-        overflow: hidden;
-    }
 </style>
+
+<!--Live PDF viewer will be displayed to the right of the checkboxes hence the empty space on the right side of the page-->
 <body>
 
     <br>
@@ -67,25 +70,25 @@
         </div>
         <br>
 
-        <button class="accordion">Computer Languages</button>
+        <button class="accordion">Programming Languages</button>
         <div class="panel">
-            <input type="checkbox" id="clang" name="clang">
+            <input type="checkbox" id="plang" name="plang">
             <label for="clang"> C#</label>
             <br>
 
-            <input type="checkbox" id="clang" name="clang">
+            <input type="checkbox" id="plang" name="plang">
             <label for="clang"> HTML </label>
             <br>
 
-            <input type="checkbox" id="clang" name="clang">
+            <input type="checkbox" id="plang" name="plang">
             <label for="clang"> CSS </label>
             <br>
 
-            <input type="checkbox" id="clang" name="clang">
+            <input type="checkbox" id="plang" name="plang">
             <label for="clang"> JavaScript </label>
             <br>
 
-            <input type="checkbox" id="clang" name="clang">
+            <input type="checkbox" id="plang" name="plang">
             <label for="clang"> Python </label>
         </div>
         <br>
@@ -166,9 +169,12 @@
     <br>
     <br>
     <input type="submit" value="Submit">
+    <input type="submit" value="Save as Draft">
+
 
 </body>
 
+<!-- Script for acordion functionality of the dropdown https://stackoverflow.com/questions/71484299/how-to-external-javascript-in-html-and-css-->
 <script>
     var acc = document.getElementsByClassName("accordion");
     var i;
