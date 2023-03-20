@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using SCCPP1.Models;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace SCCPP1
 {
@@ -46,6 +47,11 @@ namespace SCCPP1
                     
                     if (loadCaches)
                         LoadCaches();
+                    else
+                    {
+                        LoadCacheStates();
+                    }
+
                 }
             }
             
@@ -1520,6 +1526,66 @@ namespace SCCPP1
             }
         }
 
+
+        /*public static string[]? GetInstitutionNames(params int[] ids)
+        {
+            if (ids.Length < 1)
+                return null;
+
+            Dictionary<int, string> nameResults = new Dictionary<int, string>(ids.Length);
+            int[] institutionIDs = new int[ids.Length];
+
+            //create names list
+            StringBuilder sb = new StringBuilder("SELECT id, name FROM institutions WHERE id IN (@name0");
+            nameResults.Add(ids[0], -1);
+
+
+            for (int i = 1; i < ids.Length; i++)
+            {
+                sb.Append(',');
+                sb.Append($"@skillName{i}");
+
+                //fill with -1's initially to indicate not found
+                nameResults.Add(ids[i], -1);
+                institutionIDs[i] = -1;
+            }
+            sb.Append(");");
+
+            string sql = sb.ToString();
+
+            //execute select query
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+
+                    for (int i = 0; i < ids.Length; i++)
+                    {
+                        cmd.Parameters.AddWithValue($"@skillName{i}", ValueCleaner(ids[i]));
+                    }
+                    Console.WriteLine(cmd.CommandText);
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        //put results in dictionary
+                        while (r.Read())
+                            nameResults[GetString(r, 0)] = GetInt32(r, 1);
+
+
+                        //refresh skillIds with dictionary data
+                        for (int i = 0; i < ids.Length; i++)
+                            institutionIDs[i] = nameResults[ids[i]];
+
+                        Console.Write("SkillIDs: ");
+                        Console.WriteLine(string.Join(",", institutionIDs));
+
+                        return institutionIDs;
+                    }
+                }
+            }
+        }*/
+
         public static int GetInstitutionID(string institutionName)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -1539,6 +1605,7 @@ namespace SCCPP1
                 }
             }
         }
+
 
         public static int InsertInstitution(string name)
         {
@@ -1678,6 +1745,184 @@ namespace SCCPP1
                     }
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Loads the education history of a colleague into the Account class. This method populates the Account.EducationHistory list.
+        /// </summary>
+        /// <param name="account">The Account object to which the education history will be associated.</param>
+        /// <param name="useCache">A boolean parameter indicating whether the cached data should be used or not. The default value is false.</param>
+        /// <returns>Returns true if the education history was loaded successfully, false otherwise.</returns>
+        public static bool LoadColleagueEducationHistory(Account account, bool useCache = false)
+        {
+            if (account == null || account.RecordID < 0)
+                return false;
+
+            //temp caches
+            Dictionary<int, string> educationTypes = new(), institutionNames = new();
+
+            //create skills list
+            StringBuilder sqlEduType = new StringBuilder("SELECT id, type FROM education_types WHERE id IN ("),
+                sqlInsti = new StringBuilder("SELECT id, name FROM institutions WHERE id IN (");
+            List<EducationData> list;
+
+
+            string sql;
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                sql = @"SELECT id, colleague_id, education_type_id, institution_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleague_id);";
+                
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        list = new List<EducationData>();
+
+                        while (r.Read())
+                        {
+                            EducationData ed = new EducationData(account, GetInt32(r, 0));
+                            ed.EducationTypeID = GetInt32(r, 2);
+                            ed.InstitutionID = GetInt32(r, 3);
+                            ed.Location = new Location(GetInt32(r, 4), GetInt32(r, 5));
+
+                            ed.StartDate = GetDateOnly(r, 6);
+                            ed.EndDate = GetDateOnly(r, 7);
+
+                            ed.Description = GetString(r, 8);
+
+                            list.Add(ed);
+
+                            //add education_type_id
+                            if (educationTypes.TryAdd(ed.EducationTypeID, null))
+                            {
+                                //new id, add it
+                                sqlEduType.Append(ed.EducationTypeID);
+                                sqlEduType.Append(',');
+                            }
+
+                            //add institution_id
+                            if (institutionNames.TryAdd(ed.InstitutionID, null))
+                            {
+                                //new id, add it
+                                sqlInsti.Append(ed.InstitutionID);
+                                sqlInsti.Append(',');
+                            }
+                        }
+
+                        //remove last comma, then append ending
+                        sqlEduType.Remove(sqlEduType.Length - 1, 1).Append(");");
+                        sqlInsti.Remove(sqlInsti.Length - 1, 1).Append(");");
+
+                        account.EducationHistory = list;
+                    }
+                }
+
+                //no records found.
+                if (account.EducationHistory == null || account.EducationHistory.Count < 1)
+                    return false;
+
+                Console.WriteLine($"Found Education Records: {list.Count}");
+
+                //load edu types.
+                using (SqliteCommand cmd = new SqliteCommand(sqlEduType.ToString(), conn))
+                {
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+
+                        //fill edutype dict
+                        while (r.Read())
+                            educationTypes[GetInt32(r, 0)] = GetString(r, 1);
+
+                    }
+                }
+                Console.WriteLine($"Found EducationTypes: {educationTypes.Count}");
+
+                //load institution names.
+                using (SqliteCommand cmd = new SqliteCommand(sqlInsti.ToString(), conn))
+                {
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+
+                        //fill institution dict
+                        while (r.Read())
+                            institutionNames[GetInt32(r, 0)] = GetString(r, 1);
+
+                    }
+                }
+
+                Console.WriteLine($"Found Institutions: {institutionNames.Count}");
+            }
+
+            //these should always have at least 1 count if one record is loaded.
+            if (educationTypes.Count == 0 || institutionNames.Count == 0)
+                return false;
+
+            //fill data
+            foreach (EducationData ed in list)
+            {
+                ed.EducationType = educationTypes[ed.EducationTypeID];
+                ed.Institution = institutionNames[ed.InstitutionID];
+            }
+
+            Console.WriteLine($"Loaded {list.Count} education records!");
+
+            return true;
+        }
+
+        public static bool LoadColleagueEducationHistory1(Account account, bool useCache = false)
+        {
+            if (account == null || account.RecordID < 0)
+                return false;
+
+
+            List<EducationData> list;
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+
+                string sql = @"SELECT ed.id, ed.colleague_id, ed.education_type_id, ed.institution_id, ed.municipality_id, ed.state_id, ed.start_date, ed.end_date, ed.description, et.type AS education_type, i.name AS institution
+                                            FROM education_history ed
+                                            JOIN education_types et ON ed.education_type_id = et.id
+                                            JOIN institutions i ON ed.institution_id = i.id
+                                            WHERE ed.colleague_id=@colleague_id;";
+
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        list = new List<EducationData>();
+
+                        while (r.Read())
+                        {
+                            EducationData ed = new EducationData(account, GetInt32(r, 0));
+                            ed.EducationTypeID = GetInt32(r, 2);
+                            ed.InstitutionID = GetInt32(r, 3);
+                            ed.Location = new Location(GetInt32(r, 4), GetInt32(r, 5));
+                            ed.StartDate = GetDateOnly(r, 6);
+                            ed.EndDate = GetDateOnly(r, 7);
+                            ed.Description = GetString(r, 8);
+                            ed.EducationType = GetString(r, 9);
+                            ed.Institution = GetString(r, 10);
+
+                            list.Add(ed);
+                        }
+
+                        account.EducationHistory = list;
+                    }
+                }
+            }
+
+            Console.WriteLine($"Found Education Records: {list?.Count}");
+
+            return true;
         }
 
         #endregion
@@ -2099,6 +2344,182 @@ namespace SCCPP1
                     }
                 }
             }
+        }
+
+        public static bool LoadColleagueWorkHistory(Account account, bool useCache = false)
+        {
+            if (account == null || account.RecordID < 0)
+                return false;
+
+            //temp caches
+            Dictionary<int, string> employers = new(), jobTitles = new();
+
+            //create work history list
+            StringBuilder sqlEmp = new("SELECT id, name FROM employers WHERE id IN ("),
+                sqlJob = new("SELECT id, title FROM job_titles WHERE id IN (");
+
+            List<WorkData> list;
+
+            string sql;
+
+            using (SqliteConnection conn = new(connStr))
+            {
+                conn.Open();
+                sql = @"SELECT id, colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description FROM work_history WHERE (colleague_id=@colleague_id);";
+
+                using (SqliteCommand cmd = new(sql, conn))
+                {
+
+                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        list = new List<WorkData>();
+
+                        while (r.Read())
+                        {
+                            WorkData wd = new WorkData(account, GetInt32(r, 0));
+                            wd.EmployerID = GetInt32(r, 2);
+                            wd.JobTitleID = GetInt32(r, 3);
+                            wd.Location = new Location(GetInt32(r, 4), GetInt32(r, 5));
+
+                            wd.StartDate = GetDateOnly(r, 6);
+                            wd.EndDate = GetDateOnly(r, 7);
+
+                            wd.Description = GetString(r, 8);
+
+                            list.Add(wd);
+
+                            //add employer_id
+                            if (employers.TryAdd(wd.EmployerID, null))
+                            {
+                                //new id, add it
+                                sqlEmp.Append(wd.EmployerID);
+                                sqlEmp.Append(',');
+                            }
+
+                            //add job_title_id
+                            if (jobTitles.TryAdd(wd.JobTitleID, null))
+                            {
+                                //new id, add it
+                                sqlJob.Append(wd.JobTitleID);
+                                sqlJob.Append(',');
+                            }
+
+                        }
+
+                        //emove last comma, then append ending
+                        sqlEmp.Remove(sqlEmp.Length - 1, 1).Append(");");
+                        sqlJob.Remove(sqlJob.Length - 1, 1).Append(");");
+
+                        account.WorkHistory = list;
+                    }
+                }
+
+                //no records found
+                if (account.WorkHistory == null || account.WorkHistory.Count < 1)
+                    return false;
+
+                Console.WriteLine($"Found Work Records: {list.Count}");
+
+                //load employers
+                using (SqliteCommand cmd = new SqliteCommand(sqlEmp.ToString(), conn))
+                {
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+
+                        //fill employer dict
+                        while (r.Read())
+                            employers[GetInt32(r, 0)] = GetString(r, 1);
+
+                    }
+                }
+
+                Console.WriteLine($"Found Employers: {employers.Count}");
+
+                //load job titles.
+                using (SqliteCommand cmd = new SqliteCommand(sqlJob.ToString(), conn))
+                {
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+
+                        //fill job title dict
+                        while (r.Read())
+                            jobTitles[GetInt32(r, 0)] = GetString(r, 1);
+
+                    }
+                }
+
+                Console.WriteLine($"Found Job Titles: {jobTitles.Count}");
+            }
+
+            //these should always have at least 1 count if one record is loaded.
+            if (employers.Count == 0 || jobTitles.Count == 0)
+                return false;
+
+            //fill data
+            foreach (WorkData wd in list)
+            {
+                wd.Employer = employers[wd.EmployerID];
+                wd.JobTitle = jobTitles[wd.JobTitleID];
+            }
+
+            Console.WriteLine($"Loaded {list.Count} work experience records!");
+
+            return true;
+
+        }
+
+        //need to test this to see if this is more efficient.
+        public static bool LoadColleagueWorkHistory1(Account account, bool useCache = false)
+        {
+            if (account == null || account.RecordID < 0)
+                return false;
+
+            //create work history list
+            List<WorkData> list;
+
+            using (SqliteConnection conn = new(connStr))
+            {
+                conn.Open();
+
+                string sql = @"SELECT wh.id, wh.colleague_id, wh.employer_id, wh.job_title_id, wh.municipality_id, wh.state_id, wh.start_date, wh.end_date, wh.description, e.name AS employer_name, jt.title AS job_title_name
+                                FROM work_history wh
+                                JOIN employers e ON wh.employer_id = e.id
+                                JOIN job_titles jt ON wh.job_title_id = jt.id
+                                WHERE wh.colleague_id=@colleague_id;";
+
+                using (SqliteCommand cmd = new(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        list = new List<WorkData>();
+
+                        while (r.Read())
+                        {
+                            WorkData wd = new WorkData(account, GetInt32(r, 0));
+                            wd.EmployerID = GetInt32(r, 2);
+                            wd.JobTitleID = GetInt32(r, 3);
+                            wd.Location = new Location(GetInt32(r, 4), GetInt32(r, 5));
+                            wd.StartDate = GetDateOnly(r, 6);
+                            wd.EndDate = GetDateOnly(r, 7);
+                            wd.Description = GetString(r, 8);
+                            wd.Employer = GetString(r, 9);
+                            wd.JobTitle = GetString(r, 10);
+                            list.Add(wd);
+                        }
+
+                        account.WorkHistory = list;
+                    }
+                }
+            }
+
+
+            Console.WriteLine($"Found Work Records: {list?.Count}");
+
+            return true;
         }
         #endregion
 

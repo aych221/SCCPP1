@@ -88,6 +88,10 @@ namespace SCCPP1.Session
                 DatabaseConnector.Thomas(acc = new Account(Data, false));
                 page = "/UserHome";
                 Console.WriteLine("[IsReturning = True]");
+                Console.WriteLine(DatabaseConnector.LoadColleagueEducationHistory1(acc));
+                //Console.WriteLine(DatabaseConnector.LoadColleagueEducationHistory(acc));
+                Console.WriteLine(DatabaseConnector.LoadColleagueWorkHistory1(acc));
+                //Console.WriteLine(DatabaseConnector.LoadColleagueWorkHistory(acc));
 
             }
             else//*/ 
