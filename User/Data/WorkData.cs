@@ -99,7 +99,7 @@
             if (!this.NeedsSave)
                 return true;
 
-            return DatabaseConnector.SaveWorkHistory(this);
+            return NeedsSave = !(IsUpdated = DatabaseConnector.SaveWorkHistory(this));
         }
 
     }

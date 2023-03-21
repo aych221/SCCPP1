@@ -95,7 +95,7 @@ namespace SCCPP1.User.Data
             if (!this.NeedsSave)
                 return true;
 
-            return DatabaseConnector.SaveEducationHistory(this);
+            return NeedsSave = !(IsUpdated = DatabaseConnector.SaveEducationHistory(this));
         }
 
     }

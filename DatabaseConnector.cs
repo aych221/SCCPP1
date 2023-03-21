@@ -1886,11 +1886,11 @@ namespace SCCPP1
                 conn.Open();
 
 
-                string sql = @"SELECT ed.id, ed.colleague_id, ed.education_type_id, ed.institution_id, ed.municipality_id, ed.state_id, ed.start_date, ed.end_date, ed.description, et.type AS education_type, i.name AS institution
-                                            FROM education_history ed
-                                            JOIN education_types et ON ed.education_type_id = et.id
-                                            JOIN institutions i ON ed.institution_id = i.id
-                                            WHERE ed.colleague_id=@colleague_id;";
+                string sql = @"SELECT eh.id, eh.colleague_id, eh.education_type_id, eh.institution_id, eh.municipality_id, eh.state_id, eh.start_date, eh.end_date, eh.description, et.type AS education_type, i.name AS institution
+                                            FROM education_history eh
+                                            JOIN education_types et ON eh.education_type_id = et.id
+                                            JOIN institutions i ON eh.institution_id = i.id
+                                            WHERE eh.colleague_id=@colleague_id;";
 
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
@@ -2771,7 +2771,7 @@ namespace SCCPP1
             account.EmailAddress = "thwall@augusta.edu";
             account.PhoneNumber = 1231231234;
             account.StreetAddress = "123 Main St";
-            account.IntroNarrative = "klasjdflkjas lkasdnfkljaslk";
+            account.IntroNarrative = @"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ";
 
             EducationData ed1 = new EducationData(account),
                 ed2 = new EducationData(account),

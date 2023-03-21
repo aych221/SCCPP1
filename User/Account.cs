@@ -96,7 +96,7 @@ namespace SCCPP1.User
         }
 
 
-
+        //may want to change these to dictionaries
         public List<SkillData> Skills { get; set; }
 
         public List<EducationData> EducationHistory { get; set; }
@@ -124,7 +124,7 @@ namespace SCCPP1.User
 
 
         #region Add/Update data methods
-        public void UpdateData(string firstName, string middleName, string lastName, string emailAddress, long phoneNumber, string streetAddress, Location location, string introNarrative)
+        public void UpdateData(string firstName, string middleName, string lastName, string emailAddress, long phoneNumber, string introNarrative)
         {
             FirstName = firstName;
             MiddleName = middleName;
@@ -132,17 +132,15 @@ namespace SCCPP1.User
             Name = Utilities.ToFullName(firstName, middleName, lastName);
             EmailAddress = emailAddress;
             PhoneNumber = phoneNumber;
-            StreetAddress = streetAddress;
-            Location = location;
             IntroNarrative = introNarrative;
         }
 
 
-        public void UpdateData(string name, string emailAddress, long phoneNumber, string streetAddress, Location location, string introNarrative)
+        public void UpdateData(string name, string emailAddress, long phoneNumber, string introNarrative)
         {
             Name = name;
             string[] names = Utilities.SplitFullName(Name);
-            UpdateData(names[1], names[2], names[0], emailAddress, phoneNumber, streetAddress, location, introNarrative);
+            UpdateData(names[1], names[2], names[0], emailAddress, phoneNumber, introNarrative);
         }
 
 
@@ -157,15 +155,24 @@ namespace SCCPP1.User
             NeedsSave = true;
         }
 
-        public void RemoveSkill(string skillName)
+        
+        public void RemoveSkills(params string[] skillNames)
         {
             //TODO, need to make DB methods to remove colleague records that are requested
         }
 
-        public void AddEducation(string educationName)
-        {
 
+        public void AddEducation(string institution, string educationType, string description, Location location, DateOnly startDate, DateOnly endDate)
+        {
+            EducationHistory.Add(new EducationData(this, institution, educationType, description, location, startDate, endDate));
         }
+
+
+        public void AddWork(string employer, string jobTitle, string description, Location location, DateOnly startDate, DateOnly endDate)
+        {
+            WorkHistory.Add(new WorkData(this, employer, jobTitle, description, location, startDate, endDate));
+        }
+
         #endregion
 
 
@@ -185,18 +192,19 @@ namespace SCCPP1.User
 
         public bool LoadSkills()
         {
-            return (Skills = DatabaseConnector.GetColleagueSkills(this)) != null;
+            return DatabaseConnector.LoadColleagueSkills(this);
         }
 
         public bool LoadEducationHistory()
         {
-            return (EducationHistory = DatabaseConnector.GetColleagueEducationHistory(this)) != null;
+            return DatabaseConnector.LoadColleagueEducationHistory1(this);
         }
 
         public bool LoadWorkHistory()
         {
-            return (WorkHistory = DatabaseConnector.GetColleagueWorkHistory(this)) != null;
+            return DatabaseConnector.LoadColleagueWorkHistory1(this);
         }
+
 
         /// <summary>
         /// Saves the user's direct profile information, does not save associated data.
@@ -207,7 +215,7 @@ namespace SCCPP1.User
             if (!NeedsSave)
                 return true;
 
-            return DatabaseConnector.SaveUser(this);
+            return NeedsSave = !(IsUpdated = DatabaseConnector.SaveUser(this));
         }
 
 

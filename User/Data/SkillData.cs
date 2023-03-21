@@ -54,10 +54,10 @@
         public override bool Save()
         {
             //save resources if we don't need to save.
-            if (!this.NeedsSave)
+            if (!NeedsSave)
                 return true;
 
-            return DatabaseConnector.SaveColleageSkills(this);
+            return NeedsSave = !(IsUpdated = DatabaseConnector.SaveColleageSkills(this));
         }
     }
 }

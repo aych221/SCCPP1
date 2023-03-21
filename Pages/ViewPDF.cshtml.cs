@@ -11,6 +11,7 @@ using SCCPP1.User.Data;
 
 namespace SCCPP1.Pages
 {
+
 	public class ViewPDFModel : SessionModel
     {
 
@@ -28,7 +29,8 @@ namespace SCCPP1.Pages
 
         public IActionResult OnGet()
         {
-            Console.WriteLine("EditMainProfile.OnGet() Called");
+
+            Console.WriteLine("ViewPDF.OnGet() Called");
             //invalid model state or the account is new
             if (!ModelState.IsValid)
                 return Page();
@@ -46,25 +48,46 @@ namespace SCCPP1.Pages
 
             
             StringBuilder sb = new StringBuilder();
-            //edu history
-            foreach (string s in DatabaseConnector.GetRawColleagueEducationHistory(Account.RecordID))
-                sb.Append($"{s}<br>");
-
-            ViewData["Education"] = sb.ToString();
-
-            //clear for next use
-            sb.Clear();
             
+            if (Account.LoadEducationHistory())
+            {
 
-            //work history
-            foreach (string s in DatabaseConnector.GetRawColleagueWorkHistory(Account.RecordID))
-                sb.Append($"{s}<br>");
+                //edu history
+                foreach (EducationData ed in Account.EducationHistory)
+                {
+                    sb.Append($"<p><b>{ed.Institution}</p></b>");
+                    sb.Append($"<p>{ed.StartDate.ToString()}-{ed.EndDate.ToString()}<br>");
+                    sb.Append($"{ed.EducationType} {ed.Description}</p><br><br>");
+                    sb.Append($"=====================================================");
+                }
 
-            ViewData["Work"] = sb.ToString();
-            sb.Clear();
+                ViewData["Education"] = sb.ToString();
+
+                //clear for next use
+                sb.Clear();
+
+            }
+            
+            if (Account.LoadWorkHistory())
+            {
+
+                //work history
+                foreach (WorkData wd in Account.WorkHistory)
+                {
+                    sb.Append($"<p><b>{wd.JobTitle}</b> at {wd.Employer}</p>");
+                    sb.Append($"<p>{wd.StartDate.ToString()}-{wd.EndDate.ToString()}<br>");
+                    sb.Append($"{wd.Description}</p><br><br>");
+                    sb.Append($"=====================================================");
+                }
+
+                ViewData["Work"] = sb.ToString();
+
+                //clear for next use
+                sb.Clear();
+            }
 
 
-            if (!DatabaseConnector.LoadColleagueSkills(Account))
+            if (!Account.LoadSkills())
             {
                 ViewData["Skills"] = "Failed to load skills";
                 return Page();
@@ -82,30 +105,10 @@ namespace SCCPP1.Pages
         //TODO: should probably make EditMain and CreateMain same page and just change name.
         public IActionResult OnPost()
         {
-            Console.WriteLine("EditMainProfile.OnPost() Called");
+            Console.WriteLine("ViewPDF.OnPost() Called");
             if (!ModelState.IsValid)
                 return Page();
 
-            if (Colleague != null)
-            {
-                Account.Name = $"{Colleague.LastName}, {Colleague.FirstName} {Colleague.MiddleName?.ToString()}";
-                Account.EmailAddress = Colleague.EmailAddress;
-                Account.PhoneNumber = Utilities.ParsePhoneNumber(Colleague.PhoneNumber);
-                Account.IntroNarrative = Colleague.IntroNarrative;
-
-                if (DatabaseConnector.SaveUser(Account))
-                {
-                    Console.WriteLine("Saved");
-                    ViewData["UserData"] = "Saved!";
-                }
-                else
-                {
-                    Console.WriteLine("Could not save");
-                    ViewData["UserData"] = "Error Saving";
-
-                }
-
-            }
 
             return Page();
         }
