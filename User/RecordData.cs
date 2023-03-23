@@ -17,6 +17,12 @@
         protected bool NeedsSave;
 
         /// <summary>
+        /// A flag to let the database know this record needs to be removed if it exists, or not to save if it doesn't exist.
+        /// </summary>
+        protected bool Remove;
+
+
+        /// <summary>
         /// Message that is used to relay information back after a save attempt was made
         /// </summary>
         protected string SaveAttemptMessage { get; set; }

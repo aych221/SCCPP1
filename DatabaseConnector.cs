@@ -1322,6 +1322,49 @@ namespace SCCPP1
             return true;
 
         }
+
+
+        /// <summary>
+        /// Loads the colleague's skills into the Account class. This will populate the Account.Skills list.
+        /// </summary>
+        /// <param name="account">The account associated with the skills</param>
+        /// <param name="useCache">optional param</param>
+        /// <returns>true if skills could be loaded, false if not</returns>
+        public static bool LoadColleagueSkills(Account account, out Dictionary<int, SkillData> dict, bool useCache = false)
+        {
+
+            dict = new Dictionary<int, SkillData>();
+
+            //session must've not had an account, so user must not exist
+            if (account == null)
+                return false;
+
+            List<int> skillIds;
+
+            //load skills, return false if failed
+            if ((account.Skills = GetColleagueSkills(account, out skillIds)) == null || skillIds == null)
+                return false;
+
+            string[] skillNames;
+
+            //update the skillnames in the SkillData
+            if (useCache) {
+                skillNames = GetCachedSkills(skillIds.ToArray());
+            } else {
+                skillNames = GetSkillNames(skillIds.ToArray());
+            }
+
+            SkillData sd;
+            for (int i = 0; i < account.Skills.Count; i ++)
+            {
+                sd = account.Skills[i];
+                sd.SkillName = skillNames[i];
+                dict.TryAdd(sd.RecordID, sd);
+            }
+
+            return true;
+
+        }
         #endregion
 
 
@@ -1925,6 +1968,63 @@ namespace SCCPP1
             return true;
         }
 
+
+
+        public static bool LoadColleagueEducationHistory1(Account account, out Dictionary<int, EducationData> dict, bool useCache = false)
+        {
+            dict = new Dictionary<int, EducationData>();
+
+            if (account == null || account.RecordID < 0)
+                return false;
+
+
+            List<EducationData> list;
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+
+                string sql = @"SELECT eh.id, eh.colleague_id, eh.education_type_id, eh.institution_id, eh.municipality_id, eh.state_id, eh.start_date, eh.end_date, eh.description, et.type AS education_type, i.name AS institution
+                                            FROM education_history eh
+                                            JOIN education_types et ON eh.education_type_id = et.id
+                                            JOIN institutions i ON eh.institution_id = i.id
+                                            WHERE eh.colleague_id=@colleague_id;";
+
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        list = new List<EducationData>();
+
+                        EducationData ed;
+                        while (r.Read())
+                        {
+                            ed = new EducationData(account, GetInt32(r, 0));
+                            ed.EducationTypeID = GetInt32(r, 2);
+                            ed.InstitutionID = GetInt32(r, 3);
+                            ed.Location = new Location(GetInt32(r, 4), GetInt32(r, 5));
+                            ed.StartDate = GetDateOnly(r, 6);
+                            ed.EndDate = GetDateOnly(r, 7);
+                            ed.Description = GetString(r, 8);
+                            ed.EducationType = GetString(r, 9);
+                            ed.Institution = GetString(r, 10);
+
+                            list.Add(ed);
+                            dict.TryAdd(ed.RecordID, ed);
+                        }
+
+                        account.EducationHistory = list;
+                    }
+                }
+            }
+
+            Console.WriteLine($"Found Education Records: {list?.Count}");
+
+            return true;
+        }
         #endregion
 
 
@@ -2521,6 +2621,61 @@ namespace SCCPP1
 
             return true;
         }
+
+        public static bool LoadColleagueWorkHistory1(Account account, out Dictionary<int, WorkData> dict, bool useCache = false)
+        {
+            dict = new();
+
+            if (account == null || account.RecordID < 0)
+                return false;
+
+            //create work history list
+            List<WorkData> list;
+
+            using (SqliteConnection conn = new(connStr))
+            {
+                conn.Open();
+
+                string sql = @"SELECT wh.id, wh.colleague_id, wh.employer_id, wh.job_title_id, wh.municipality_id, wh.state_id, wh.start_date, wh.end_date, wh.description, e.name AS employer_name, jt.title AS job_title_name
+                                FROM work_history wh
+                                JOIN employers e ON wh.employer_id = e.id
+                                JOIN job_titles jt ON wh.job_title_id = jt.id
+                                WHERE wh.colleague_id=@colleague_id;";
+
+                using (SqliteCommand cmd = new(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        list = new List<WorkData>();
+                        WorkData wd;
+                        while (r.Read())
+                        {
+                            wd = new WorkData(account, GetInt32(r, 0));
+                            wd.EmployerID = GetInt32(r, 2);
+                            wd.JobTitleID = GetInt32(r, 3);
+                            wd.Location = new Location(GetInt32(r, 4), GetInt32(r, 5));
+                            wd.StartDate = GetDateOnly(r, 6);
+                            wd.EndDate = GetDateOnly(r, 7);
+                            wd.Description = GetString(r, 8);
+                            wd.Employer = GetString(r, 9);
+                            wd.JobTitle = GetString(r, 10);
+
+                            list.Add(wd);
+                            dict.TryAdd(wd.RecordID, wd);
+                        }
+
+                        account.WorkHistory = list;
+                    }
+                }
+            }
+
+
+            Console.WriteLine($"Found Work Records: {list?.Count}");
+
+            return true;
+        }
         #endregion
 
 
@@ -2866,6 +3021,9 @@ namespace SCCPP1
         {
             if (val == null)
                 return DBNull.Value;
+
+            //Test before using.
+            //Utilities.HtmlStripper(val);
 
             return val;
         }

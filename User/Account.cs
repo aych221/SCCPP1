@@ -195,14 +195,30 @@ namespace SCCPP1.User
             return DatabaseConnector.LoadColleagueSkills(this);
         }
 
+        public bool LoadSkills(out Dictionary<int, SkillData> skills)
+        {
+            return DatabaseConnector.LoadColleagueSkills(this, out skills);
+        }
+
         public bool LoadEducationHistory()
         {
             return DatabaseConnector.LoadColleagueEducationHistory1(this);
         }
 
+        public bool LoadEducationHistory(out Dictionary<int, EducationData> educationHistory)
+        {
+            return DatabaseConnector.LoadColleagueEducationHistory1(this, out educationHistory);
+        }
+
+
         public bool LoadWorkHistory()
         {
             return DatabaseConnector.LoadColleagueWorkHistory1(this);
+        }
+
+        public bool LoadWorkHistory(out Dictionary<int, WorkData> workHistory)
+        {
+            return DatabaseConnector.LoadColleagueWorkHistory1(this, out workHistory);
         }
 
 
@@ -212,7 +228,12 @@ namespace SCCPP1.User
         /// <returns>true if changes are saved in database, false otherwise.</returns>
         public override bool Save()
         {
-            if (!NeedsSave)
+            if (Remove)
+            {
+                //TODO put database remove method
+                return true;
+            }
+            else if (!NeedsSave)
                 return true;
 
             return NeedsSave = !(IsUpdated = DatabaseConnector.SaveUser(this));
