@@ -20,14 +20,25 @@
             set { SetField(ref rating, value); }
         }
 
+        private string skillCategoryName;
+        public string SkillCategoryName
+        {
+            get { return skillCategoryName; }
+            set { SetField(ref skillCategoryName, value); }
+        }
+
+        public int SkillCategoryID { get; set; }
+
 
         public SkillData(Account owner, int recordID = -1) : base(owner, recordID)
         {
             Rating = -1;
         }
 
-        public SkillData(Account owner, int recordID, string skillName, int skillID, int rating) : this(owner, recordID)
+        public SkillData(Account owner, int recordID, string skillCategoryName, int skillCategoryID, string skillName, int skillID, int rating) : this(owner, recordID)
         {
+            this.SkillCategoryName = skillCategoryName;
+            this.SkillCategoryID = skillCategoryID;
             this.SkillName = skillName;
             this.SkillID = skillID;
             this.Rating = rating;
@@ -35,20 +46,35 @@
             this.IsUpdated = true;
         }
 
+        //load from database
+        public SkillData(Account owner, int recordID, int skillCategoryID, int skillID, int rating) :
+            this(owner, recordID, null, skillCategoryID, null, skillID, rating)
+        {
+            this.NeedsSave = false;
+        }
 
-        //input from user
-        public SkillData(Account owner, string skillName, int rating) : this(owner, -1, skillName, -1, rating)
+        //load from database
+        public SkillData(Account owner, string skillCategoryName, string skillName, int rating) :
+            this(owner, -1, skillCategoryName, -1, skillName, -1, rating)
         {
             this.NeedsSave = true;
         }
 
 
-        //loaded from db
-        public SkillData(Account owner, int recordID, int skillID, int rating) : this(owner, recordID, null, skillID, rating)
+        //load from database (no skill category)
+        public SkillData(Account owner, int recordID, int skillID, int rating) :
+            this(owner, recordID, null, -1, null, skillID, rating)
         {
             this.NeedsSave = false;
-            //maybe use IsUpdated = false flag to let DB know we need null values filled?
         }
+
+        //load from database (no skill category
+        public SkillData(Account owner, string skillName, int rating) :
+            this(owner, -1, null, -1, skillName, -1, rating)
+        {
+            this.NeedsSave = true;
+        }
+
 
 
         public override bool Save()
@@ -58,6 +84,21 @@
                 return true;
 
             return NeedsSave = !(IsUpdated = DatabaseConnector.SaveColleageSkills(this));
+        }
+
+
+        /// <summary>
+        /// Deletes the profile record.
+        /// </summary>
+        /// <returns>true if record was removed from database, false otherwise.</returns>
+        protected override bool Delete()
+        {
+            if (!Remove)
+                return true;
+
+            //TODO put database remove method
+            //NeedsSave = !(IsUpdated
+            return true;
         }
     }
 }

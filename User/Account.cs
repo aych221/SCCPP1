@@ -124,6 +124,16 @@ namespace SCCPP1.User
 
 
         #region Add/Update data methods
+
+        /// <summary>
+        /// Updates the basic account data for this colleague. Updates NeedsSave and IsUpdated flags.
+        /// </summary>
+        /// <param name="firstName"></param>
+        /// <param name="middleName"></param>
+        /// <param name="lastName"></param>
+        /// <param name="emailAddress"></param>
+        /// <param name="phoneNumber"></param>
+        /// <param name="introNarrative"></param>
         public void UpdateData(string firstName, string middleName, string lastName, string emailAddress, long phoneNumber, string introNarrative)
         {
             FirstName = firstName;
@@ -133,9 +143,17 @@ namespace SCCPP1.User
             EmailAddress = emailAddress;
             PhoneNumber = phoneNumber;
             IntroNarrative = introNarrative;
+            NeedsSave = IsUpdated = true;
         }
 
 
+        /// <summary>
+        /// Updates the basic account data for this colleague. Updates NeedsSave and IsUpdated flags.
+        /// </summary>
+        /// <param name="name">Passed in as "LastName, FirstName [MiddleName]"</param>
+        /// <param name="emailAddress"></param>
+        /// <param name="phoneNumber"></param>
+        /// <param name="introNarrative"></param>
         public void UpdateData(string name, string emailAddress, long phoneNumber, string introNarrative)
         {
             Name = name;
@@ -144,6 +162,10 @@ namespace SCCPP1.User
         }
 
 
+        /// <summary>
+        /// Adds a list of skills to the account.
+        /// </summary>
+        /// <param name="skillNames"></param>
         public void AddSkills(params string[] skillNames)
         {
             if (skillNames == null || skillNames.Length == 0)
@@ -152,10 +174,27 @@ namespace SCCPP1.User
             foreach (string skillName in skillNames)
                 Skills.Add(new SkillData(this, skillName, -1));
 
-            NeedsSave = true;
+            NeedsSave = IsUpdated = true;
         }
 
-        
+
+        /// <summary>
+        /// Adds a list of skills to the account for the specified skill category.
+        /// </summary>
+        /// <param name="skillCategory">Category of skill</param>
+        /// <param name="skillNames"></param>
+        public void AddSkills(string skillCategory, params string[] skillNames)
+        {
+            if (skillNames == null || skillNames.Length == 0)
+                return;
+
+            foreach (string skillName in skillNames)
+                Skills.Add(new SkillData(this, skillCategory, skillName, -1));
+
+            NeedsSave = IsUpdated = true;
+        }
+
+
         public void RemoveSkills(params string[] skillNames)
         {
             //TODO, need to make DB methods to remove colleague records that are requested
@@ -165,14 +204,46 @@ namespace SCCPP1.User
         public void AddEducation(string institution, string educationType, string description, Location location, DateOnly startDate, DateOnly endDate)
         {
             EducationHistory.Add(new EducationData(this, institution, educationType, description, location, startDate, endDate));
+            NeedsSave = IsUpdated = true;
         }
 
 
         public void AddWork(string employer, string jobTitle, string description, Location location, DateOnly startDate, DateOnly endDate)
         {
             WorkHistory.Add(new WorkData(this, employer, jobTitle, description, location, startDate, endDate));
+            NeedsSave = IsUpdated = true;
         }
 
+        /// <summary>
+        /// Saves current skill data and attempts to fetch the record
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public SkillData EditSkillData(int id)
+        {
+            //save skills
+            //need to find better way to reference specific objects, might use UUID upon object creation.
+            SaveSkills();
+
+            //need to make better way that isn't O(n). use dictionaries later
+            return Skills.Find(x => x.RecordID == id);
+        }
+
+        public EducationData EditEducationData(int id)
+        {
+            //save education
+            SaveEducationHistory();
+
+            return EducationHistory.Find(x => x.RecordID == id);
+        }
+
+        public WorkData EditWorkData(int id)
+        {
+            //save work
+            SaveWorkHistory();
+
+            return WorkHistory.Find(x => x.RecordID == id);
+        }
         #endregion
 
 
@@ -241,34 +312,81 @@ namespace SCCPP1.User
 
 
         /// <summary>
+        /// Deletes the user's data and all records associated with it.
+        /// </summary>
+        /// <returns>true if records were removed from database, false otherwise.</returns>
+        protected override bool Delete()
+        {
+            if (!Remove)
+                return true;
+
+            //TODO put database remove method
+            //NeedsSave = !(IsUpdated
+            return true;
+        }
+
+
+        /// <summary>
         /// Saves everything for the user. All associated data is saved to the database.
         /// </summary>
         /// <returns>true if changes are saved in the database, false otherwise.</returns>
         public bool SaveAll()
         {
+
+            //TODO add list of saves
+            //List<SkillData> skillSaves = new List<SkillData>();
+
+            return Save() && SaveSkills() && SaveEducationHistory() && SaveWorkHistory(); 
+        }
+
+
+        /// <summary>
+        /// Saves all Skill data for the user.
+        /// </summary>
+        /// <returns>true if changes are saved in the database, false otherwise.</returns>
+        protected bool SaveSkills()
+        {
             bool failed = false;
 
-            //Save user first
-            Save();
-
-            //Batch save skills
             foreach (SkillData sd in Skills)
                 if (!sd.Save())
                     failed = true;
 
-            //Batch save education history
+            return failed;
+        }
+
+
+        /// <summary>
+        /// Saves all Education data for the user.
+        /// </summary>
+        /// <returns>true if changes are saved in the database, false otherwise.</returns>
+        protected bool SaveEducationHistory()
+        {
+            bool failed = false;
+
             foreach (EducationData ed in EducationHistory)
                 if (!ed.Save())
                     failed = true;
 
-            //Batch save work history
+            return failed;
+        }
+
+
+
+        /// <summary>
+        /// Saves all Work data for the user.
+        /// </summary>
+        /// <returns>true if changes are saved in the database, false otherwise.</returns>
+        protected bool SaveWorkHistory()
+        {
+            bool failed = false;
+
             foreach (WorkData wd in WorkHistory)
                 if (!wd.Save())
                     failed = true;
 
             return failed;
         }
-
 
     }
 }

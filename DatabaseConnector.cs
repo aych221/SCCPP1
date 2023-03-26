@@ -1281,7 +1281,7 @@ namespace SCCPP1
             }
         }
 
-
+        [Obsolete]
         /// <summary>
         /// Loads the colleague's skills into the Account class. This will populate the Account.Skills list.
         /// </summary>
@@ -1323,7 +1323,7 @@ namespace SCCPP1
 
         }
 
-
+        [Obsolete]
         /// <summary>
         /// Loads the colleague's skills into the Account class. This will populate the Account.Skills list.
         /// </summary>
@@ -1364,6 +1364,128 @@ namespace SCCPP1
 
             return true;
 
+        }
+
+
+        /// <summary>
+        /// Loads the colleague's skills into the Account class. This will populate the Account.Skills list.
+        /// </summary>
+        /// <param name="account">The account associated with the skills</param>
+        /// <param name="useCache">optional param</param>
+        /// <returns>true if skills could be loaded, false if not</returns>
+        public static bool LoadColleagueSkills1(Account account, bool useCache = false)
+        {
+            if (account == null || account.RecordID < 0)
+                return false;
+
+
+            List<SkillData> list;
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+                /*
+
+        CREATE TABLE colleague_skills (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          colleague_id INTEGER NOT NULL,
+          skill_id INTEGER NOT NULL,
+          skill_category_id INTEGER,
+          rating INTEGER,
+          FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
+          FOREIGN KEY (skill_id) REFERENCES skills(id),
+          FOREIGN KEY (skill_category_id) REFERENCES skill_categories(id)
+        );
+                 * 
+                 */
+                string sql = @"SELECT cs.id, cs.colleague_id, sc.name AS skill_category, cs.skill_category_id, s.name AS skill, cs.skill_id, cs.rating
+                                            FROM colleague_skills cs
+                                            JOIN skills s ON cs.skill_id = s.id
+                                            JOIN skill_categories sc ON cs.skill_category_id = sc.id
+                                            WHERE cs.colleague_id=@colleague_id;";
+
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        list = new List<SkillData>();
+
+                        SkillData sd;
+                        while (r.Read())
+                        {
+                            //SkillData(Account owner, int recordID, string skillCategoryName, int skillCategoryID, string skillName, int skillID, int rating)
+                            sd = new SkillData(account, GetInt32(r, 0), GetString(r, 2), GetInt32(r, 3), GetString(r, 4), GetInt32(r, 5), GetInt32(r, 6));
+
+                            list.Add(sd);
+                        }
+
+                        account.Skills = list;
+                    }
+                }
+            }
+
+            Console.WriteLine($"Found Colleage_Skill Records: {list?.Count}");
+
+            return true;
+        }
+
+
+
+        /// <summary>
+        /// Loads the colleague's skills into the Account class. This will populate the Account.Skills list.
+        /// </summary>
+        /// <param name="account">The account associated with the skills</param>
+        /// <param name="useCache">optional param</param>
+        /// <returns>true if skills could be loaded, false if not</returns>
+        public static bool LoadColleagueSkills1(Account account, out Dictionary<int, SkillData> dict, bool useCache = false)
+        {
+            dict = new Dictionary<int, SkillData>();
+
+            if (account == null || account.RecordID < 0)
+                return false;
+
+
+            List<SkillData> list;
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+                string sql = @"SELECT cs.id, cs.colleague_id, sc.name AS skill_category, cs.skill_category_id, s.name AS skill, cs.skill_id, cs.rating
+                                            FROM colleague_skills cs
+                                            JOIN skills s ON cs.skill_id = s.id
+                                            JOIN skill_categories sc ON cs.skill_category_id = sc.id
+                                            WHERE cs.colleague_id=@colleague_id;";
+
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        list = new List<SkillData>();
+
+                        SkillData sd;
+                        while (r.Read())
+                        {
+                            //SkillData(Account owner, int recordID, string skillCategoryName, int skillCategoryID, string skillName, int skillID, int rating)
+                            sd = new SkillData(account, GetInt32(r, 0), GetString(r, 2), GetInt32(r, 3), GetString(r, 4), GetInt32(r, 5), GetInt32(r, 6));
+
+                            list.Add(sd);
+                            dict.TryAdd(sd.RecordID, sd);
+                        }
+
+                        account.Skills = list;
+                    }
+                }
+            }
+
+            Console.WriteLine($"Found Education Records: {list?.Count}");
+
+            return true;
         }
         #endregion
 
@@ -3106,6 +3228,7 @@ namespace SCCPP1
         DROP TABLE IF EXISTS [job_titles];
         DROP TABLE IF EXISTS [work_history];
         DROP TABLE IF EXISTS [skills];
+        DROP TABLE IF EXISTS [skill_categories];
         DROP TABLE IF EXISTS [colleague_skills];
         DROP TABLE IF EXISTS [profiles];
         COMMIT;
@@ -3193,13 +3316,20 @@ namespace SCCPP1
           name TEXT UNIQUE NOT NULL
         );
 
+        CREATE TABLE skill_categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE NOT NULL
+        );
+
         CREATE TABLE colleague_skills (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           colleague_id INTEGER NOT NULL,
           skill_id INTEGER NOT NULL,
+          skill_category_id INTEGER,
           rating INTEGER,
           FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
-          FOREIGN KEY (skill_id) REFERENCES skills(id)
+          FOREIGN KEY (skill_id) REFERENCES skills(id),
+          FOREIGN KEY (skill_category_id) REFERENCES skill_categories(id)
         );
 
         CREATE TABLE profiles (

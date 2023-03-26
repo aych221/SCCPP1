@@ -98,5 +98,20 @@ namespace SCCPP1.User.Data
             return NeedsSave = !(IsUpdated = DatabaseConnector.SaveEducationHistory(this));
         }
 
+
+        /// <summary>
+        /// Deletes the profile record.
+        /// </summary>
+        /// <returns>true if record was removed from database, false otherwise.</returns>
+        protected override bool Delete()
+        {
+            if (!Remove)
+                return true;
+
+            //TODO put database remove method
+            //NeedsSave = !(IsUpdated
+            return true;
+        }
+
     }
 }

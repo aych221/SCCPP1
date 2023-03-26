@@ -52,5 +52,9 @@
         }
 
         public abstract bool Save();
+
+
+        protected abstract bool Delete();
+
     }
 }

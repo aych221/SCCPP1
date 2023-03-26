@@ -92,7 +92,7 @@ namespace SCCPP1.Pages
                 ViewData["Skills"] = "Failed to load skills";
                 return Page();
             }
-
+            Console.WriteLine("Skills: " + Account.Skills.Count);
             //skills
             foreach (SkillData sd in Account.Skills)
                 sb.Append($"{sd.SkillName}<br>");

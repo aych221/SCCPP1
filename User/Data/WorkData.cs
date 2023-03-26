@@ -102,5 +102,20 @@
             return NeedsSave = !(IsUpdated = DatabaseConnector.SaveWorkHistory(this));
         }
 
+
+        /// <summary>
+        /// Deletes the profile record.
+        /// </summary>
+        /// <returns>true if record was removed from database, false otherwise.</returns>
+        protected override bool Delete()
+        {
+            if (!Remove)
+                return true;
+
+            //TODO put database remove method
+            //NeedsSave = !(IsUpdated
+            return true;
+        }
+
     }
 }
