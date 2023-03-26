@@ -45,7 +45,7 @@ namespace SCCPP1.Pages
             Colleague.FirstName = names[1];
             Colleague.LastName= names[0];
             Colleague.MiddleName = names[2];
-            Colleague.PhoneNumber = Account.PhoneNumber.ToString();
+            Colleague.PhoneNumber = Account.PhoneNumber;
             Colleague.IntroNarrative = Account.IntroNarrative;
             Colleague.EmailAddress = Account.EmailAddress;
 
@@ -66,8 +66,32 @@ namespace SCCPP1.Pages
             {
                 Account.Name = $"{Colleague.LastName}, {Colleague.FirstName} {Colleague.MiddleName?.ToString()}";
                 Account.EmailAddress = Colleague.EmailAddress;
-                Account.PhoneNumber = Utilities.ParsePhoneNumber(Colleague.PhoneNumber);
+                Account.PhoneNumber = Colleague.PhoneNumber;
                 Account.IntroNarrative = Colleague.IntroNarrative;
+
+                //Account.AddSkills(
+                //    Skill.ProgLang,
+                //    Skill.OS,
+                //    Skill.SoftAndFrame
+                //    );
+
+                //Account.AddWork(
+                //    Work.Employer,
+                //    Work.JobTitle,
+                //    Work.Description,
+                //    Work.Location,
+                //    Work.StartDate,
+                //    Work.EndDate
+                //    );
+
+                //Account.AddEducation(
+                //    Education.EduCert,
+                //    Education.EduType,
+                //    Education.Study,
+                //    Education.Location,
+                //    Education.StartDate,
+                //    Education.EndDate
+                //    );
 
                 if (DatabaseConnector.SaveUser(Account))
                 {

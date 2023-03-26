@@ -2,7 +2,7 @@
 
 namespace SCCPP1.Models
 {
-    // Here we have our Skill class, with the getters and setters for the "Skill" section of the Colleague
+    // Here we have our Skill class, with the getters and setters for the "Skill" section of the Account
     // ie. languages known, operating system, software, and framework
     public class Skill
     {

@@ -38,26 +38,63 @@ namespace SCCPP1.Pages
 
             if (Colleague != null)
             {
-                Account.Name = $"{Colleague.LastName}, {Colleague.FirstName} {Colleague.MiddleName?.ToString()} ";
-                Account.EmailAddress = Colleague.EmailAddress;
-                Account.PhoneNumber = Utilities.ParsePhoneNumber(Colleague.PhoneNumber);
-                Account.IntroNarrative = Colleague.IntroNarrative;
+                //Account.Name = $"{Colleague.LastName}, {Colleague.FirstName} {Colleague.MiddleName?.ToString()} ";
+                //Account.EmailAddress = Colleague.EmailAddress;
+                //Account.PhoneNumber = Utilities.ParsePhoneNumber(Colleague.PhoneNumber);
+                //Account.IntroNarrative = Colleague.IntroNarrative;
+                //// Account.EducationHistory[0].Remove.RecordID;
 
-                if (DatabaseConnector.SaveUser(Account))
-                {
-                    //Maybe have save and continue?
-                    Console.WriteLine("Saved");
-                    ViewData["UserData"] = "Saved!";
-                    return RedirectToPage("/UserHome");
-                }
-                else
-                {
-                    Console.WriteLine("Could not save");
-                    ViewData["UserData"] = "Error Saving";
-                }
+                Account.UpdateData(
+                    Colleague.FirstName, 
+                    Colleague.MiddleName, 
+                    Colleague.LastName, 
+                    Colleague.EmailAddress, 
+                    0, //Colleague.PhoneNumber
+                    Colleague.IntroNarrative
+                    );
+
+                //Account.AddSkills(
+                //    Skill.ProgLang,
+                //    Skill.OS,
+                //    Skill.SoftAndFrame
+                //    );
+
+                //Account.AddWork(
+                //    Work.Employer,
+                //    Work.JobTitle,
+                //    Work.Description,
+                //    Work.Location,
+                //    Work.StartDate,
+                //    Work.EndDate
+                //    );
+
+                //Account.AddEducation(
+                //    Education.EduCert,
+                //    Education.EduType,
+                //    Education.Study,
+                //    Education.Location,
+                //    Education.StartDate,
+                //    Education.EndDate
+                //    );
+
+                //if (DatabaseConnector.SaveUser(Account))
+                //{
+                //    //Maybe have save and continue?
+                //    Console.WriteLine("Saved");
+                //    ViewData["UserData"] = "Saved!";
+                //    return RedirectToPage("/UserHome");
+                //}
+                //else
+                //{
+                //    Console.WriteLine("Could not save");
+                //    ViewData["UserData"] = "Error Saving";
+                //}
+
+                Account.SaveAll();
             }
 
             return Page();
+
         }
     }
 }
