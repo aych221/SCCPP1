@@ -175,16 +175,21 @@
 
             <div id="experience-list">
                 <form>
-                    <label for="company-input">Company:</label>
-                    <input type="text" id="company-input">
-                    <label for="job-title-input">Job Title:</label>
-                    <input type="text" id="job-title-input">
-                    <label for="start-date-input">Start Date:</label>
-                    <input type="date" id="start-date-input">
-                    <label for="end-date-input">End Date:</label>
-                    <input type="date" id="end-date-input">
+                    <label for="Employer">Employer:</label>
+                    <input type="text" asp-for="Work!.Employer">
+
+                    <label for="JobTitle">Job Title:</label>
+                    <input type="text" asp-for="Work!.JobTitle">
+
+                    <label for="StartDate">Start Date:</label>
+                    <input type="date" asp-for="Work!.StartDate">
+
+                    <label for="EndDate">End Date:</label>
+                    <input type="date" asp-for="Work!.EndDate">
+
                     <label for="present-checkbox">Present Employment:</label>
                     <input type="checkbox" id="present-checkbox">
+
                     <button type="button" onclick="addExperience()">Add Experience</button>
                 </form>
                 <ul id="experience-ul">
@@ -288,21 +293,23 @@
                 input.value = '';
             }
         }
-    });</script>
+    });
+</script>
 
 <!-- Configurable list script-->
+
 <script>
     function addExperience() {
         var ul = document.querySelector("#experience-ul");
-        var companyInput = document.querySelector("#company-input");
-        var jobTitleInput = document.querySelector("#job-title-input");
-        var startDateInput = document.querySelector("#start-date-input");
-        var endDateInput = document.querySelector("#end-date-input");
+        var employerInput = document.getElementById("Work_Employer");
+        var jobTitleInput = document.getElementById("Work_JobTitle");
+        var startDateInput = document.getElementById("Work_StartDate");
+        var endDateInput = document.getElementById("Work_EndDate");
         var presentCheckbox = document.querySelector("#present-checkbox");
 
         var li = document.createElement("li");
         var company = document.createElement("p");
-        company.appendChild(document.createTextNode("Company: " + companyInput.value));
+        company.appendChild(document.createTextNode("WorkEmployer: " + employerInput.value));
         li.appendChild(company);
 
         var jobTitle = document.createElement("p");
@@ -322,7 +329,52 @@
         li.appendChild(endDate);
 
         ul.appendChild(li);
-        companyInput.value = "";
+        employerInput.value = "";
+        jobTitleInput.value = "";
+        startDateInput.value = "";
+        endDateInput.value = "";
+        presentCheckbox.checked = false;
+    }
+
+    function removeLastExperience() {
+        var ul = document.querySelector("#experience-ul");
+        var li = document.querySelector("#experience-ul li:last-child");
+        ul.removeChild(li);
+    }
+</script>
+
+<script>
+    function addEducation() {
+        var ul = document.querySelector("#experience-ul");
+        var employerInput = document.getElementById("Work_Employer");
+        var jobTitleInput = document.getElementById("Work_JobTitle");
+        var startDateInput = document.getElementById("Work_StartDate");
+        var endDateInput = document.getElementById("Work_EndDate");
+        var presentCheckbox = document.querySelector("#present-checkbox");
+
+        var li = document.createElement("li");
+        var company = document.createElement("p");
+        company.appendChild(document.createTextNode("WorkEmployer: " + employerInput.value));
+        li.appendChild(company);
+
+        var jobTitle = document.createElement("p");
+        jobTitle.appendChild(document.createTextNode("Job Title: " + jobTitleInput.value));
+        li.appendChild(jobTitle);
+
+        var startDate = document.createElement("p");
+        startDate.appendChild(document.createTextNode("Start Date: " + startDateInput.value));
+        li.appendChild(startDate);
+
+        var endDate = document.createElement("p");
+        if (presentCheckbox.checked) {
+            endDate.appendChild(document.createTextNode("End Date: Present"));
+        } else {
+            endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
+        }
+        li.appendChild(endDate);
+
+        ul.appendChild(li);
+        employerInput.value = "";
         jobTitleInput.value = "";
         startDateInput.value = "";
         endDateInput.value = "";
