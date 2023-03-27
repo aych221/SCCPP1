@@ -175,14 +175,14 @@
 
             <div id="experience-list">
                 <form>
-                    <label for="Employer">Company:</label>
-                    <input type="text" asp-for="Work!.Employer">
-                    <label for="JobTitle">Job Title:</label>
-                    <input type="text" asp-for="Work!.JobTitle">
-                    <label for="StartDate">Start Date:</label>
-                    <input type="date" asp-for="Work!.StartDate">
-                    <label for="EndDate">End Date:</label>
-                    <input type="date" asp-for="Work!.EndDate">
+                    <label for="company-input">Company:</label>
+                    <input type="text" id="company-input">
+                    <label for="job-title-input">Job Title:</label>
+                    <input type="text" id="job-title-input">
+                    <label for="start-date-input">Start Date:</label>
+                    <input type="date" id="start-date-input">
+                    <label for="end-date-input">End Date:</label>
+                    <input type="date" id="end-date-input">
                     <label for="present-checkbox">Present Employment:</label>
                     <input type="checkbox" id="present-checkbox">
                     <button type="button" onclick="addExperience()">Add Experience</button>
