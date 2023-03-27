@@ -24,7 +24,7 @@
         margin-bottom: 16px;
         resize: vertical;
     }
-
+/*
     label > .required {
         color: red;
         display: none;
@@ -33,7 +33,7 @@
     input:required + label > .required {
         display: inline;
     }
-
+    */
     /* Div class styling for tag system*/
     .tags-input {
         width: 100%;
@@ -231,6 +231,8 @@
 
     let tags = [];
 
+
+    // Creates a new HTML `li` element with a label and a close icon, and returns it.
     function createTag(label) {
         const li = document.createElement('li');
         li.classList.add('tag');
@@ -247,12 +249,14 @@
         return li;
     }
 
+    // Removes all tag elements from the `tagsList` element.
     function clearTags() {
         tagsList.querySelectorAll('.tag').forEach(tag => {
             tag.parentElement.removeChild(tag);
         });
     }
 
+    // Renders all tags in the `tags` array in reverse order, calling `createTag()` to create the HTML elements.
     function renderTags() {
         clearTags();
         tags.slice().reverse().forEach(tag => {
@@ -266,6 +270,7 @@
         renderTags();
     }
 
+    // Removes a tag from the array by label and renders all tags using `renderTags()`.
     function removeTag(tag) {
         const index = tags.indexOf(tag);
         if (index !== -1) {
@@ -274,6 +279,7 @@
         renderTags();
     }
 
+    //Listens for thekeyup event on the input element, and adds a new tag when the user presses the enter key.
     input.addEventListener('keyup', (e) => {
         if (e.key === 'Enter') {
             const tag = input.value.trim();
@@ -284,6 +290,7 @@
         }
     });
 
+    // Listens for the input event on the input element, and adds a new tag when the user types a comma or space.
     input.addEventListener('input', () => {
         const lastChar = input.value.slice(-1);
         if (lastChar === ',' || lastChar === ' ') {
@@ -342,53 +349,6 @@
         ul.removeChild(li);
     }
 </script>
-
-<!--
-<script>
-    function addEducation() {
-        var ul = document.querySelector("#experience-ul");
-        var employerInput = document.getElementById("Work_Employer");
-        var jobTitleInput = document.getElementById("Work_JobTitle");
-        var startDateInput = document.getElementById("Work_StartDate");
-        var endDateInput = document.getElementById("Work_EndDate");
-        var presentCheckbox = document.querySelector("#present-checkbox");
-
-        var li = document.createElement("li");
-        var company = document.createElement("p");
-        company.appendChild(document.createTextNode("WorkEmployer: " + employerInput.value));
-        li.appendChild(company);
-
-        var jobTitle = document.createElement("p");
-        jobTitle.appendChild(document.createTextNode("Job Title: " + jobTitleInput.value));
-        li.appendChild(jobTitle);
-
-        var startDate = document.createElement("p");
-        startDate.appendChild(document.createTextNode("Start Date: " + startDateInput.value));
-        li.appendChild(startDate);
-
-        var endDate = document.createElement("p");
-        if (presentCheckbox.checked) {
-            endDate.appendChild(document.createTextNode("End Date: Present"));
-        } else {
-            endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
-        }
-        li.appendChild(endDate);
-
-        ul.appendChild(li);
-        employerInput.value = "";
-        jobTitleInput.value = "";
-        startDateInput.value = "";
-        endDateInput.value = "";
-        presentCheckbox.checked = false;
-    }
-
-    function removeLastExperience() {
-        var ul = document.querySelector("#experience-ul");
-        var li = document.querySelector("#experience-ul li:last-child");
-        ul.removeChild(li);
-    }
-</script>
--->
 
 <!--Stops page from being submitted upon pressing enter-->
 <script>

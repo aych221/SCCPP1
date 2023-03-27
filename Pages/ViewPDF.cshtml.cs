@@ -98,6 +98,27 @@ namespace SCCPP1.Pages
                 sb.Append($"{sd.SkillName}<br>");
             ViewData["Skills"] = sb.ToString();
 
+            // testing how data will load on front end
+            StringBuilder sB = new StringBuilder();
+            string title = "Master of Business Administration";
+            string year = "2019";
+            string institution = "University of Wisconsin";
+
+            /*
+            if (true)
+            {
+                // foreach (EducationData ed in Account.WorkHistory) {
+                sB.Append($"<table>");
+                sB.Append($"<tr>");
+                sB.Append($"<b>{title}</b><br>");
+                sB.Append($"{institution} | {year}");
+                sB.Append($"</tr>");
+                sB.Append($"</table>");
+                sB.Append($"<br>");
+                // }
+            }
+            ViewData["TestData"] = sB.ToString();
+            */
 
             return Page();
         }
