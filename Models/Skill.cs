@@ -6,6 +6,8 @@ namespace SCCPP1.Models
     // ie. languages known, operating system, software, and framework
     public class Skill
     {
+        public int ID { get; set; }
+
         public string? ProgLang { get; set; }
 
         public string? OS { get; set; }

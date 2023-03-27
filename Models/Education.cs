@@ -7,6 +7,8 @@ namespace SCCPP1.Models
     // ie. the title of their degree/certification and the corresponding year of completion
     public class Education
     {
+        public int ID { get; set; }
+
         public string? EduCert { get; set; }
 
         public string? EduYear { get; set; }

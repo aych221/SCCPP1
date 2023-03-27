@@ -6,7 +6,7 @@ namespace SCCPP1.Models
     // ie. First Name, Last Name, Number etc.
     public class Colleague
     {
-        public int Id { get; set; }
+        public int ID { get; set; }
 
         [Required]
         public string FirstName { get; set; }

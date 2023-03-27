@@ -100,6 +100,18 @@
         background-color: white;
         padding: 20px;
     }
+
+    #experience-list ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    #experience-list li {
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid black;
+    }
 </style>
 
 <body>
@@ -161,8 +173,27 @@
 
             <legend><b>Experience:</b></legend>
 
-            <label for="Experience">Experience:</label>
-            <textarea asp-for="Work!.Experience" name="experience" placeholder="Tell me about your work experience..." style="height:200px"></textarea>
+            <div id="experience-list">
+                <form>
+                    <label for="company-input">Company:</label>
+                    <input type="text" id="company-input">
+                    <label for="job-title-input">Job Title:</label>
+                    <input type="text" id="job-title-input">
+                    <label for="start-date-input">Start Date:</label>
+                    <input type="date" id="start-date-input">
+                    <label for="end-date-input">End Date:</label>
+                    <input type="date" id="end-date-input">
+                    <label for="present-checkbox">Present Employment:</label>
+                    <input type="checkbox" id="present-checkbox">
+                    <button type="button" onclick="addExperience()">Add Experience</button>
+                </form>
+                <ul id="experience-ul">
+                </ul>
+            </div>
+            <br />
+            <button onclick="removeLastExperience()">Remove Last Experience</button>
+
+            <br />
             <br />
 
             <legend><b>Education/Certification:</b></legend>
@@ -186,8 +217,9 @@
     </div>
 </body>
 
-<script>
 
+<!--Tag system script-->
+<script>
     const tagsInput = document.querySelector('.tags-input');
     const tagsList = document.querySelector('.tags-list');
     const input = tagsInput.querySelector('input');
@@ -256,9 +288,52 @@
                 input.value = '';
             }
         }
-    });
+    });</script>
 
+<!-- Configurable list script-->
+<script>
+    function addExperience() {
+        var ul = document.querySelector("#experience-ul");
+        var companyInput = document.querySelector("#company-input");
+        var jobTitleInput = document.querySelector("#job-title-input");
+        var startDateInput = document.querySelector("#start-date-input");
+        var endDateInput = document.querySelector("#end-date-input");
+        var presentCheckbox = document.querySelector("#present-checkbox");
 
+        var li = document.createElement("li");
+        var company = document.createElement("p");
+        company.appendChild(document.createTextNode("Company: " + companyInput.value));
+        li.appendChild(company);
+
+        var jobTitle = document.createElement("p");
+        jobTitle.appendChild(document.createTextNode("Job Title: " + jobTitleInput.value));
+        li.appendChild(jobTitle);
+
+        var startDate = document.createElement("p");
+        startDate.appendChild(document.createTextNode("Start Date: " + startDateInput.value));
+        li.appendChild(startDate);
+
+        var endDate = document.createElement("p");
+        if (presentCheckbox.checked) {
+            endDate.appendChild(document.createTextNode("End Date: Present"));
+        } else {
+            endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
+        }
+        li.appendChild(endDate);
+
+        ul.appendChild(li);
+        companyInput.value = "";
+        jobTitleInput.value = "";
+        startDateInput.value = "";
+        endDateInput.value = "";
+        presentCheckbox.checked = false;
+    }
+
+    function removeLastExperience() {
+        var ul = document.querySelector("#experience-ul");
+        var li = document.querySelector("#experience-ul li:last-child");
+        ul.removeChild(li);
+    }
 </script>
 
 <!--Stops page from being submitted upon pressing enter-->

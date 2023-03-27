@@ -49,6 +49,8 @@ namespace SCCPP1.Pages
             Colleague.IntroNarrative = Account.IntroNarrative;
             Colleague.EmailAddress = Account.EmailAddress;
 
+            //Education.ID = Account.EducationHistory[0].RecordID;
+
             return Page();
         }
 

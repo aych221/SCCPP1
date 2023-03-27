@@ -8,6 +8,8 @@ namespace SCCPP1.Models
     // Ex. Do we want to save Experience as ExperienceTitle, ExperienceYear, and ExperienceDescription
     public class Work
     {
+        public int ID { get; set; }
+
         public string? Experience { get; set; }
 
         public string? Employer { get; set; }
