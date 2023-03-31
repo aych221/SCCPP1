@@ -1,10 +1,10 @@
 ﻿@page
-@model SCCPP1.Pages.EditMainProfileModel
+@model SCCPP1.Pages.CreateMainProfileModel
 @{
-    ViewData["Title"] = "Edit Main Profile";
+    ViewData["Title"] = "Create Main Profile";
 }
 
-<!-- This page is used to create the user's profile. Will only be seen once upon initial login. -->
+<!-- This page is used to create the user's profile. Will only be seen once upon inital login. -->
 <style>
     body {
         font-family: Arial, Helvetica, sans-serif;
@@ -24,6 +24,60 @@
         margin-bottom: 16px;
         resize: vertical;
     }
+
+    label > .required {
+        color: red;
+        display: none;
+    }
+
+    input:required + label > .required {
+        display: inline;
+    }
+
+    /* Div class styling for tag system*/
+    .tags-input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #000000;
+        border-radius: 4px;
+        box-sizing: border-box;
+        margin-top: 6px;
+        margin-bottom: 16px;
+        resize: vertical;
+    }
+
+        .tags-input input {
+            border: 1px solid #000000;
+            outline: none;
+            width: 100%;
+        }
+
+    .tags-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .tag {
+        background-color: #f2f2f2;
+        padding: 5px;
+        border-radius: 5px;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+        .tag span {
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+
+        .tag i {
+            cursor: pointer;
+        }
 
     /* Submit button styling*/
     input[type=submit] {
@@ -47,107 +101,120 @@
         padding: 20px;
     }
 
-    /* Div class styling for tag system*/
-    .input-categories {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-start;
+    #experience-list ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
     }
 
-        .input-categories ul {
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            list-style-type: none;
-            flex-wrap: wrap;
-        }
-
-        .input-categories li {
-            border: 1px solid black;
-            border-radius: 2px;
-            padding: 1px;
-            margin: 1px;
-        }
-
-        .input-categories input {
-            flex: 1 1 auto;
-            align-self: flex-start;
-        }
+    #experience-list li {
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid black;
+    }
 </style>
 
 <body>
-    <h1>Edit Your Main Profile</h1>
+    <h1>Create Your Main Profile</h1>
     <br />
     <div class="profile">
-        <!-- Stops page from being submitted every time user presses enter, need to find a different way to do this as it affects where the form is being sent this way-->
-        <!-- action="javascript:void(0)" -->
-        <form method="post">
+        <form method="post" id="myForm">
             <legend><b>About:</b></legend>
 
-            <label for="FirstName">First Name</label>
-            <input type="text" asp-for="Colleague!.FirstName" placeholder="Ex. John" />
+            <label for="FirstName">First Name:*</label>
+            <input type="text" asp-for="Colleague!.FirstName" placeholder="Ex. John" required />
             <br />
 
-            <label for="LastName">Last Name</label>
-            <input type="text" asp-for="Colleague!.LastName" placeholder="Ex. Smith" />
+            <label for="LastName">Last Name:*</label>
+            <input type="text" asp-for="Colleague!.LastName" placeholder="Ex. Doe" required />
             <br />
 
-            <label for="MiddleName">Middle Name</label>
-            <input type="text" asp-for="Colleague!.MiddleName" placeholder="Ex. Robert" />
+            <label for="MiddleName">Middle Name:</label>
+            <input type="text" asp-for="Colleague!.MiddleName" placeholder="Ex. Bob" />
             <br />
 
-            <label for="PhoneNumber">Phone</label>
-            <input type="text" asp-for="Colleague!.PhoneNumber" placeholder="Ex. (987)-654-3210" />
+            <label for="PhoneNumber">Phone:*</label>
+            <input type="tel" asp-for="Colleague!.PhoneNumber" placeholder="Ex. (987)-654-3210" required />
+            <br />
             <br />
 
-            <label for="EmailAddress">Email Address</label>
-            <input type="text" asp-for="Colleague!.EmailAddress" placeholder="Ex. jsmith@example.com" />
+            <label for="EmailAddress">Email Address:*</label>
+            <input type="email" asp-for="Colleague!.EmailAddress" placeholder="Ex. jdoe@example.com" required />
+            <br />
             <br />
 
-            <label for="IntroNarrative">About</label>
-            <textarea asp-for="Colleague!.IntroNarrative" placeholder="Introduce yourself..." style="height:200px"></textarea>
+            <label for="IntroNarrative">About:</label>
+            <textarea type="text" asp-for="Colleague!.IntroNarrative" placeholder="Introduce yourself..." style="height:200px"></textarea>
             <br />
 
             <legend><b>Skills:</b></legend>
-
-            <!-- This is an example of how I will be doing the tag system and is not yet finalized.
-              I intend to have the tags remain in the input field and also allow the user to delete any tags they may have created  -->
             <label for="ProgLang">Programming Languages:</label>
-            <div class="input-categories">
-                <input type="text" asp-for="Skill!.ProgLang" placeholder="What languages do you know?... (Press enter to save language)" />
-                &nbsp;
-                <ul>
-                </ul>
+            <div class="tags-input">
+                <input type="text" asp-for="Skill!.ProgLang" placeholder="What languages do you know?... (Press enter to save)" />
+                <ul class="tags-list"></ul>
+            </div>
+
+            <br />
+
+            <label for="OS">Operating Systems:</label>
+            <div class="tags-input">
+                <input type="text" asp-for="Skill!.OS" placeholder="What operating systems do you know?... (Press enter to save)" />
+                <ul class="tags-list"></ul>
             </div>
             <br />
 
-            <label for="OS">Operating Systems</label>
-            <input type="text" asp-for="Skill!.OS" placeholder="What operating systems do you know?..." />
+            <label for="SoftAndFrame">Software & Frameworks:</label>
+            <div class="tags-input">
+                <input type="text" asp-for="Skill!.SoftAndFrame" placeholder="What softwares and frameworks do you know?... (Press enter to save)">
+                <ul class="tags-list"></ul>
+            </div>
             <br />
 
-            <label for="SoftAndFrame">Software & Frameworks</label>
-            <input type="text" asp-for="Skill!.SoftAndFrame" placeholder="What softwares and frameworks do you know?...">
-            <br />
 
             <legend><b>Experience:</b></legend>
 
-            <label for="Experience">Experience</label>
-            <textarea asp-for="Work!.Experience" name="experience" placeholder="Tell me about your work experience..." style="height:200px"></textarea>
+            <div id="experience-list">
+                <form>
+                    <label for="Employer">Employer:</label>
+                    <input type="text" asp-for="Work!.Employer">
+
+                    <label for="JobTitle">Job Title:</label>
+                    <input type="text" asp-for="Work!.JobTitle">
+
+                    <label for="StartDate">Start Date:</label>
+                    <input type="date" asp-for="Work!.StartDate">
+
+                    <label for="EndDate">End Date:</label>
+                    <input type="date" asp-for="Work!.EndDate">
+
+                    <label for="present-checkbox">Present Employment:</label>
+                    <input type="checkbox" id="present-checkbox">
+
+                    <button type="button" onclick="addExperience()">Add Experience</button>
+                </form>
+                <ul id="experience-ul">
+                </ul>
+            </div>
+            <br />
+            <button onclick="removeLastExperience()">Remove Last Experience</button>
+
+            <br />
             <br />
 
             <legend><b>Education/Certification:</b></legend>
 
-            <label for="EduCert">Education</label>
+            <label for="EduCert">Education:</label>
             <input type="text" asp-for="Education!.EduCert" placeholder="Ex. Master of Business Administration (M.B.A.)">
             <br />
 
-            <label for="EduCert">Certification</label>
+            <label for="EduCert">Certification:</label>
             <input type="text" asp-for="Education!.EduCert" placeholder="Ex. Advanced Cyber Defender Certificate">
             <br />
 
-            <label for="EduYear">Education Year</label>
+            <label for="EduYear">Education Year:</label>
             <input type="text" asp-for="Education!.EduYear" placeholder="When did you get your education/certification?...">
             <br />
+
 
             <input type="submit" value="Submit" />
             <input type="submit" value="Save as Draft">
@@ -155,23 +222,147 @@
     </div>
 </body>
 
+
+<!--Tag system script-->
 <script>
-    /* Script for adding a tag from data input into the input fields https://stackoverflow.com/questions/10839570/how-does-stackoverflow-make-its-tag-input-field */
-    var es = document.querySelectorAll('.input-categories');
-    for (var i = 0; i < es.length; i++) {
-        es[i]._list = es[i].querySelector('ul');
-        es[i]._input = es[i].querySelector('input');
-        es[i]._input._icategories = es[i];
-        es[i].onkeydown = function (e) {
-            var e = event || e;
-            if (e.keyCode == 13) {
-                var c = e.target._icategories;
-                var li = document.createElement('li');
-                li.innerHTML = c._input.value;
-                c._list.appendChild(li);
-                c._input.value = '';
-                e.preventDefault();
+    const tagsInput = document.querySelector('.tags-input');
+    const tagsList = document.querySelector('.tags-list');
+    const input = tagsInput.querySelector('input');
+
+    let tags = [];
+
+
+    // Creates a new HTML `li` element with a label and a close icon, and returns it.
+    function createTag(label) {
+        const li = document.createElement('li');
+        li.classList.add('tag');
+        const span = document.createElement('span');
+        span.innerText = label;
+        const closeIcon = document.createElement('i');
+        closeIcon.classList.add('material-icons');
+        closeIcon.innerText = 'X';
+        closeIcon.addEventListener('click', () => {
+            removeTag(label);
+        });
+        li.appendChild(span);
+        li.appendChild(closeIcon);
+        return li;
+    }
+
+    // Removes all tag elements from the `tagsList` element.
+    function clearTags() {
+        tagsList.querySelectorAll('.tag').forEach(tag => {
+            tag.parentElement.removeChild(tag);
+        });
+    }
+
+    // Renders all tags in the `tags` array in reverse order, calling `createTag()` to create the HTML elements.
+    function renderTags() {
+        clearTags();
+        tags.slice().reverse().forEach(tag => {
+            const li = createTag(tag);
+            tagsList.prepend(li);
+        });
+    }
+
+    function addTag(tag) {
+        tags.push(tag);
+        renderTags();
+    }
+
+    // Removes a tag from the array by label and renders all tags using `renderTags()`.
+    function removeTag(tag) {
+        const index = tags.indexOf(tag);
+        if (index !== -1) {
+            tags.splice(index, 1);
+        }
+        renderTags();
+    }
+
+    //Listens for the keyup event on the input element, and adds a new tag when the user presses the enter key.
+    input.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            const tag = input.value.trim();
+            if (tag) {
+                addTag(tag);
+                input.value = '';
             }
         }
+    });
+
+    // Listens for the input event on the input element, and adds a new tag when the user types a comma or space.
+    input.addEventListener('input', () => {
+        const lastChar = input.value.slice(-1);
+        if (lastChar === ',' || lastChar === ' ') {
+            const tag = input.value.slice(0, -1).trim();
+            if (tag) {
+                addTag(tag);
+                input.value = '';
+            }
+        }
+    });</script>
+
+<!-- Configurable list script for experience-->
+
+<script>
+    function addExperience() {
+        var ul = document.querySelector("#experience-ul"); // The list element
+        var employerInput = document.getElementById("Work_Employer"); // Input field for employer name
+        var jobTitleInput = document.getElementById("Work_JobTitle"); // Input field for job title
+        var startDateInput = document.getElementById("Work_StartDate"); // Input field for start date
+        var endDateInput = document.getElementById("Work_EndDate"); // Input field for end date
+        var presentCheckbox = document.querySelector("#present-checkbox"); // Present employer checkbox
+
+        // Creates new list item to hold experience details
+        var li = document.createElement("li");
+
+        // Creates paragraph element for employer name and adds it to list
+        var company = document.createElement("p");
+        company.appendChild(document.createTextNode("WorkEmployer: " + employerInput.value));
+        li.appendChild(company);
+
+        // Creates paragraph element for job title and adds it to list
+        var jobTitle = document.createElement("p");
+        jobTitle.appendChild(document.createTextNode("Job Title: " + jobTitleInput.value));
+        li.appendChild(jobTitle);
+
+        // Creates paragraph element for start date and adds it to list
+        var startDate = document.createElement("p");
+        startDate.appendChild(document.createTextNode("Start Date: " + startDateInput.value));
+        li.appendChild(startDate);
+
+        // Creates paragraph element for end date and adds it to list
+        var endDate = document.createElement("p");
+        if (presentCheckbox.checked) {
+            endDate.appendChild(document.createTextNode("End Date: Present Employer"));
+        } else {
+            endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
+        }
+        li.appendChild(endDate);
+
+        //Adds new list to experience list
+        ul.appendChild(li);
+
+        // Clears input fields and checkbox
+        employerInput.value = "";
+        jobTitleInput.value = "";
+        startDateInput.value = "";
+        endDateInput.value = "";
+        presentCheckbox.checked = false;
     }
+
+    function removeLastExperience() {
+        var ul = document.querySelector("#experience-ul");
+        var li = document.querySelector("#experience-ul li:last-child");
+        ul.removeChild(li);
+    }</script>
+
+<!--Stops page from being submitted upon pressing enter-->
+<script>
+    const form = document.getElementById("myForm");
+    form.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+        }
+    });
 </script>

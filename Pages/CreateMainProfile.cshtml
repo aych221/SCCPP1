@@ -24,7 +24,7 @@
         margin-bottom: 16px;
         resize: vertical;
     }
-/*
+
     label > .required {
         color: red;
         display: none;
@@ -33,7 +33,7 @@
     input:required + label > .required {
         display: inline;
     }
-    */
+
     /* Div class styling for tag system*/
     .tags-input {
         width: 100%;
@@ -279,7 +279,7 @@
         renderTags();
     }
 
-    //Listens for thekeyup event on the input element, and adds a new tag when the user presses the enter key.
+    //Listens for the keyup event on the input element, and adds a new tag when the user presses the enter key.
     input.addEventListener('keyup', (e) => {
         if (e.key === 'Enter') {
             const tag = input.value.trim();
@@ -303,39 +303,48 @@
     });
 </script>
 
-<!-- Configurable list script-->
+<!-- Configurable list script for experience-->
 
 <script>
     function addExperience() {
-        var ul = document.querySelector("#experience-ul");
-        var employerInput = document.getElementById("Work_Employer");
-        var jobTitleInput = document.getElementById("Work_JobTitle");
-        var startDateInput = document.getElementById("Work_StartDate");
-        var endDateInput = document.getElementById("Work_EndDate");
-        var presentCheckbox = document.querySelector("#present-checkbox");
+        var ul = document.querySelector("#experience-ul"); // The list element
+        var employerInput = document.getElementById("Work_Employer"); // Input field for employer name
+        var jobTitleInput = document.getElementById("Work_JobTitle"); // Input field for job title
+        var startDateInput = document.getElementById("Work_StartDate"); // Input field for start date
+        var endDateInput = document.getElementById("Work_EndDate"); // Input field for end date
+        var presentCheckbox = document.querySelector("#present-checkbox"); // Present employer checkbox
 
+        // Creates new list item to hold experience details
         var li = document.createElement("li");
+
+        // Creates paragraph element for employer name and adds it to list
         var company = document.createElement("p");
         company.appendChild(document.createTextNode("WorkEmployer: " + employerInput.value));
         li.appendChild(company);
 
+        // Creates paragraph element for job title and adds it to list
         var jobTitle = document.createElement("p");
         jobTitle.appendChild(document.createTextNode("Job Title: " + jobTitleInput.value));
         li.appendChild(jobTitle);
 
+        // Creates paragraph element for start date and adds it to list
         var startDate = document.createElement("p");
         startDate.appendChild(document.createTextNode("Start Date: " + startDateInput.value));
         li.appendChild(startDate);
 
+        // Creates paragraph element for end date and adds it to list
         var endDate = document.createElement("p");
         if (presentCheckbox.checked) {
-            endDate.appendChild(document.createTextNode("End Date: Present"));
+            endDate.appendChild(document.createTextNode("End Date: Present Employer"));
         } else {
             endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
         }
         li.appendChild(endDate);
 
+        //Adds new list to experience list
         ul.appendChild(li);
+
+        // Clears input fields and checkbox
         employerInput.value = "";
         jobTitleInput.value = "";
         startDateInput.value = "";

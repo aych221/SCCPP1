@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using SCCPP1.Database.Tables;
 using SCCPP1.User;
 using System.Security.Claims;
 
@@ -88,6 +90,8 @@ namespace SCCPP1.Session
                 DatabaseConnector.Thomas(acc = new Account(Data, false));
                 page = "/UserHome";
                 Console.WriteLine("[IsReturning = True]");
+                //new TableModels();
+                //DatabaseConnector.TestQueryMaker();
                 //Console.WriteLine(DatabaseConnector.LoadColleagueEducationHistory1(acc));
                 //Console.WriteLine(DatabaseConnector.LoadColleagueEducationHistory(acc));
                 //Console.WriteLine(DatabaseConnector.LoadColleagueWorkHistory1(acc));

@@ -13,6 +13,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using SCCPP1.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Collections.Concurrent;
+using SCCPP1.Database.Entity;
+using SCCPP1.Database;
+using SCCPP1.Database.Tables;
 
 namespace SCCPP1
 {
@@ -33,9 +37,81 @@ namespace SCCPP1
         private static Dictionary<int, string> employers;
         private static Dictionary<int, string> job_titles;
 
+        public static TableModels TableModels;
 
         public static void CreateDatabase(bool loadCaches = false)
         {
+            /*
+            TableModels = new TableModels();
+
+            StringBuilder sql = new StringBuilder();
+
+            //drop tables if exists
+            sql.AppendLine(QueryGenerator.DropTables(TableModels.Tables));
+
+            //generate sql for tables
+            foreach (DbTable table in TableModels.Tables)
+                sql.AppendLine(QueryGenerator.CreateTableSql(table));
+
+            //add foreign key to colleagues table
+            sql.AppendLine(QueryGenerator.AlterTableAddForeignKeys(TableModels.Colleagues, new Field("main_profile_id", typeof(int), false, false, TableModels.Profiles.PrimaryKey)));
+
+            DbRecord[] states = new DbRecord[]
+            {
+                new DbRecord(new DbStateData("Alabama", "AL")),
+                new DbRecord(new DbStateData("Alaska", "AK")),
+                new DbRecord(new DbStateData("Arizona", "AZ")),
+                new DbRecord(new DbStateData("Arkansas", "AR")),
+                new DbRecord(new DbStateData("California", "CA")),
+                new DbRecord(new DbStateData("Colorado", "CO")),
+                new DbRecord(new DbStateData("Connecticut", "CT")),
+                new DbRecord(new DbStateData("Delaware", "DE")),
+                new DbRecord(new DbStateData("Florida", "FL")),
+                new DbRecord(new DbStateData("Georgia", "GA")),
+                new DbRecord(new DbStateData("Hawaii", "HI")),
+                new DbRecord(new DbStateData("Idaho", "ID")),
+                new DbRecord(new DbStateData("Illinois", "IL")),
+                new DbRecord(new DbStateData("Indiana", "IN")),
+                new DbRecord(new DbStateData("Iowa", "IA")),
+                new DbRecord(new DbStateData("Kansas", "KS")),
+                new DbRecord(new DbStateData("Kentucky", "KY")),
+                new DbRecord(new DbStateData("Louisiana", "LA")),
+                new DbRecord(new DbStateData("Maine", "ME")),
+                new DbRecord(new DbStateData("Maryland", "MD")),
+                new DbRecord(new DbStateData("Massachusetts", "MA")),
+                new DbRecord(new DbStateData("Michigan", "MI")),
+                new DbRecord(new DbStateData("Minnesota", "MN")),
+                new DbRecord(new DbStateData("Mississippi", "MS")),
+                new DbRecord(new DbStateData("Missouri", "MO")),
+                new DbRecord(new DbStateData("Montana", "MT")),
+                new DbRecord(new DbStateData("Nebraska", "NE")),
+                new DbRecord(new DbStateData("Nevada", "NV")),
+                new DbRecord(new DbStateData("New Hampshire", "NH")),
+                new DbRecord(new DbStateData("New Jersey", "NJ")),
+                new DbRecord(new DbStateData("New Mexico", "NM")),
+                new DbRecord(new DbStateData("New York", "NY")),
+                new DbRecord(new DbStateData("North Carolina", "NC")),
+                new DbRecord(new DbStateData("North Dakota", "ND")),
+                new DbRecord(new DbStateData("Ohio", "OH")),
+                new DbRecord(new DbStateData("Oklahoma", "OK")),
+                new DbRecord(new DbStateData("Oregon", "OR")),
+                new DbRecord(new DbStateData("Pennsylvania", "PA")),
+                new DbRecord(new DbStateData("Rhode Island", "RI")),
+                new DbRecord(new DbStateData("South Carolina", "SC")),
+                new DbRecord(new DbStateData("South Dakota", "SD")),
+                new DbRecord(new DbStateData("Tennessee", "TN")),
+                new DbRecord(new DbStateData("Texas", "TX")),
+                new DbRecord(new DbStateData("Utah", "UT")),
+                new DbRecord(new DbStateData("Vermont", "VT")),
+                new DbRecord(new DbStateData("Virginia", "VA")),
+                new DbRecord(new DbStateData("Washington", "WA")),
+                new DbRecord(new DbStateData("West Virginia", "WV")),
+                new DbRecord(new DbStateData("Wisconsin", "WI")),
+                new DbRecord(new DbStateData("Wyoming", "WY"))
+            };
+            */
+
+
 
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
@@ -44,6 +120,7 @@ namespace SCCPP1
                 {
                     cmd.ExecuteNonQuery();
 
+                    //QueryGenerator.InsertOrIgnore(cmd, TableModels.States, states);
                     
                     if (loadCaches)
                         LoadCaches();
@@ -471,6 +548,7 @@ namespace SCCPP1
                 }
             }
         }
+
 
         public static int GetUserRecordID(string username)
         {
@@ -1692,65 +1770,6 @@ namespace SCCPP1
         }
 
 
-        /*public static string[]? GetInstitutionNames(params int[] ids)
-        {
-            if (ids.Length < 1)
-                return null;
-
-            Dictionary<int, string> nameResults = new Dictionary<int, string>(ids.Length);
-            int[] institutionIDs = new int[ids.Length];
-
-            //create names list
-            StringBuilder sb = new StringBuilder("SELECT id, name FROM institutions WHERE id IN (@name0");
-            nameResults.Add(ids[0], -1);
-
-
-            for (int i = 1; i < ids.Length; i++)
-            {
-                sb.Append(',');
-                sb.Append($"@skillName{i}");
-
-                //fill with -1's initially to indicate not found
-                nameResults.Add(ids[i], -1);
-                institutionIDs[i] = -1;
-            }
-            sb.Append(");");
-
-            string sql = sb.ToString();
-
-            //execute select query
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-
-                    for (int i = 0; i < ids.Length; i++)
-                    {
-                        cmd.Parameters.AddWithValue($"@skillName{i}", ValueCleaner(ids[i]));
-                    }
-                    Console.WriteLine(cmd.CommandText);
-
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        //put results in dictionary
-                        while (r.Read())
-                            nameResults[GetString(r, 0)] = GetInt32(r, 1);
-
-
-                        //refresh skillIds with dictionary data
-                        for (int i = 0; i < ids.Length; i++)
-                            institutionIDs[i] = nameResults[ids[i]];
-
-                        Console.Write("SkillIDs: ");
-                        Console.WriteLine(string.Join(",", institutionIDs));
-
-                        return institutionIDs;
-                    }
-                }
-            }
-        }*/
-
         public static int GetInstitutionID(string institutionName)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -2151,36 +2170,6 @@ namespace SCCPP1
 
 
         #region Work Data
-        //TODO make query fields dynamic in what is typed in
-        public static int InsertWorkHistory(params InputF[] fields)
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string? sql = $"{QueryGeneratorInsert("work_history", fields)} RETURNING id;";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    foreach (InputF f in fields)
-                        cmd.Parameters.AddWithValue(f.VariableName, f.Value);
-                    /*cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
-                    cmd.Parameters.AddWithValue("@employer_id", employerID);
-                    cmd.Parameters.AddWithValue("@job_title_id", jobTitleID);
-                    cmd.Parameters.AddWithValue("@municipality_id", municipalityID);
-                    cmd.Parameters.AddWithValue("@state_id", stateID);
-                    cmd.Parameters.AddWithValue("@start_date", startDate);
-                    cmd.Parameters.AddWithValue("@end_date", endDate);
-                    cmd.Parameters.AddWithValue("@description", description);*/
-
-
-                    object? workID = cmd.ExecuteScalar();
-
-                    if (workID == null)
-                        return -1;
-
-                    return Convert.ToInt32(workID);//return record ID
-                }
-            }
-        }//*/
 
         public static int InsertWorkHistory(int colleagueID, int employerID, int jobTitleID, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
         {
@@ -2191,6 +2180,29 @@ namespace SCCPP1
                                 work_history(colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description) 
                                 VALUES (@colleague_id, @employer_id, @job_title_id, @municipality_id, @state_id, @start_date, @end_date, @description)
                                 RETURNING id;";
+                /*
+                 * 
+                 * 
+                 * BEGIN TRANSACTION;
+
+INSERT OR IGNORE INTO employer (name) VALUES ('Acme Inc.');
+INSERT INTO work_history (colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description)
+VALUES (
+    @colleague_id, 
+    (SELECT COALESCE((SELECT id FROM employer WHERE name = 'Acme Inc.'), last_insert_rowid())),
+    (SELECT COALESCE((SELECT id FROM job_title WHERE name = @job_title_name), 
+                     (INSERT INTO job_title (name) VALUES (@job_title_name); SELECT last_insert_rowid()))), 
+    (SELECT COALESCE((SELECT id FROM municipality WHERE name = @municipality_name), 
+                     (INSERT INTO municipality (name) VALUES (@municipality_name); SELECT last_insert_rowid()))), 
+    @state_id, 
+    @start_date, 
+    @end_date, 
+    @description
+);
+
+COMMIT;
+
+                 */
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
@@ -2214,6 +2226,63 @@ namespace SCCPP1
                 }
             }
         }
+
+
+        public static int InsertWorkHistory(int colleagueID, string employer, string jobTitle, string municipality, int stateID, DateOnly startDate, DateOnly endDate, string description)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+                using (SqliteTransaction transaction = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        int workHistoryID = -1, employerID, jobTitleID, municipalityID;
+
+                        string sql = @"INSERT INTO work_history (colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description) 
+                        VALUES (@colleague_id, @employer_id, @job_title_id, @municipality_id, @state_id, @start_date, @end_date, @description);
+                        SELECT last_insert_rowid();";
+                        using (SqliteCommand cmd = new SqliteCommand("", conn, transaction))
+                        {
+                            employerID = InsertOrIgnore(cmd, "employers", "name", employer);
+                            jobTitleID = InsertOrIgnore(cmd, "job_titles", "title", jobTitle);
+                            municipalityID = InsertOrIgnore(cmd, "municipalities", "name", municipality);
+
+
+                            cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(colleagueID));
+                            cmd.Parameters.AddWithValue("@employer_id", ValueCleaner(employerID));
+                            cmd.Parameters.AddWithValue("@job_title_id", ValueCleaner(jobTitleID));
+                            cmd.Parameters.AddWithValue("@municipality_id", ValueCleaner(municipalityID));
+                            cmd.Parameters.AddWithValue("@state_id", ValueCleaner(stateID));
+                            cmd.Parameters.AddWithValue("@start_date", ValueCleaner(startDate));
+                            cmd.Parameters.AddWithValue("@end_date", ValueCleaner(endDate));
+                            cmd.Parameters.AddWithValue("@description", ValueCleaner(description));
+
+                            object? id = cmd.ExecuteScalar();
+
+                            if (id == null)
+                                return -1;
+
+                            workHistoryID = Convert.ToInt32(id);
+
+                        }
+
+                        transaction.Commit();
+
+                        return workHistoryID;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine(ex.Message);
+                        throw;
+                    }
+                }
+            }
+        }
+
+
 
 
         public static int InsertWorkHistory(WorkData wd)
@@ -3186,6 +3255,148 @@ namespace SCCPP1
             return Utilities.ToDateOnly(r.GetDateTime(ordinal));
         }
 
+
+        #region Sqlite Helper Methods
+
+        #region Insertion
+        /// <summary>
+        /// Uses an INSERT OR IGNORE query, then returns the result that was input. Only intended for tables with an id and unique text column.
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="tableName"></param>
+        /// <param name="fieldName"></param>
+        /// <param name="value"></param>
+        /// <returns>The id of the value inserted into the input table</returns>
+        protected static int InsertOrIgnore(SqliteCommand cmd, string tableName, string fieldName, string value)
+        {
+            //save incoming command type
+            CommandType originalType = cmd.CommandType;
+            string originalSql = cmd.CommandText;
+
+            cmd.CommandType = CommandType.Text;
+
+            cmd.CommandText = $"INSERT OR IGNORE INTO {tableName} ({fieldName}) VALUES (@val); SELECT id FROM {tableName} WHERE {fieldName} = @val;";
+
+            cmd.Parameters.AddWithValue("@val", ValueCleaner(value));
+
+
+            object? o = cmd.ExecuteScalar();
+
+            //reset command type
+            cmd.CommandType = originalType;
+            cmd.CommandText = originalSql;
+
+            if (o == null)
+                return -1;
+
+
+            return Convert.ToInt32(o);
+        }
+
+        protected static List<int> InsertOrIgnore(SqliteCommand cmd, string tableName, string fieldName, List<string> values)
+        {
+            //save incoming command type
+            CommandType originalType = cmd.CommandType;
+            string originalSql = cmd.CommandText;
+
+            cmd.CommandType = CommandType.Text;
+
+            //build the SQL query string for inserting the values
+            StringBuilder sb = new StringBuilder($"INSERT OR IGNORE INTO {tableName} ({fieldName}) VALUES ");
+
+            //insert value parameters into query
+            for (int i = 0; i < values.Count; i++)
+                sb.Append($"@val{i},");
+            sb.Remove(sb.Length - 1, 1);
+
+            sb.Append($"; SELECT id FROM {tableName} WHERE {fieldName} IN ({string.Join(",", values)});");
+
+            //insert values into query
+            cmd.CommandText = sb.ToString();
+            for (int i = 0; i < values.Count; i++)
+                cmd.Parameters.AddWithValue($"@val{i}", ValueCleaner(values[i]));
+
+
+            List<int> ids = new List<int>();
+            using (SqliteDataReader r = cmd.ExecuteReader())
+            {
+                while (r.Read())
+                    ids.Add(GetInt32(r, 0));
+            }
+
+            //reset command type
+            cmd.CommandType = originalType;
+            cmd.CommandText = originalSql;
+
+            return ids;
+        }
+
+        /**
+         * 
+        CREATE TABLE colleagues (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_hash TEXT NOT NULL,
+          role INTEGER NOT NULL, --0=admin 1=normal
+          name TEXT NOT NULL,
+          email TEXT,
+          phone INTEGER,
+          address TEXT,
+          intro_narrative TEXT
+        );
+         */
+        public static void TestQueryMaker()
+        {
+
+            //DbTable table = new DbTable();
+ /*           DbColumn c1 = new DbColumn("user_hash", typeof(string), 1, true, true);
+            DbColumn c2 = new DbColumn("role", typeof(int), 2, true, false);
+            DbColumn c3 = new DbColumn("name", typeof(string), 3, true, false);
+            DbColumn c4 = new DbColumn("email", typeof(string), 4, false, false);
+            DbColumn c5 = new DbColumn("phone", typeof(long), 5, false, false);
+            DbColumn c6 = new DbColumn("address", typeof(string), 6, false, false);
+            DbColumn c7 = new DbColumn("intro_narrative", typeof(string), 7, false, false);
+
+            DbTuple tuple = new DbTuple(c1, c2, c3, c4, c5, c6, c7);
+
+            DbTable table = new DbTable("colleagues", tuple);
+
+            DbTuple record1 = new DbTuple(
+                new DbField<string>(c1, "test"),
+                new DbField<int>(c2, 0),
+                new DbField<string>(c3, "test man2"),
+                new DbField<string>(c4, "test@email.com"),
+                new DbField<long>(c5, 1000000000),
+                new DbField<string>(c6, "1000 Georgian Lane, Augusta GA"),
+                new DbField<string>(c7, "Listen here")
+                );
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+                using (SqliteCommand cmd = new SqliteCommand("", conn))
+                {
+                    QueryGenerator.InsertOrIgnore(cmd, table, record1, record1, record1);
+
+                    cmd.CommandText = "SELECT * FROM colleagues;";
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            Console.WriteLine(GetInt32(r, 0) + " "  + GetString(r, 1) + " " + GetInt32(r, 2) + " " + GetString(r, 3) + " " + GetString(r, 4) + " " + GetInt64(r, 5) + " " + GetString(r, 6) + " " + GetString(r, 7));
+                            
+                        }
+                    }
+
+                }
+            }*/
+
+        }
+        #endregion
+
+        #endregion
+
         /*private static void AddWithValueOrNull(SqliteCommand cmd, string variable, object? value)
         {
             if (value == null)
@@ -3402,16 +3613,11 @@ namespace SCCPP1
         ";
 
 
-        private static string? QueryGeneratorInsert(string tableName, params InputF[] fields)
+ /*       private static string? QueryGeneratorInsert(string tableName, params InputF[] fields)
         {
             if (fields.Length < 1)
                 return null;
 
-            /*
-             * INSERT INTO 
-                                work_history(colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description) 
-                                VALUES (@colleague_id, @employer_id, @job_title_id, @municipality_id, @state_id, @start_date, @end_date, @description)
-             */
             StringBuilder sb = new StringBuilder($"INSERT INTO {tableName} ("),
                 columns = new StringBuilder($"{fields[0].ColumnName}"),
                 values = new StringBuilder($"{fields[0].VariableName}");
@@ -3429,7 +3635,7 @@ namespace SCCPP1
             return sb.ToString();
         }
 
-        
+ /*       
         protected class Field
         {
             public readonly string ColumnName;
@@ -3475,5 +3681,7 @@ namespace SCCPP1
         }
         //*/
     }
+
+
 
 }

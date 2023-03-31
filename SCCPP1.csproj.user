@@ -6,4 +6,12 @@
     <RazorPage_SelectedScaffolderID>RazorPageScaffolder</RazorPage_SelectedScaffolderID>
     <RazorPage_SelectedScaffolderCategoryPath>root/Common/RazorPage</RazorPage_SelectedScaffolderCategoryPath>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="Database\DatabaseCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Database\DatabaseConnection.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
 </Project>
