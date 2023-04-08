@@ -3,38 +3,161 @@
 @{
     ViewData["Title"] = "View PDF";
 }
-<h1>@ViewData["Title"]</h1>
 
-<!--<p> Allows user to view final PDF version of the main/sub profile of their choosing. </p>-->
+
+<!--<h1>@ViewData["Title"]</h1>
+
+<!--<p> Allows user to view final PDF version of the main/sub profile of their choosing. </p>
 <h3>@Html.Raw(@ViewData["FullName"])</h3>
 
 <br />
 <h4>Contact</h4>
 <p>
-    @Html.Raw(ViewData["Contact"])
+@Html.Raw(ViewData["Contact"])
 </p>
 
 <br />
 <h4>Intro Narrative</h4>
 <p>
-    @Html.Raw(ViewData["Intro"])
+@Html.Raw(ViewData["Intro"])
 </p>
 
 <br />
 <h4>Education History</h4>
 <p>
-    @Html.Raw(ViewData["Education"])
-    <!--@Html.Raw(ViewData["TestData"])-->
+@Html.Raw(ViewData["Education"])
+@Html.Raw(ViewData["TestData"])
 </p>
 
 <br />
 <h4>Work History</h4>
 <p>
-    @Html.Raw(ViewData["Work"])
+@Html.Raw(ViewData["Work"])
 </p>
 
 <br />
 <h4>Skills</h4>
 <p>
-    @Html.Raw(ViewData["Skills"])
-</p>
+@Html.Raw(ViewData["Skills"])
+</p>-->
+<!-- Mock PDF -->
+
+<style>
+
+    body {
+        font-family: sans-serif;
+    }
+
+    #red {
+        padding: 10px;
+        border-left: 5px solid #e4002b;
+        margin: 10px
+    }
+
+    #blue {
+        padding: 10px;
+        border-left: 5px solid #002b49;
+        margin: 10px
+    }
+
+</style>
+
+<!-- We need to figure out how to -->
+<body>
+
+    <h1><b>Wang Ho Chiu</b></h1>
+    <h6>
+        | <i class="fa fa-phone"></i> (987) 654-3210 | <i class="fa fa-envelope"></i> wchiu@augusta.edu |
+    </h6>
+    <br />
+
+    <div id="about">
+        <h5><i class="fa fa-user"></i><b> About </b></h5>
+        <p id="red">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+            Ante in nibh mauris cursus mattis. Auctor neque vitae tempus quam pellentesque. Suspendisse faucibus interdum posuere lorem ipsum dolor. 
+            Ipsum consequat nisl vel pretium lectus quam id leo. 
+            Quis lectus nulla at volutpat diam ut venenatis. 
+            Ut aliquam purus sit amet luctus. 
+            Odio ut enim blandit volutpat maecenas volutpat blandit aliquam. 
+            Fermentum odio eu feugiat pretium. 
+            At volutpat diam ut venenatis tellus in metus vulputate eu. 
+            Sed sed risus pretium quam vulputate dignissim. 
+            Imperdiet proin fermentum leo vel orci porta non pulvinar. 
+            Malesuada proin libero nunc consequat interdum.
+        </p>
+    </div>
+    <br />
+
+    <div class="skill">
+        <h5><i class="fa fa-lightbulb-o"></i><b> Skills </b></h5>
+        <p id="blue">
+            <b>Programming Langauges:</b> JavaScript, Python, C#, Unity, Rust
+            <br />
+            <b>Operating System:</b> Windows, iOS, Android
+            <br />
+            <b>Software & Framework:</b> ASP.NET, jQuery
+        </p>
+    </div>
+    <br />
+
+    <div class="experience">
+        <h5><i class="fa fa-briefcase"></i><b> Experience </b></h5>
+        <p id="red">
+            <b>Job Title</b>
+            <br />
+            Employer | Start Date - End Date
+            <br />
+            Experience Description - Currently does not exist for user.
+            <br /> <br />
+
+            <b>The Kern Family Foundation</b>
+            <br />
+            Kern Kernbert | 2012 - 2021
+            <br />
+            Led a four-week product discovery effort yo establish alignmnet on the problem statement.
+            Conducted qualitative and quantitative user research to elicit requirements and identify highest business value features.
+            Facilitated sessions with key stakeholders to align on priority.
+            Conducted ongoing discovery to influence the product strategy, roadmap, and backlog.
+            <br />
+        </p>
+    </div>
+    <br />
+
+    <div class="education">
+        <h5><i class="fa fa-graduation-cap"></i><b> Education </b></h5>
+        <p id="blue">
+            <b>Education Title</b>
+            <br />
+            University/College | Start Date - End Date
+            <br /> <br />
+
+            <b>Bachelor of Computer Science</b>
+            <br />
+            Augusta University | 2019 - 2023
+            <br /> <br />
+
+            <b>Master of None</b>
+            <br />
+            Talentless University | Birth - Present
+            <br />
+        </p>
+    </div>
+    <br />
+
+    <div class="certificate">
+        <h5><i class="fa fa-certificate"></i><b> Certificate </b></h5>
+        <p id="red">
+            <b>Certificate Title</b>
+            <br />
+            Institution | Start Date - End Date
+            <br /> <br />
+
+            <b>Cyber Defender Certificate</b>
+            <br />
+            Augusta University | 2016 - 2021
+            <br />
+        </p>
+    </div>
+
+</body>
