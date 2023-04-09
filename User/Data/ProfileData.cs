@@ -1,4 +1,5 @@
-﻿using SCCPP1.Models;
+﻿using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
+using SCCPP1.Models;
 
 namespace SCCPP1.User.Data
 {
@@ -114,7 +115,7 @@ namespace SCCPP1.User.Data
         public ProfileData(Account owner, string title, List<int> skillIDs, List<int> educationIDs, List<int> workIDs, string ordering) :
             this(owner, -1, title, skillIDs, educationIDs, workIDs, ordering)
         {
-
+            
             this.NeedsSave = true;
         }
 
@@ -128,6 +129,30 @@ namespace SCCPP1.User.Data
             //cross-reference account skills with ids in this.
             //may need to save items before allowing profile to be edited, since it relies heavily on ids
             return skills;
+        }
+
+
+        public Dictionary<int, EducationData> GetEducationHistory()
+        {
+
+            if (!IsUpdated || skills == null)
+                educationHistory = new Dictionary<int, EducationData>();
+
+            //cross-reference account skills with ids in this.
+            //may need to save items before allowing profile to be edited, since it relies heavily on ids
+            return educationHistory;
+        }
+
+
+        public Dictionary<int, WorkData> GetWorkHistory()
+        {
+
+            if (!IsUpdated || skills == null)
+                workHistory = new Dictionary<int, WorkData>();
+
+            //cross-reference account skills with ids in this.
+            //may need to save items before allowing profile to be edited, since it relies heavily on ids
+            return workHistory;
         }
 
 

@@ -103,6 +103,8 @@ namespace SCCPP1.User
 
         public List<WorkData> WorkHistory { get; set; }
 
+        public List<ProfileData> Profiles { get; set; }
+
 
 
         /// <summary>
@@ -214,6 +216,7 @@ namespace SCCPP1.User
             NeedsSave = IsUpdated = true;
         }
 
+
         /// <summary>
         /// Saves current skill data and attempts to fetch the record
         /// </summary>
@@ -255,6 +258,38 @@ namespace SCCPP1.User
             return Data.Username;
         }
 
+        /// <summary>
+        /// Attempts to fetch skill record
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>SkillData if object is found, null otherwise</returns>
+        public SkillData? GetSkillData(int id)
+        {
+            //need to make better way that isn't O(n). use dictionaries later
+            return Skills.Find(x => x.RecordID == id);
+        }
+
+        /// <summary>
+        /// Attempts to fetch education history record
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>EducationData if object is found, null otherwise</returns>
+        public EducationData? GetEducationData(int id)
+        {
+            return EducationHistory.Find(x => x.RecordID == id);
+        }
+
+
+        /// <summary>
+        /// Attempts to fetch work history record
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>WorkData if object is found, null otherwise</returns>
+        public WorkData? GetWorkData(int id)
+        {
+            return WorkHistory.Find(x => x.RecordID == id);
+        }
+
 
         public bool Load()
         {
@@ -263,12 +298,12 @@ namespace SCCPP1.User
 
         public bool LoadSkills()
         {
-            return DatabaseConnector.LoadColleagueSkills(this);
+            return DatabaseConnector.LoadColleagueSkills1(this);
         }
 
         public bool LoadSkills(out Dictionary<int, SkillData> skills)
         {
-            return DatabaseConnector.LoadColleagueSkills(this, out skills);
+            return DatabaseConnector.LoadColleagueSkills1(this, out skills);
         }
 
         public bool LoadEducationHistory()
@@ -291,6 +326,32 @@ namespace SCCPP1.User
         {
             return DatabaseConnector.LoadColleagueWorkHistory1(this, out workHistory);
         }
+
+
+        #region Profile methods
+
+        /// <summary>
+        /// Creates a new profile object, which also saves all data in the account to the database, excluding other profiles.
+        /// </summary>
+        /// <param name="title"></param>
+        /// <returns>A new profile object for the user</returns>
+        public ProfileData CreateProfile(string title)
+        {
+            //may not need in the future, considered a "heavy" call.
+            SaveAll();
+            ProfileData pd = new ProfileData(this);
+            pd.Title = title;
+            pd.LoadData();
+
+            return pd;
+        }
+
+        public ProfileData? GetProfile(int id)
+        {
+            return Profiles.Find(x => x.RecordID == id);
+        }
+
+        #endregion
 
 
         /// <summary>
