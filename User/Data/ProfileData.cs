@@ -14,22 +14,24 @@ namespace SCCPP1.User.Data
             set { SetField(ref title, value); }
         }
 
+
         /// <summary>
         /// Used for loading ids from the database.
         /// </summary>
-        private List<int> skillIDs, educationIDs, workIDs;
+        private HashSet<int> skillIDs, educationIDs, workIDs;
 
-        protected List<int> SkillIDs
+
+        protected HashSet<int> SkillIDs
         {
             get { return skillIDs; }
             set { SetField(ref skillIDs, value); }
         }
-        protected List<int> EducationIDs
+        protected HashSet<int> EducationIDs
         {
             get { return educationIDs; }
             set { SetField(ref educationIDs, value); }
         }
-        protected List<int> WorkIDs
+        protected HashSet<int> WorkIDs
         {
             get { return workIDs; }
             set { SetField(ref workIDs, value); }
@@ -63,6 +65,8 @@ namespace SCCPP1.User.Data
             set { SetField(ref workHistory, value); }
         }
 
+
+
         /// <summary>
         /// Used to determine the ordering of the skill, education, and work sections.
         /// Skill is section 0, Education is section 1, Work is section 2.
@@ -76,20 +80,6 @@ namespace SCCPP1.User.Data
         }
 
 
-
-        /*
-         * 
-         * 
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          colleague_id INTEGER NOT NULL,
-          title TEXT NOT NULL,          --similar to the file name
-          education_history_ids TEXT,   --list of education history ids in specified order
-          work_history_ids TEXT,        --list of work history ids in specified order
-          colleague_skills_ids TEXT,    --list of skill ids in specified order
-          ordering TEXT,                --The ordering of how the different sections will be (education, work, skills, etc)
-          FOREIGN KEY (colleague_id) REFERENCES colleagues(id)
-         */
-
         public ProfileData(Account owner, int id = -1) : base(owner, id)
         {
             this.NeedsSave = false;
@@ -98,7 +88,8 @@ namespace SCCPP1.User.Data
 
 
         //used when database loads profile
-        public ProfileData(Account owner, int recordID, string title, List<int> skillIDs, List<int> educationIDs, List<int> workIDs, string ordering) : this(owner, recordID)
+        public ProfileData(Account owner, int recordID, string title, HashSet<int> skillIDs, HashSet<int> educationIDs, HashSet<int> workIDs, string ordering) :
+            this(owner, recordID)
         {
             Title = title;
             SkillIDs = skillIDs;
@@ -112,7 +103,7 @@ namespace SCCPP1.User.Data
 
 
         //used when user creates profile that needs to be saved
-        public ProfileData(Account owner, string title, List<int> skillIDs, List<int> educationIDs, List<int> workIDs, string ordering) :
+        public ProfileData(Account owner, string title, HashSet<int> skillIDs, HashSet<int> educationIDs, HashSet<int> workIDs, string ordering) :
             this(owner, -1, title, skillIDs, educationIDs, workIDs, ordering)
         {
             
@@ -154,6 +145,86 @@ namespace SCCPP1.User.Data
             //may need to save items before allowing profile to be edited, since it relies heavily on ids
             return workHistory;
         }
+
+
+
+        //Content add methods
+        #region Add Methods
+
+        /// <summary>
+        /// Adds a SkillData object to the profile using a skill ID.
+        /// </summary>
+        /// <param name="skillID">The SkillData.SkillID to be added.</param>
+        public void AddSkill(int skillID)
+        {
+            if (skillIDs.Add(skillID))
+                skills.TryAdd(skillID, Owner.GetSkillData(skillID));
+        }
+
+
+        /// <summary>
+        /// Adds an EducationData object to the profile using its ID.
+        /// </summary>
+        /// <param name="eduRecordID">The EducationData.RecordID to be added.</param>
+        public void AddEducation(int eduRecordID)
+        {
+            if (educationIDs.Add(eduRecordID))
+                educationHistory.TryAdd(eduRecordID, Owner.GetEducationData(eduRecordID));
+        }
+
+
+        /// <summary>
+        /// Adds a WorkData object to the profile using its ID.
+        /// </summary>
+        /// <param name="workRecordID">The WorkData.RecordID to be added.</param>
+        public void AddWork(int workRecordID)
+        {
+            if (workIDs.Add(workRecordID))
+                workHistory.TryAdd(workRecordID, Owner.GetWorkData(workRecordID));
+        }
+
+        #endregion
+
+
+
+        //Content remove methods
+        #region Remove Methods
+
+        /// <summary>
+        /// Removes a SkillData object from the profile.
+        /// </summary>
+        /// <param name="skillID">The SkillData.SkillID to be removed.</param>
+        public void RemoveSkill(int skillID)
+        {
+            if (skillIDs.Remove(skillID))
+                skills.Remove(skillID);
+        }
+
+
+        /// <summary>
+        /// Removes an EducationData object from the profile.
+        /// </summary>
+        /// <param name="eduRecordID">The EducationData.RecordID to be removed.</param>
+        public void RemoveEducation(int eduRecordID)
+        {
+            if (educationIDs.Remove(eduRecordID))
+                educationHistory.Remove(eduRecordID);
+        }
+
+
+        /// <summary>
+        /// Removes a WorkData object from the profile.
+        /// </summary>
+        /// <param name="workRecordID">The WorkData.RecordID to be removed.</param>
+        public void RemoveWork(int workRecordID)
+        {
+            if (workIDs.Remove(workRecordID))
+                workHistory.Remove(workRecordID);
+        }
+
+        #endregion
+
+
 
 
         public bool LoadData()

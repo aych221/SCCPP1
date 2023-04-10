@@ -40,6 +40,7 @@ namespace SCCPP1.User
             set { SetField(ref lastName, value); }
         }
 
+
         private string? middleName;
         public string? MiddleName
         {

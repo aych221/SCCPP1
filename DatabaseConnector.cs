@@ -3,19 +3,7 @@ using SCCPP1.Session;
 using SCCPP1.User;
 using SCCPP1.User.Data;
 using System.Data;
-using System.Security.Principal;
 using System.Text;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.UI;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Authorization;
-using SCCPP1.Models;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Collections.Concurrent;
-using SCCPP1.Database.Entity;
-using SCCPP1.Database;
 using SCCPP1.Database.Tables;
 
 namespace SCCPP1
@@ -1462,25 +1450,11 @@ namespace SCCPP1
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-
-                /*
-
-        CREATE TABLE colleague_skills (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          colleague_id INTEGER NOT NULL,
-          skill_id INTEGER NOT NULL,
-          skill_category_id INTEGER,
-          rating INTEGER,
-          FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
-          FOREIGN KEY (skill_id) REFERENCES skills(id),
-          FOREIGN KEY (skill_category_id) REFERENCES skill_categories(id)
-        );
-                 * 
-                 */
+               
                 string sql = @"SELECT cs.id, cs.colleague_id, sc.name AS skill_category, cs.skill_category_id, s.name AS skill, cs.skill_id, cs.rating
                                             FROM colleague_skills cs
                                             JOIN skills s ON cs.skill_id = s.id
-                                            JOIN skill_categories sc ON cs.skill_category_id = sc.id
+                                            LEFT JOIN skill_categories sc ON cs.skill_category_id = sc.id
                                             WHERE cs.colleague_id=@colleague_id;";
 
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
@@ -1496,7 +1470,7 @@ namespace SCCPP1
                         {
                             //SkillData(Account owner, int recordID, string skillCategoryName, int skillCategoryID, string skillName, int skillID, int rating)
                             sd = new SkillData(account, GetInt32(r, 0), GetString(r, 2), GetInt32(r, 3), GetString(r, 4), GetInt32(r, 5), GetInt32(r, 6));
-
+                            Console.WriteLine($"Skill: {sd.SkillName} - {sd.SkillID} - {sd.SkillCategoryName} - {sd.SkillCategoryID} - {sd.Rating}");
                             list.Add(sd);
                         }
 
@@ -1552,6 +1526,7 @@ namespace SCCPP1
                             //SkillData(Account owner, int recordID, string skillCategoryName, int skillCategoryID, string skillName, int skillID, int rating)
                             sd = new SkillData(account, GetInt32(r, 0), GetString(r, 2), GetInt32(r, 3), GetString(r, 4), GetInt32(r, 5), GetInt32(r, 6));
 
+                            Console.WriteLine($"Skill: {sd.SkillName} - {sd.SkillID} - {sd.SkillCategoryName} - {sd.SkillCategoryID} - {sd.Rating}");
                             list.Add(sd);
                             dict.TryAdd(sd.RecordID, sd);
                         }
@@ -2873,12 +2848,14 @@ COMMIT;
         #region Profile Methods
 
 
-        #endregion
 
+
+
+        #endregion
         public static List<string> PrintRecords(string table)
+    {
+        using (SqliteConnection conn = new SqliteConnection(connStr))
         {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
                 conn.Open();
                 string sql = $"SELECT * FROM {table};";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
@@ -3611,6 +3588,8 @@ COMMIT;
           ('Wyoming', 'WY');
 
         ";
+
+
 
 
  /*       private static string? QueryGeneratorInsert(string tableName, params InputF[] fields)
