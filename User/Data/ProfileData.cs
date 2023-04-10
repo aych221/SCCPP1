@@ -152,18 +152,18 @@ namespace SCCPP1.User.Data
         #region Add Methods
 
         /// <summary>
-        /// Adds a SkillData object to the profile using a skill ID.
+        /// Adds a SkillData object to the profile using its RecordID.
         /// </summary>
-        /// <param name="skillID">The SkillData.SkillID to be added.</param>
-        public void AddSkill(int skillID)
+        /// <param name="skillRecordID">The SkillData.RecordID to be added.</param>
+        public void AddSkill(int skillRecordID)
         {
-            if (skillIDs.Add(skillID))
-                skills.TryAdd(skillID, Owner.GetSkillData(skillID));
+            if (skillIDs.Add(skillRecordID))
+                skills.TryAdd(skillRecordID, Owner.GetSkillData(skillRecordID));
         }
 
 
         /// <summary>
-        /// Adds an EducationData object to the profile using its ID.
+        /// Adds an EducationData object to the profile using its RecordID.
         /// </summary>
         /// <param name="eduRecordID">The EducationData.RecordID to be added.</param>
         public void AddEducation(int eduRecordID)
@@ -174,7 +174,7 @@ namespace SCCPP1.User.Data
 
 
         /// <summary>
-        /// Adds a WorkData object to the profile using its ID.
+        /// Adds a WorkData object to the profile using its RecordID.
         /// </summary>
         /// <param name="workRecordID">The WorkData.RecordID to be added.</param>
         public void AddWork(int workRecordID)
@@ -191,18 +191,18 @@ namespace SCCPP1.User.Data
         #region Remove Methods
 
         /// <summary>
-        /// Removes a SkillData object from the profile.
+        /// Removes a SkillData object from the profile using its RecordID.
         /// </summary>
-        /// <param name="skillID">The SkillData.SkillID to be removed.</param>
-        public void RemoveSkill(int skillID)
+        /// <param name="skillRecordID">The SkillData.RecordID to be removed.</param>
+        public void RemoveSkill(int skillRecordID)
         {
-            if (skillIDs.Remove(skillID))
-                skills.Remove(skillID);
+            if (skillIDs.Remove(skillRecordID))
+                skills.Remove(skillRecordID);
         }
 
 
         /// <summary>
-        /// Removes an EducationData object from the profile.
+        /// Removes an EducationData object from the profile using its RecordID.
         /// </summary>
         /// <param name="eduRecordID">The EducationData.RecordID to be removed.</param>
         public void RemoveEducation(int eduRecordID)
@@ -213,7 +213,7 @@ namespace SCCPP1.User.Data
 
 
         /// <summary>
-        /// Removes a WorkData object from the profile.
+        /// Removes a WorkData object from the profile using its RecordID.
         /// </summary>
         /// <param name="workRecordID">The WorkData.RecordID to be removed.</param>
         public void RemoveWork(int workRecordID)
