@@ -19,7 +19,7 @@
         /// <summary>
         /// A flag to let the database know this record needs to be removed if it exists, or not to save if it doesn't exist.
         /// </summary>
-        protected bool Remove;
+        public bool Remove;
 
 
         /// <summary>
@@ -54,7 +54,10 @@
         public abstract bool Save();
 
 
-        protected abstract bool Delete();
+        public abstract bool Delete();
+
+
+
 
     }
 }

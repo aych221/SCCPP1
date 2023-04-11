@@ -91,7 +91,7 @@
         /// Deletes the profile record.
         /// </summary>
         /// <returns>true if record was removed from database, false otherwise.</returns>
-        protected override bool Delete()
+        public override bool Delete()
         {
             if (!Remove)
                 return true;

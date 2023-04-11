@@ -8,6 +8,10 @@ namespace SCCPP1.User.Data
 
 
         private string title;
+
+        /// <summary>
+        /// The title of this profile, does not need to be unique.
+        /// </summary>
         public string Title
         {
             get { return title; }
@@ -16,55 +20,38 @@ namespace SCCPP1.User.Data
 
 
         /// <summary>
-        /// Used for loading ids from the database.
+        /// Used to hold RecordData.RecordIDs that are selected (by the user) to appear on this profile.
         /// </summary>
-        private HashSet<int> skillIDs, educationIDs, workIDs;
+        private HashSet<int> _skillIDs, _educationIDs, _workIDs;
 
 
-        protected HashSet<int> SkillIDs
+        /// <summary>
+        /// The set of SkillData.RecordIDs that are selected (by the user) to appear on this profile.
+        /// </summary>
+        public HashSet<int> SelectedSkillIDs
         {
-            get { return skillIDs; }
-            set { SetField(ref skillIDs, value); }
-        }
-        protected HashSet<int> EducationIDs
-        {
-            get { return educationIDs; }
-            set { SetField(ref educationIDs, value); }
-        }
-        protected HashSet<int> WorkIDs
-        {
-            get { return workIDs; }
-            set { SetField(ref workIDs, value); }
+            get { return _skillIDs; }
+            protected set { SetField(ref _skillIDs, value); }
         }
 
-
-
-        private Dictionary<int, SkillData> skills;
-
-        protected Dictionary<int, SkillData> Skills
+        /// <summary>
+        /// The set of EducationData.RecordIDs that are selected (by the user) to appear on this profile.
+        /// </summary>
+        public HashSet<int> SelectedEducationIDs
         {
-            get { return skills; }
-            set { SetField(ref skills, value); }
+            get { return _educationIDs; }
+            protected set { SetField(ref _educationIDs, value); }
         }
 
 
-        private Dictionary<int, EducationData> educationHistory;
-
-        protected Dictionary<int, EducationData> EducationHistory
+        /// <summary>
+        /// The set of WorkData.RecordIDs that are selected (by the user) to appear on this profile.
+        /// </summary>
+        public HashSet<int> SelectedWorkIDs
         {
-            get { return educationHistory; }
-            set { SetField(ref educationHistory, value); }
+            get { return _workIDs; }
+            protected set { SetField(ref _workIDs, value); }
         }
-
-
-        private Dictionary<int, WorkData> workHistory;
-
-        protected Dictionary<int, WorkData> WorkHistory
-        {
-            get { return workHistory; }
-            set { SetField(ref workHistory, value); }
-        }
-
 
 
         /// <summary>
@@ -73,11 +60,20 @@ namespace SCCPP1.User.Data
         /// Future revisions could allow for more precise ordering down to the line.
         /// </summary>
         private string ordering;
-        protected string Ordering
+
+
+        /// <summary>
+        /// Used to determine the ordering of the skill, education, and work sections.
+        /// Skill is section 0, Education is section 1, Work is section 2.
+        /// Future revisions could allow for more precise ordering down to the line.
+        /// </summary>
+        public string Ordering
         {
             get { return ordering; }
-            set { SetField(ref ordering, value); }
+            protected set { SetField(ref ordering, value); }
         }
+
+
 
 
         public ProfileData(Account owner, int id = -1) : base(owner, id)
@@ -87,14 +83,16 @@ namespace SCCPP1.User.Data
         }
 
 
+
+
         //used when database loads profile
         public ProfileData(Account owner, int recordID, string title, HashSet<int> skillIDs, HashSet<int> educationIDs, HashSet<int> workIDs, string ordering) :
             this(owner, recordID)
         {
             Title = title;
-            SkillIDs = skillIDs;
-            EducationIDs = educationIDs;
-            WorkIDs = workIDs;
+            SelectedSkillIDs = skillIDs;
+            SelectedEducationIDs = educationIDs;
+            SelectedWorkIDs = workIDs;
             Ordering = ordering;
 
             this.IsUpdated = true;
@@ -111,43 +109,6 @@ namespace SCCPP1.User.Data
         }
 
 
-        public Dictionary<int, SkillData> GetSkills()
-        {
-
-            if (!IsUpdated || skills == null)
-                skills = new Dictionary<int, SkillData>();
-
-            //cross-reference account skills with ids in this.
-            //may need to save items before allowing profile to be edited, since it relies heavily on ids
-            return skills;
-        }
-
-
-        public Dictionary<int, EducationData> GetEducationHistory()
-        {
-
-            if (!IsUpdated || skills == null)
-                educationHistory = new Dictionary<int, EducationData>();
-
-            //cross-reference account skills with ids in this.
-            //may need to save items before allowing profile to be edited, since it relies heavily on ids
-            return educationHistory;
-        }
-
-
-        public Dictionary<int, WorkData> GetWorkHistory()
-        {
-
-            if (!IsUpdated || skills == null)
-                workHistory = new Dictionary<int, WorkData>();
-
-            //cross-reference account skills with ids in this.
-            //may need to save items before allowing profile to be edited, since it relies heavily on ids
-            return workHistory;
-        }
-
-
-
         //Content add methods
         #region Add Methods
 
@@ -157,8 +118,7 @@ namespace SCCPP1.User.Data
         /// <param name="skillRecordID">The SkillData.RecordID to be added.</param>
         public void AddSkill(int skillRecordID)
         {
-            if (skillIDs.Add(skillRecordID))
-                skills.TryAdd(skillRecordID, Owner.GetSkillData(skillRecordID));
+            SelectedSkillIDs.Add(skillRecordID);
         }
 
 
@@ -168,8 +128,7 @@ namespace SCCPP1.User.Data
         /// <param name="eduRecordID">The EducationData.RecordID to be added.</param>
         public void AddEducation(int eduRecordID)
         {
-            if (educationIDs.Add(eduRecordID))
-                educationHistory.TryAdd(eduRecordID, Owner.GetEducationData(eduRecordID));
+            SelectedEducationIDs.Add(eduRecordID);
         }
 
 
@@ -179,8 +138,8 @@ namespace SCCPP1.User.Data
         /// <param name="workRecordID">The WorkData.RecordID to be added.</param>
         public void AddWork(int workRecordID)
         {
-            if (workIDs.Add(workRecordID))
-                workHistory.TryAdd(workRecordID, Owner.GetWorkData(workRecordID));
+            SelectedWorkIDs.Add(workRecordID);
+            //    workHistory.TryAdd(workRecordID, Owner.GetWorkData(workRecordID));
         }
 
         #endregion
@@ -196,8 +155,7 @@ namespace SCCPP1.User.Data
         /// <param name="skillRecordID">The SkillData.RecordID to be removed.</param>
         public void RemoveSkill(int skillRecordID)
         {
-            if (skillIDs.Remove(skillRecordID))
-                skills.Remove(skillRecordID);
+            SelectedSkillIDs.Remove(skillRecordID);
         }
 
 
@@ -207,8 +165,7 @@ namespace SCCPP1.User.Data
         /// <param name="eduRecordID">The EducationData.RecordID to be removed.</param>
         public void RemoveEducation(int eduRecordID)
         {
-            if (educationIDs.Remove(eduRecordID))
-                educationHistory.Remove(eduRecordID);
+            SelectedEducationIDs.Remove(eduRecordID);
         }
 
 
@@ -218,23 +175,15 @@ namespace SCCPP1.User.Data
         /// <param name="workRecordID">The WorkData.RecordID to be removed.</param>
         public void RemoveWork(int workRecordID)
         {
-            if (workIDs.Remove(workRecordID))
-                workHistory.Remove(workRecordID);
+            SelectedWorkIDs.Remove(workRecordID);
         }
 
         #endregion
 
 
-
-
-        public bool LoadData()
-        {
-            return IsUpdated = (Owner.LoadSkills(out skills) && Owner.LoadEducationHistory(out educationHistory) && Owner.LoadWorkHistory(out workHistory));
-        }
-
         public override bool Save()
         {
-            return false;
+            return true;//DatabaseConnector.SaveProfile(this);
         }
 
 
@@ -242,7 +191,7 @@ namespace SCCPP1.User.Data
         /// Deletes the profile record.
         /// </summary>
         /// <returns>true if record was removed from database, false otherwise.</returns>
-        protected override bool Delete()
+        public override bool Delete()
         {
             if (!Remove)
                 return true;

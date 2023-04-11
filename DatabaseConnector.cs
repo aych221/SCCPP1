@@ -5,6 +5,7 @@ using SCCPP1.User.Data;
 using System.Data;
 using System.Text;
 using SCCPP1.Database.Tables;
+using System.Collections.ObjectModel;
 
 namespace SCCPP1
 {
@@ -1494,7 +1495,8 @@ namespace SCCPP1
         /// <returns>true if skills could be loaded, false if not</returns>
         public static bool LoadColleagueSkills1(Account account, out Dictionary<int, SkillData> dict, bool useCache = false)
         {
-            dict = new Dictionary<int, SkillData>();
+            dict = new();
+
 
             if (account == null || account.RecordID < 0)
                 return false;
@@ -2203,7 +2205,7 @@ COMMIT;
         }
 
 
-        public static int InsertWorkHistory(int colleagueID, string employer, string jobTitle, string municipality, int stateID, DateOnly startDate, DateOnly endDate, string description)
+        public static int InsertOrIgnoreWorkHistory(int colleagueID, string employer, string jobTitle, string municipality, int stateID, DateOnly startDate, DateOnly endDate, string description)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
@@ -2215,7 +2217,7 @@ COMMIT;
                     {
                         int workHistoryID = -1, employerID, jobTitleID, municipalityID;
 
-                        string sql = @"INSERT INTO work_history (colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description) 
+                        string sql = @"INSERT INTO OR IGNORE work_history (colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description) 
                         VALUES (@colleague_id, @employer_id, @job_title_id, @municipality_id, @state_id, @start_date, @end_date, @description);
                         SELECT last_insert_rowid();";
                         using (SqliteCommand cmd = new SqliteCommand("", conn, transaction))
@@ -2845,13 +2847,220 @@ COMMIT;
         #endregion
 
 
+
+
         #region Profile Methods
 
+        public static int InsertProfile(ProfileData pd)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+                using (SqliteTransaction transaction = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        int profileID = -1;
+
+                        string sql = @"INSERT INTO profiles (colleague_id, title, education_history_ids, work_history_ids, colleague_skills_ids, ordering) 
+                                    VALUES (@colleague_id, @title, @education_history_ids, @work_history_ids, @colleague_skills_ids, @ordering)
+                                    RETURNING id;";
+
+                        using (SqliteCommand cmd = new SqliteCommand(sql, conn, transaction))
+                        {
 
 
+                            cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(pd.Owner.RecordID));
+                            cmd.Parameters.AddWithValue("@title", ValueCleaner(pd.Title));
+                            cmd.Parameters.AddWithValue("@education_history_ids", ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
+                            cmd.Parameters.AddWithValue("@work_history_ids", ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
+                            cmd.Parameters.AddWithValue("@colleague_skills_ids", ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
+                            cmd.Parameters.AddWithValue("@ordering", ValueCleaner(pd.Ordering));
+
+                            object? id = cmd.ExecuteScalar();
+
+                            if (id == null)
+                                return -1;
+
+                            pd.RecordID = profileID = Convert.ToInt32(id);
+
+                        }
+
+                        transaction.Commit();
+
+                        return profileID;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine(ex.Message);
+                        throw;
+                    }
+                }
+            }
+        }
+
+
+        public static int UpdateProfile(ProfileData pd)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+                using (SqliteTransaction transaction = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        int profileID = -1;
+
+                        string sql = @"UPDATE profiles SET colleague_id=@colleague_id, title=@title, education_history_ids=@education_history_ids, work_history_ids=@work_history_ids, colleague_skills_ids=@colleague_skills_ids, ordering=@ordering 
+                                    WHERE id=@id;";
+
+                        using (SqliteCommand cmd = new SqliteCommand(sql, conn, transaction))
+                        {
+
+
+                            cmd.Parameters.AddWithValue("@id", ValueCleaner(pd.RecordID));
+                            cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(pd.Owner.RecordID));
+                            cmd.Parameters.AddWithValue("@title", ValueCleaner(pd.Title));
+                            cmd.Parameters.AddWithValue("@education_history_ids", ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
+                            cmd.Parameters.AddWithValue("@work_history_ids", ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
+                            cmd.Parameters.AddWithValue("@colleague_skills_ids", ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
+                            cmd.Parameters.AddWithValue("@ordering", ValueCleaner(pd.Ordering));
+
+                            object? id = cmd.ExecuteScalar();
+
+                            if (id == null)
+                                return -1;
+
+                            pd.RecordID = profileID = Convert.ToInt32(id);
+
+                        }
+
+                        transaction.Commit();
+
+                        return profileID;
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        Console.WriteLine(ex.Message);
+                        throw;
+                    }
+                }
+            }
+        }
+
+        public static bool LoadColleageProfiles(Account account)
+        {
+            if (account == null || account.RecordID < 0)
+                return false;
+
+            //create work history list
+            List<ProfileData> list;
+
+            using (SqliteConnection conn = new(connStr))
+            {
+                conn.Open();
+
+                string sql = @"SELECT id, colleague_id, title, education_history_ids, work_history_ids, colleague_skills_ids, ordering
+                                FROM profiles
+                                WHERE colleague_id=@colleague_id;";
+
+                using (SqliteCommand cmd = new(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        list = new List<ProfileData>();
+
+                        while (r.Read())
+                        {
+                            list.Add(new ProfileData(
+                                account,
+                                GetInt32(r, 0), //populate profile record id
+                                GetString(r, 2), //populate title
+                                new HashSet<int>(GetString(r, 5).Split(',').Select(int.Parse)), //populate skills ids
+                                new HashSet<int>(GetString(r, 3).Split(',').Select(int.Parse)), //populate education history ids
+                                new HashSet<int>(GetString(r, 4).Split(',').Select(int.Parse)), //populate work history ids
+                                GetString(r, 6) //populate ordering
+                                ));
+                        }
+
+                        account.Profiles = list;
+                    }
+                }
+            }
+
+
+            Console.WriteLine($"Found Profile Records: {list?.Count}");
+
+            return true;
+        }
+
+        public static bool LoadColleageProfiles(Account account, out Dictionary<int, ProfileData> dict)
+        {
+            dict = new();
+
+            if (account == null || account.RecordID < 0)
+                return false;
+
+            //create work history list
+            List<ProfileData> list;
+
+            using (SqliteConnection conn = new(connStr))
+            {
+                conn.Open();
+
+                string sql = @"SELECT id, colleague_id, title, education_history_ids, work_history_ids, colleague_skills_ids, ordering
+                                FROM profiles
+                                WHERE colleague_id=@colleague_id;";
+
+                using (SqliteCommand cmd = new(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        list = new List<ProfileData>();
+                        ProfileData pd;
+
+                        while (r.Read())
+                        {
+
+                            list.Add(pd = new ProfileData(
+                                account,
+                                GetInt32(r, 0), //populate profile record id
+                                GetString(r, 2), //populate title
+                                new HashSet<int>(GetString(r, 5).Split(',').Select(int.Parse)), //populate skills ids
+                                new HashSet<int>(GetString(r, 3).Split(',').Select(int.Parse)), //populate education history ids
+                                new HashSet<int>(GetString(r, 4).Split(',').Select(int.Parse)), //populate work history ids
+                                GetString(r, 6) //populate ordering
+                                ));
+
+                            dict.TryAdd(pd.RecordID, pd);
+                        }
+
+                        account.Profiles = list;
+                    }
+                }
+            }
+
+
+            Console.WriteLine($"Found Profile Records: {list?.Count}");
+
+            return true;
+        }
 
 
         #endregion
+
+
+
+
+
         public static List<string> PrintRecords(string table)
     {
         using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -2883,6 +3092,8 @@ COMMIT;
                 }
             }
         }
+
+
 
         #region Debugging
 

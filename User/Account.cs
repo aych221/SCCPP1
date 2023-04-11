@@ -1,5 +1,7 @@
 ﻿using SCCPP1.Session;
 using SCCPP1.User.Data;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 
 namespace SCCPP1.User
 {
@@ -9,116 +11,211 @@ namespace SCCPP1.User
         protected readonly SessionData Data;
 
 
+        #region Account Data properties
+        //TODO: change all properties to use protected sets
         //0 = admin, 1 = normal user
-        private int role;
+        private int _role;
         public int Role
         {
-            get { return role; }
-            set { SetField(ref role, value); }
+            get { return _role; }
+            set { SetField(ref _role, value); }
         }
 
 
         //Name stored
-        private string name;
+        private string _name;
         public string Name
         {
-            get { return name; }
-            set { SetField(ref name, value); }
+            get { return _name; }
+            set { SetField(ref _name, value); }
         }
 
-        private string firstName;
+        private string _firstName;
         public string FirstName
         {
-            get { return firstName; }
-            set { SetField(ref firstName, value); }
+            get { return _firstName; }
+            set { SetField(ref _firstName, value); }
         }
 
-        private string lastName;
+        private string _lastName;
         public string LastName
         {
-            get { return lastName; }
-            set { SetField(ref lastName, value); }
+            get { return _lastName; }
+            set { SetField(ref _lastName, value); }
         }
 
 
-        private string? middleName;
+        private string? _middleName;
         public string? MiddleName
         {
-            get { return middleName; }
-            set { SetField(ref middleName, value); }
+            get { return _middleName; }
+            set { SetField(ref _middleName, value); }
         }
 
 
         //Email stored (may not want to use signed on E-mail)
-        private string emailAddress;
+        private string _emailAddress;
         public string EmailAddress
         {
-            get { return emailAddress; }
-            set { SetField(ref emailAddress, value); }
+            get { return _emailAddress; }
+            set { SetField(ref _emailAddress, value); }
         }
 
-        private long phoneNumber;
+        private long _phoneNumber;
         public long PhoneNumber
         {
-            get { return phoneNumber; }
-            set { SetField(ref phoneNumber, value); }
+            get { return _phoneNumber; }
+            set { SetField(ref _phoneNumber, value); }
         }
 
 
-        private string streetAddress;
+        private string _streetAddress;
         public string StreetAddress
         {
-            get { return streetAddress; }
-            set { SetField(ref streetAddress, value); }
+            get { return _streetAddress; }
+            set { SetField(ref _streetAddress, value); }
         }
 
 
-        private Location location;
+        private Location _location;
         public Location Location
         {
-            get { return location; }
-            set { SetField(ref location, value); }
+            get { return _location; }
+            set { SetField(ref _location, value); }
         }
 
 
-        private string introNarrative;
+        private string _introNarrative;
         public string IntroNarrative
         {
-            get { return introNarrative; }
-            set { SetField(ref introNarrative, value); }
+            get { return _introNarrative; }
+            set { SetField(ref _introNarrative, value); }
         }
 
 
-        private int mainProfileID;
+        private int _mainProfileID;
         public int MainProfileID
         {
-            get { return mainProfileID; }
-            set { SetField(ref mainProfileID, value); }
+            get { return _mainProfileID; }
+            set { SetField(ref _mainProfileID, value); }
         }
+
+        #endregion
+
 
 
         //may want to change these to dictionaries
+        [Obsolete("Use SavedSkills instead", false)]
         public List<SkillData> Skills { get; set; }
 
+
+        [Obsolete("Use SavedEducation instead", false)]
         public List<EducationData> EducationHistory { get; set; }
 
+
+        [Obsolete("Use SavedWorkHistory instead", false)]
         public List<WorkData> WorkHistory { get; set; }
 
+
+        [Obsolete("Use SavedProfiles instead", false)]
         public List<ProfileData> Profiles { get; set; }
+
+
+        #region Unsaved Data Lists
+        private List<SkillData> _unsavedSkills;
+
+        protected List<SkillData> UnsavedSkills
+        {
+            get { return _unsavedSkills; }
+            set { SetField(ref _unsavedSkills, value); }
+        }
+
+
+
+        private List<EducationData> _unsavedEducationHistory;
+
+        protected List<EducationData> UnsavedEducationHistory
+        {
+            get { return _unsavedEducationHistory; }
+            set { SetField(ref _unsavedEducationHistory, value); }
+        }
+
+
+
+        private List<WorkData> _unsavedWorkHistory;
+
+        protected List<WorkData> UnsavedWorkHistory
+        {
+            get { return _unsavedWorkHistory; }
+            set { SetField(ref _unsavedWorkHistory, value); }
+        }
+
+
+
+        private List<ProfileData> _unsavedProfiles;
+        
+        protected List<ProfileData> UnsavedProfiles
+        {
+            get { return _unsavedProfiles; }
+            set { SetField(ref _unsavedProfiles, value); }
+        }
+        #endregion
+
+
+        #region Saved Data Dictionaries
+        private ReadOnlyDictionary<int, SkillData> _savedSkills;
+
+        public ReadOnlyDictionary<int, SkillData> SavedSkills
+        {
+            get { return _savedSkills; }
+            protected set { SetField(ref _savedSkills, value); }
+        }
+
+
+
+        private ReadOnlyDictionary<int, EducationData> _savedEducationHistory;
+
+        public ReadOnlyDictionary<int, EducationData> SavedEducationHistory
+        {
+            get { return _savedEducationHistory; }
+            protected set { SetField(ref _savedEducationHistory, value); }
+        }
+
+
+
+        private ReadOnlyDictionary<int, WorkData> _savedWorkHistory;
+
+        public ReadOnlyDictionary<int, WorkData> SavedWorkHistory
+        {
+            get { return _savedWorkHistory; }
+            protected set { SetField(ref _savedWorkHistory, value); }
+        }
+
+
+        private ReadOnlyDictionary<int, ProfileData> _savedProfiles;
+
+        public ReadOnlyDictionary<int, ProfileData> SavedProfiles
+        {
+            get { return _savedProfiles; }
+            protected set { SetField(ref _savedProfiles, value); }
+        }
+        #endregion
+
+
 
 
 
         /// <summary>
         /// Are they a returning user?
         /// </summary>
-        public bool IsReturning;
+        public bool IsReturning { get; set; }
 
 
 
         public Account(SessionData sessionData, bool isReturning) : base()
         {
             this.Data = sessionData;
-            this.IsReturning= isReturning;
+            this.IsReturning = isReturning;
 
             this.EmailAddress = Data.GetUsersEmail();
             this.Name = Data.GetUsersName();
@@ -126,7 +223,7 @@ namespace SCCPP1.User
         }
 
 
-        #region Add/Update data methods
+        #region Add/Remove/Edit data methods
 
         /// <summary>
         /// Updates the basic account data for this colleague. Updates NeedsSave and IsUpdated flags.
@@ -175,7 +272,10 @@ namespace SCCPP1.User
                 return;
 
             foreach (string skillName in skillNames)
+            {
                 Skills.Add(new SkillData(this, skillName, -1));
+                UnsavedSkills.Add(new SkillData(this, skillName, -1));
+            }
 
             NeedsSave = IsUpdated = true;
         }
@@ -192,7 +292,10 @@ namespace SCCPP1.User
                 return;
 
             foreach (string skillName in skillNames)
-                Skills.Add(new SkillData(this, skillCategory, skillName, -1));
+            {
+                Skills.Add(new SkillData(this, skillCategory, skillName, -1)); //later will need to remove this
+                UnsavedSkills.Add(new SkillData(this, skillCategory, skillName, -1));
+            }
 
             NeedsSave = IsUpdated = true;
         }
@@ -207,6 +310,7 @@ namespace SCCPP1.User
         public void AddEducation(string institution, string educationType, string description, Location location, DateOnly startDate, DateOnly endDate)
         {
             EducationHistory.Add(new EducationData(this, institution, educationType, description, location, startDate, endDate));
+            UnsavedEducationHistory.Add(new EducationData(this, institution, educationType, description, location, startDate, endDate));
             NeedsSave = IsUpdated = true;
         }
 
@@ -214,10 +318,11 @@ namespace SCCPP1.User
         public void AddWork(string employer, string jobTitle, string description, Location location, DateOnly startDate, DateOnly endDate)
         {
             WorkHistory.Add(new WorkData(this, employer, jobTitle, description, location, startDate, endDate));
+            UnsavedWorkHistory.Add(new WorkData(this, employer, jobTitle, description, location, startDate, endDate));
             NeedsSave = IsUpdated = true;
         }
 
-
+        [Obsolete("Use GetSkillData() instead.")]
         /// <summary>
         /// Saves current skill data and attempts to fetch the record
         /// </summary>
@@ -233,6 +338,7 @@ namespace SCCPP1.User
             return Skills.Find(x => x.RecordID == id);
         }
 
+        [Obsolete("Use GetEducationData() instead.")]
         public EducationData EditEducationData(int id)
         {
             //save education
@@ -241,6 +347,7 @@ namespace SCCPP1.User
             return EducationHistory.Find(x => x.RecordID == id);
         }
 
+        [Obsolete("Use GetWorkData() instead.")]
         public WorkData EditWorkData(int id)
         {
             //save work
@@ -253,80 +360,61 @@ namespace SCCPP1.User
 
 
 
+        #region Get Data methods
 
+        /// <summary>
+        /// Gets the username of the account.
+        /// </summary>
+        /// <returns>The SessionData.Username</returns>
         public string GetUsername()
         {
             return Data.Username;
         }
 
+
         /// <summary>
-        /// Attempts to fetch skill record
+        /// Attempts to fetch a saved SkillData record.
         /// </summary>
         /// <param name="id"></param>
         /// <returns>SkillData if object is found, null otherwise</returns>
         public SkillData? GetSkillData(int id)
         {
-            //need to make better way that isn't O(n). use dictionaries later
-            return Skills.Find(x => x.RecordID == id);
+            return SavedSkills[id];
         }
 
+
         /// <summary>
-        /// Attempts to fetch education history record
+        /// Attempts to fetch a saved EducationData record.
         /// </summary>
         /// <param name="id"></param>
         /// <returns>EducationData if object is found, null otherwise</returns>
         public EducationData? GetEducationData(int id)
         {
-            return EducationHistory.Find(x => x.RecordID == id);
+            return SavedEducationHistory[id];
         }
 
 
         /// <summary>
-        /// Attempts to fetch work history record
+        /// Attempts to fetch a saved WorkData record.
         /// </summary>
         /// <param name="id"></param>
         /// <returns>WorkData if object is found, null otherwise</returns>
         public WorkData? GetWorkData(int id)
         {
-            return WorkHistory.Find(x => x.RecordID == id);
+            return SavedWorkHistory[id];
         }
 
 
-        public bool Load()
+        /// <summary>
+        /// Attempts to fetch a saved ProfileData record.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>WorkData if object is found, null otherwise</returns>
+        public ProfileData? GetProfileData(int id)
         {
-            return DatabaseConnector.GetUser(this);
+            return SavedProfiles[id];
         }
-
-        public bool LoadSkills()
-        {
-            return DatabaseConnector.LoadColleagueSkills1(this);
-        }
-
-        public bool LoadSkills(out Dictionary<int, SkillData> skills)
-        {
-            return DatabaseConnector.LoadColleagueSkills1(this, out skills);
-        }
-
-        public bool LoadEducationHistory()
-        {
-            return DatabaseConnector.LoadColleagueEducationHistory1(this);
-        }
-
-        public bool LoadEducationHistory(out Dictionary<int, EducationData> educationHistory)
-        {
-            return DatabaseConnector.LoadColleagueEducationHistory1(this, out educationHistory);
-        }
-
-
-        public bool LoadWorkHistory()
-        {
-            return DatabaseConnector.LoadColleagueWorkHistory1(this);
-        }
-
-        public bool LoadWorkHistory(out Dictionary<int, WorkData> workHistory)
-        {
-            return DatabaseConnector.LoadColleagueWorkHistory1(this, out workHistory);
-        }
+        #endregion
 
 
         #region Profile methods
@@ -338,22 +426,110 @@ namespace SCCPP1.User
         /// <returns>A new profile object for the user</returns>
         public ProfileData CreateProfile(string title)
         {
-            //may not need in the future, considered a "heavy" call.
-            SaveAll();
-            ProfileData pd = new ProfileData(this);
-            pd.Title = title;
-            pd.LoadData();
+            //might want to load main profile as default.
+
+            //may not need in the future, considered an expensive call.
+            PersistAll();
+
+            //might want to create these hashsets in LoadAll() method to reduce memory and computations
+            ProfileData pd = new ProfileData(this, title,
+                new HashSet<int>(SavedSkills.Keys),
+                new HashSet<int>(SavedEducationHistory.Keys),
+                new HashSet<int>(SavedWorkHistory.Keys),
+                ""
+                );
+            UnsavedProfiles.Add(pd);
 
             return pd;
         }
 
-        public ProfileData? GetProfile(int id)
-        {
-            return Profiles.Find(x => x.RecordID == id);
-        }
-
         #endregion
 
+
+
+        #region Load methods
+
+        [Obsolete("Use PersistAll() instead.")]
+        public void LoadAll()
+        {
+            Load();
+
+            Dictionary<int, SkillData> savedSkills;
+            Dictionary<int, EducationData> savedEducationHistory;
+            Dictionary<int, WorkData> savedWorkHistory;
+            Dictionary<int, ProfileData> savedProfiles;
+
+            LoadSkills(out savedSkills);
+            LoadEducationHistory(out savedEducationHistory);
+            LoadWorkHistory(out savedWorkHistory);
+            LoadProfiles(out savedProfiles);
+
+            SavedSkills = new ReadOnlyDictionary<int, SkillData>(savedSkills);
+            SavedEducationHistory = new ReadOnlyDictionary<int, EducationData>(savedEducationHistory);
+            SavedWorkHistory = new ReadOnlyDictionary<int, WorkData>(savedWorkHistory);
+            SavedProfiles = new ReadOnlyDictionary<int, ProfileData>(savedProfiles);
+        }
+
+
+        [Obsolete("Use Persist() instead.")]
+        public bool Load()
+        {
+            return DatabaseConnector.GetUser(this);
+        }
+
+        [Obsolete("Use PersistSkills() instead.")]
+        public bool LoadSkills()
+        {
+            return DatabaseConnector.LoadColleagueSkills1(this);
+        }
+
+        [Obsolete("Use PersistSkills() and the SavedSkills property instead.")]
+        public bool LoadSkills(out Dictionary<int, SkillData> skills)
+        {
+            return DatabaseConnector.LoadColleagueSkills1(this, out skills);
+        }
+
+        [Obsolete("Use PersistEducationHistory() instead.")]
+        public bool LoadEducationHistory()
+        {
+            return DatabaseConnector.LoadColleagueEducationHistory1(this);
+        }
+
+        [Obsolete("Use PersistEducationHistory() and the SavedEducationHistory property instead.")]
+        public bool LoadEducationHistory(out Dictionary<int, EducationData> educationHistory)
+        {
+            return DatabaseConnector.LoadColleagueEducationHistory1(this, out educationHistory);
+        }
+
+
+        [Obsolete("Use PersistWorkHistory() instead.")]
+        public bool LoadWorkHistory()
+        {
+            return DatabaseConnector.LoadColleagueWorkHistory1(this);
+        }
+
+        [Obsolete("Use PersistWorkHistory() and the SavedWorkHistory property instead.")]
+        public bool LoadWorkHistory(out Dictionary<int, WorkData> workHistory)
+        {
+            return DatabaseConnector.LoadColleagueWorkHistory1(this, out workHistory);
+        }
+
+        [Obsolete("Use PersistProfiles() instead.")]
+        public bool LoadProfiles()
+        {
+            return DatabaseConnector.LoadColleageProfiles(this);
+        }
+
+        [Obsolete("Use PersistProfiles() and the SavedProfiles property instead.")]
+        public bool LoadProfiles(out Dictionary<int, ProfileData> profiles)
+        {
+            return DatabaseConnector.LoadColleageProfiles(this, out profiles);
+        }
+        #endregion
+
+
+
+        #region Save methods
 
         /// <summary>
         /// Saves the user's direct profile information, does not save associated data.
@@ -361,33 +537,14 @@ namespace SCCPP1.User
         /// <returns>true if changes are saved in database, false otherwise.</returns>
         public override bool Save()
         {
-            if (Remove)
-            {
-                //TODO put database remove method
-                return true;
-            }
-            else if (!NeedsSave)
+            if (!NeedsSave)
                 return true;
 
             return NeedsSave = !(IsUpdated = DatabaseConnector.SaveUser(this));
         }
 
 
-        /// <summary>
-        /// Deletes the user's data and all records associated with it.
-        /// </summary>
-        /// <returns>true if records were removed from database, false otherwise.</returns>
-        protected override bool Delete()
-        {
-            if (!Remove)
-                return true;
-
-            //TODO put database remove method
-            //NeedsSave = !(IsUpdated
-            return true;
-        }
-
-
+        [Obsolete("Use PersistAll() instead.")]
         /// <summary>
         /// Saves everything for the user. All associated data is saved to the database.
         /// </summary>
@@ -398,10 +555,11 @@ namespace SCCPP1.User
             //TODO add list of saves
             //List<SkillData> skillSaves = new List<SkillData>();
 
-            return Save() && SaveSkills() && SaveEducationHistory() && SaveWorkHistory(); 
+            return Save() && SaveSkills() && SaveEducationHistory() && SaveWorkHistory();
         }
 
 
+        [Obsolete("Use PersistSkills() instead.")]
         /// <summary>
         /// Saves all Skill data for the user.
         /// </summary>
@@ -410,6 +568,7 @@ namespace SCCPP1.User
         {
             bool failed = false;
 
+            //Save the saved skills
             foreach (SkillData sd in Skills)
                 if (!sd.Save())
                     failed = true;
@@ -418,6 +577,7 @@ namespace SCCPP1.User
         }
 
 
+        [Obsolete("Use PersistEducationHistory() instead.")]
         /// <summary>
         /// Saves all Education data for the user.
         /// </summary>
@@ -435,6 +595,7 @@ namespace SCCPP1.User
 
 
 
+        [Obsolete("Use PersistWorkHistory() instead.")]
         /// <summary>
         /// Saves all Work data for the user.
         /// </summary>
@@ -449,6 +610,188 @@ namespace SCCPP1.User
 
             return failed;
         }
+
+
+        [Obsolete("Use PersistProfiles() instead.")]
+        protected bool SaveProfiles()
+        {
+            bool failed = false;
+            foreach (ProfileData pd in Profiles)
+                if (!pd.Save())
+                    failed = true;
+            return failed;
+        }
+
+        #endregion
+
+
+
+        #region Delete methods
+        /// <summary>
+        /// Deletes the user's data and all records associated with it.
+        /// </summary>
+        /// <returns>true if records were removed from database, false otherwise.</returns>
+        public override bool Delete()
+        {
+            if (!Remove)
+                return true;
+
+            //TODO put database remove method
+            //NeedsSave = !(IsUpdated
+            return true;
+        }
+
+        #endregion
+
+
+        #region Persist methods
+        /// <summary>
+        /// This method will save, update, or delete and reload data to ensure all data is updated in the database.
+        /// </summary>
+        /// <returns>true if the operation was successful, false otherwise.</returns>
+        public bool PersistAll()
+        {
+            return Persist() && PersistSkills() && PersistEducationHistory() && PersistWorkHistory() && PersistProfiles();
+        }
+
+
+        /// <summary>
+        /// This method will save, update, or delete and reload data to ensure all account data is updated in the database.
+        /// </summary>
+        /// <returns>true if the operation was successful, false otherwise.</returns>
+        public bool Persist()
+        {
+            bool success = true;
+
+            //save, update, or delete account
+            if (Remove ? !Delete() : !Save())
+                success = false;
+
+            return success;
+        }
+
+
+        public bool PersistSkills()
+        {
+            bool success = true;
+            
+            //persist all saved skill data
+            foreach (SkillData d in SavedSkills.Values.Concat(UnsavedSkills))
+            {
+                //delete if remove, else save
+                if (d.Remove ? !d.Delete() : !d.Save())
+                    success = false;
+
+            }
+
+            //load the new skill data
+
+            Dictionary<int, SkillData> savedSkills;
+
+            if (!DatabaseConnector.LoadColleagueSkills1(this, out savedSkills))
+            {
+                success = false;
+
+                SavedSkills = new ReadOnlyDictionary<int, SkillData>(savedSkills);
+
+                UnsavedSkills.Clear();
+            }
+
+            return success;
+        }
+
+
+        public bool PersistEducationHistory()
+        {
+            bool success = true;
+
+            //persist all saved education history data
+            foreach (EducationData d in SavedEducationHistory.Values.Concat(UnsavedEducationHistory))
+            {
+                //delete if remove, else save
+                if (d.Remove ? !d.Delete() : !d.Save())
+                    success = false;
+
+            }
+
+            //load the new education history data
+
+            Dictionary<int, EducationData> savedEducationHistory;
+
+            if (!DatabaseConnector.LoadColleagueEducationHistory1(this, out savedEducationHistory))
+            {
+                success = false;
+
+                SavedEducationHistory = new ReadOnlyDictionary<int, EducationData>(savedEducationHistory);
+
+                UnsavedEducationHistory.Clear();
+            }
+
+            return success;
+        }
+
+
+        public bool PersistWorkHistory()
+        {
+            bool success = true;
+            
+            //persist all saved work history data
+            foreach (WorkData d in SavedWorkHistory.Values.Concat(UnsavedWorkHistory))
+            {
+                //delete if remove, else save
+                if (d.Remove ? !d.Delete() : !d.Save())
+                    success = false;
+
+            }
+
+            //load the new work history data
+
+            Dictionary<int, WorkData> savedWorkHistory;
+
+            if (!DatabaseConnector.LoadColleagueWorkHistory1(this, out savedWorkHistory))
+            {
+                success = false;
+
+                SavedWorkHistory = new ReadOnlyDictionary<int, WorkData>(savedWorkHistory);
+
+                UnsavedWorkHistory.Clear();
+            }
+
+            return success;
+        }
+
+
+        public bool PersistProfiles()
+        {
+            bool success = true;
+
+            //persist all saved profile data
+            foreach (ProfileData d in SavedProfiles.Values.Concat(UnsavedProfiles))
+            {
+                //delete if remove, else save
+                if (d.Remove ? !d.Delete() : !d.Save())
+                    success = false;
+
+            }
+
+            //load the new profile data
+
+            Dictionary<int, ProfileData> savedProfiles;
+
+            if (!DatabaseConnector.LoadColleageProfiles(this, out savedProfiles))
+            {
+                success = false;
+
+                SavedProfiles = new ReadOnlyDictionary<int, ProfileData>(savedProfiles);
+
+                UnsavedProfiles.Clear();
+            }
+
+            return success;
+        }
+
+        #endregion
+
 
     }
 }
