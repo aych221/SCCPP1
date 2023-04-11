@@ -49,7 +49,7 @@ namespace SCCPP1.Pages
                     Colleague.MiddleName, 
                     Colleague.LastName, 
                     Colleague.EmailAddress, 
-                    0, //Colleague.PhoneNumber
+                    Colleague.PhoneNumber,
                     Colleague.IntroNarrative
                     );
 
@@ -93,7 +93,7 @@ namespace SCCPP1.Pages
                 Account.SaveAll();
             }
 
-            return Page();
+            return RedirectToPage("/UserHome");
 
         }
     }

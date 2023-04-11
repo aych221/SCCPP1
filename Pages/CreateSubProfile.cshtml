@@ -5,7 +5,22 @@
 }
 
 <style>
-    /* accordion dropdown styling */
+    body {
+        font-family: sans-serif;
+    }
+
+    #red {
+        padding: 10px;
+        border-left: 5px solid #e4002b;
+        margin: 10px
+    }
+
+    #blue {
+        padding: 10px;
+        border-left: 5px solid #002b49;
+        margin: 10px
+    }
+
     .accordion {
         background-color: #eee;
         color: #444;
@@ -23,14 +38,6 @@
             background-color: #fff;
         }
 
-    .panel {
-        padding: 0 18px;
-        display: none;
-        background-color: white;
-        overflow: hidden;
-    }
-
-    /* Submit button styling*/
     input[type=submit] {
         background-color: white;
         color: #0062F3;
@@ -45,136 +52,63 @@
             color: white;
             border: 1px solid #0062F3;
         }
+
+    .sidenav {
+  height: 100%; 
+  width: 200px; 
+  position: fixed; 
+  z-index: 1;
+  top: 0; 
+  left: 0;
+  background-color: white
+  overflow-x: hidden; 
+  padding-top: 150px; 
+}
+
+
+.printarea {
+    margin-left: 200px;
+    padding-left: 10px;
+}
+
 </style>
 
-<!--Live PDF viewer will be displayed to the right of the checkboxes hence the empty space on the right side of the page-->
 <body>
+   
+  <div id="sidenav" class="sidenav">
 
+
+  <FORM name = "personal" method = "post">
+        @Html.Raw(ViewData["subTitle"])
+        @Html.Raw(ViewData["name"])
+        @Html.Raw(ViewData["phone"])
+        @Html.Raw(ViewData["email"])
+        @Html.Raw(ViewData["introNar"])
+        @Html.Raw(ViewData["edu"])
+        @Html.Raw(ViewData["work"])
+        @Html.Raw(ViewData["skills"])
+         <button type="button" id = "prtButton" onclick="printPDF()">Print</button>
+         <input type = "submit" value="Save Profile" />
+  </form>  
+</div>
+
+<div id="printarea" class="printarea">
+    <div id="pgHeader">
     <br>
     <h1>Create Sub Profile</h1>
     <br>
-
-    <button class="accordion">About</button>
-    <div class="panel">
-        <input type="checkbox" id="aboutme" name="about">
-        <label for="about"> Employee description</label><br>
     </div>
-    <br>
-
-    <button class="accordion">Skills</button>
-    <div class="panel">
-        <button class="accordion">Experience</button>
-        <div class="panel">
-            <input type="checkbox" id="aboutme" name="about">
-            <label for="about"> Employee description</label><br>
-        </div>
-        <br>
-
-        <button class="accordion">Programming Languages</button>
-        <div class="panel">
-            <input type="checkbox" id="plang" name="plang">
-            <label for="clang"> C#</label>
-            <br>
-
-            <input type="checkbox" id="plang" name="plang">
-            <label for="clang"> HTML </label>
-            <br>
-
-            <input type="checkbox" id="plang" name="plang">
-            <label for="clang"> CSS </label>
-            <br>
-
-            <input type="checkbox" id="plang" name="plang">
-            <label for="clang"> JavaScript </label>
-            <br>
-
-            <input type="checkbox" id="plang" name="plang">
-            <label for="clang"> Python </label>
-        </div>
-        <br>
-
-        <button class="accordion">Operating Systems</button>
-        <div class="panel">
-            <input type="checkbox" id="opsys" name="opsys">
-            <label for="opsys"> Windows </label>
-            <br>
-
-            <input type="checkbox" id="opsys" name="opsys">
-            <label for="opsys"> MacOS </label>
-            <br>
-
-            <input type="checkbox" id="opsys" name="opsys">
-            <label for="opsys"> Android </label>
-            <br>
-
-            <input type="checkbox" id="opsys" name="opsys">
-            <label for="opsys"> Linux </label>
-            <br>
-
-            <input type="checkbox" id="opsys" name="opsys">
-            <label for="opsys"> Ubuntu </label>
-        </div>
-        <br>
-
-        <button class="accordion">Software & Frameworks</button>
-        <div class="panel">
-            <input type="checkbox" id="sandf" name="sandf">
-            <label for="sandf"> ASP.net </label>
-            <br>
-
-            <input type="checkbox" id="sandf" name="sandf">
-            <label for="sandf"> React Native </label>
-            <br>
-
-            <input type="checkbox" id="sandf" name="sandf">
-            <label for="sandf"> AngularJS </label>
-            <br>
-
-            <input type="checkbox" id="sandf" name="sandf">
-            <label for="sandf"> Unity </label>
-            <br>
-
-            <input type="checkbox" id="sandf" name="sandf">
-            <label for="sandf"> Ruby </label>
-        </div>
-    </div>
-    <br>
-
-    <button class="accordion">Education & Certification</button>
-    <div class="panel">
-        <button class="accordion">Degrees</button>
-        <div class="panel">
-            <input type="checkbox" id="educert" name="educert">
-            <label for="educert"> Bachelors in Computer Science </label>
-            <br>
-
-            <input type="checkbox" id="educert" name="educert">
-            <label for="educert"> Masters in Data Analysis </label>
-
-        </div>
-        <br>
-        <button class="accordion">Certification</button>
-        <div class="panel">
-            <input type="checkbox" id="educert" name="educert">
-            <label for="educert"> Cyber Defender </label>
-            <br>
-
-            <input type="checkbox" id="educert" name="educert">
-            <label for="educert"> Comp TIA Security + </label>
-
-        </div>
-
-    </div>
-
-    <br>
-    <br>
-    <input type="submit" value="Submit">
-    <input type="submit" value="Save as Draft">
-
+  @Html.Raw(ViewData["nameDisplay"])
+  @Html.Raw(ViewData["phoneDisplay"])
+  @Html.Raw(ViewData["emailDisplay"])
+  @Html.Raw(ViewData["introNarDisplay"])
+  @Html.Raw(ViewData["eduDisplay"])
+  @Html.Raw(ViewData["workDisplay"])
+  @Html.Raw(ViewData["skillDisplay"])
+</div>
 
 </body>
 
-<!-- Script for acordion functionality of the dropdown https://stackoverflow.com/questions/71484299/how-to-external-javascript-in-html-and-css-->
 <script>
     var acc = document.getElementsByClassName("accordion");
     var i;
@@ -188,5 +122,29 @@
             }
             else { panel.style.display = "block"; }
         });
-    }
-</script>
+
+    </script>
+   
+    <script>
+        function printPDF(){
+             var x = document.getElementById("topbar");
+             var y = document.getElementById("sidenav");
+             var z = document.getElementById("footer");
+             var w = document.getElementById("pgHeader");
+             var a = document.getElementById("printarea");
+                a.style.marginLeft = 0;
+                y.style.display = "none";
+                x.style.display = "none";
+                w.style.display = "none";
+                z.style.display = "none";
+                window.print();
+                y.style.display = "block";
+                x.style.display = "block";
+                w.style.display = "block";
+                z.style.display = "block";
+                a.style.marginLeft = 200;
+        }
+
+       
+
+    </script>
