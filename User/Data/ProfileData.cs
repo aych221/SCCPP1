@@ -180,10 +180,9 @@ namespace SCCPP1.User.Data
 
         #endregion
 
-
         public override bool Save()
         {
-            return true;//DatabaseConnector.SaveProfile(this);
+            return DatabaseConnector.SaveProfile(this);
         }
 
 

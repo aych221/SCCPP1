@@ -3055,6 +3055,13 @@ COMMIT;
         }
 
 
+        public static bool SaveProfile(ProfileData pd)
+        {
+            if (pd.RecordID > 0)
+                return UpdateProfile(pd) >= 0;
+
+            return (pd.RecordID = InsertProfile(pd)) >= 0;
+        }
         #endregion
 
 

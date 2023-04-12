@@ -121,6 +121,7 @@ namespace SCCPP1.User
         public List<ProfileData> Profiles { get; set; }
 
 
+
         #region Unsaved Data Lists
         private List<SkillData> _unsavedSkills;
 
@@ -322,6 +323,7 @@ namespace SCCPP1.User
             NeedsSave = IsUpdated = true;
         }
 
+
         [Obsolete("Use GetSkillData() instead.")]
         /// <summary>
         /// Saves current skill data and attempts to fetch the record
@@ -417,6 +419,8 @@ namespace SCCPP1.User
         #endregion
 
 
+
+
         #region Profile methods
 
         /// <summary>
@@ -427,6 +431,8 @@ namespace SCCPP1.User
         public ProfileData CreateProfile(string title)
         {
             //might want to load main profile as default.
+
+
 
             //may not need in the future, considered an expensive call.
             PersistAll();
@@ -444,6 +450,7 @@ namespace SCCPP1.User
         }
 
         #endregion
+
 
 
 
