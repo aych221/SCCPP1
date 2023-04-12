@@ -9,11 +9,11 @@ namespace SCCPP1.Models
     {
         public int ID { get; set; }
 
-        public string? EduCert { get; set; }
+        public string? Institution { get; set; }
 
-        public string? EduYear { get; set; }
+        public string? Degree { get; set; }
 
-        public string? Study { get; set; }
+        public string? Field { get; set; }
 
         public Location? Location { get; set; }
 
