@@ -112,6 +112,30 @@
         padding: 10px;
         border: 1px solid black;
     }
+
+    #education-list ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    #education-list li {
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid black;
+    }
+
+    #certification-list ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    #certification-list li {
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid black;
+    }
 </style>
 
 <body>
@@ -174,22 +198,22 @@
             <legend><b>Experience:</b></legend>
 
             <div id="experience-list">
-                    <label for="Employer">Employer:</label>
-                    <input type="text" asp-for="Work!.Employer">
+                <label for="Employer">Employer:</label>
+                <input type="text" asp-for="Work!.Employer">
 
-                    <label for="JobTitle">Job Title:</label>
-                    <input type="text" asp-for="Work!.JobTitle">
+                <label for="JobTitle">Job Title:</label>
+                <input type="text" asp-for="Work!.JobTitle">
 
-                    <label for="StartDate">Start Date:</label>
-                    <input type="date" asp-for="Work!.StartDate">
+                <label for="StartDate">Start Date:</label>
+                <input type="date" asp-for="Work!.StartDate">
 
-                    <label for="EndDate">End Date:</label>
-                    <input type="date" asp-for="Work!.EndDate">
+                <label for="EndDate">End Date:</label>
+                <input type="date" asp-for="Work!.EndDate">
 
-                    <label for="present-checkbox">Present Employment:</label>
-                    <input type="checkbox" id="present-checkbox">
+                <label for="present-checkbox">Present Employment:</label>
+                <input type="checkbox" id="present-checkbox">
 
-                    <button type="button" onclick="addExperience()">Add Experience</button>
+                <button type="button" onclick="addExperience()">Add Experience</button>
                 <ul id="experience-ul">
                 </ul>
             </div>
@@ -201,19 +225,65 @@
 
             <legend><b>Education/Certification:</b></legend>
 
-            <label for="EduCert">Education:</label>
-            <input type="text" asp-for="Education!.EduCert" placeholder="Ex. Master of Business Administration (M.B.A.)">
+            <div id="education-list">
+                <label for="Institution"> Institution: </label>
+                <input type="text" asp-for="Education!.Study">
+
+                <label for="Degree">Degree:</label>
+                <input type="text" asp-for="Education!.Study">
+
+                <label for="Field">Field:</label>
+                <input type="text" asp-for="Education!.Study">
+
+                <label for="StartDate">Start Date:</label>
+                <input type="date" asp-for="Education!.StartDate">
+
+                <label for="EndDate">End Date:</label>
+                <input type="date" asp-for="Education!.EndDate">
+
+                <label for="present-checkbox">Present Employment:</label>
+                <input type="checkbox" id="present-checkbox">
+
+                <button type="button" onclick="addEducation()">Add Education</button>
+                <ul id="experience-ul">
+                </ul>
+
+            </div>
             <br />
 
-            <label for="EduCert">Certification:</label>
-            <input type="text" asp-for="Education!.EduCert" placeholder="Ex. Advanced Cyber Defender Certificate">
+            <button onclick="removeLastEducation()">Remove Last Education</button>
+
+            <br />
+            <br />
+            <!--
+            <div id="certification-list">
+                <label for="Institution"> Institution: </label>
+                <input type="text" asp-for="Certification!.Institution">
+
+                <label for="Certificate">Certificate:</label>
+                <input type="text" asp-for="Certification!.Certificate">
+
+                <label for="StartDate">Start Date:</label>
+                <input type="date" asp-for="Certification!.StartDate">
+
+                <label for="EndDate">End Date:</label>
+                <input type="date" asp-for="Certification!.EndDate">
+
+                <label for="present-checkbox">Present:</label>
+                <input type="checkbox" id="present-checkbox">
+
+                <button type="button" onclick="addCertification()">Add Certification</button>
+                <ul id="experience-ul">
+                </ul>
+
+            </div>
             <br />
 
-            <label for="EduYear">Education Year:</label>
-            <input type="text" asp-for="Education!.EduYear" placeholder="When did you get your education/certification?...">
+            <button onclick="removeLastCertification()">Remove Last Certification</button>
+
             <br />
-
-
+            <br />
+                -->
             <input type="submit" value="Submit" />
             <input type="submit" value="Save as Draft">
         </form>
@@ -298,13 +368,11 @@
                 input.value = '';
             }
         }
-    });
-</script>
+    });</script>
 
-<!-- Configurable list script for experience-->
+<!-- Configurable list script for experience -->
 
 <script>
-
     function addExperience() {
         var ul = document.querySelector("#experience-ul"); // The list element
         var employerInput = document.getElementById("Work_Employer"); // Input field for employer name
@@ -355,9 +423,124 @@
         var ul = document.querySelector("#experience-ul");
         var li = document.querySelector("#experience-ul li:last-child");
         ul.removeChild(li);
+    }</script>
+
+<!-- Configurable list script for education-->
+<script>
+    function addEducation() {
+        var ul = document.querySelector("#education-ul"); // The list element
+        var institutionInput = document.getElementById("Education_Institution"); // Input field for employer name
+        var degreeInput = document.getElementById("Education_Degree"); // Input field for job title
+        var fieldInput = document.getElementById("Education_Field"); // Input field for job title
+        var startDateInput = document.getElementById("Education_StartDate"); // Input field for start date
+        var endDateInput = document.getElementById("Education_EndDate"); // Input field for end date
+        var presentCheckbox = document.querySelector("#present-checkbox"); // Present employer checkbox
+
+        // Creates new list item to hold experience details
+        var li = document.createElement("li");
+
+        // Creates paragraph element for employer name and adds it to list
+        var company = document.createElement("p");
+        company.appendChild(document.createTextNode("Education Institution: " + institutionInput.value));
+        li.appendChild(company);
+
+        // Creates paragraph element for job title and adds it to list
+        var jobTitle = document.createElement("p");
+        jobTitle.appendChild(document.createTextNode("Degree: " + degreeInput.value));
+        li.appendChild(jobTitle);
+
+        var jobTitle = document.createElement("p");
+        jobTitle.appendChild(document.createTextNode("Field: " + fieldInput.value));
+        li.appendChild(jobTitle);
+
+        // Creates paragraph element for start date and adds it to list
+        var startDate = document.createElement("p");
+        startDate.appendChild(document.createTextNode("Start Date: " + startDateInput.value));
+        li.appendChild(startDate);
+
+        // Creates paragraph element for end date and adds it to list
+        var endDate = document.createElement("p");
+        if (presentCheckbox.checked) {
+            endDate.appendChild(document.createTextNode("End Date: Present Education"));
+        } else {
+            endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
+        }
+        li.appendChild(endDate);
+
+        //Adds new list to experience list
+        ul.appendChild(li);
+
+        // Clears input fields and checkbox
+        employerInput.value = "";
+        jobTitleInput.value = "";
+        startDateInput.value = "";
+        endDateInput.value = "";
+        presentCheckbox.checked = false;
+    }
+
+    function removeLastEducation() {
+        var ul = document.querySelector("#education-ul");
+        var li = document.querySelector("#education-ul li:last-child");
+        ul.removeChild(li);
+    }</script>
+
+<!-- Configurable list script for certification-->
+<!--
+<script>
+    function addCertification() {
+        var ul = document.querySelector("#certification-ul"); // The list element
+        var institutionInput = document.getElementById("Certification_Institution"); // Input field for employer name
+        var degreeInput = document.getElementById("Certification_Degree"); // Input field for job title
+        var fieldInput = document.getElementById("Certification_Field"); // Input field for job title
+        var startDateInput = document.getElementById("Certification_StartDate"); // Input field for start date
+        var endDateInput = document.getElementById("Certification_EndDate"); // Input field for end date
+        var presentCheckbox = document.querySelector("#present-checkbox"); // Present employer checkbox
+
+        // Creates new list item to hold experience details
+        var li = document.createElement("li");
+
+        // Creates paragraph element for employer name and adds it to list
+        var company = document.createElement("p");
+        company.appendChild(document.createTextNode("Certificate Institution: " + institutionInput.value));
+        li.appendChild(company);
+
+        // Creates paragraph element for job title and adds it to list
+        var jobTitle = document.createElement("p");
+        jobTitle.appendChild(document.createTextNode("Certificate: " + certificateInput.value));
+        li.appendChild(jobTitle);
+
+        // Creates paragraph element for start date and adds it to list
+        var startDate = document.createElement("p");
+        startDate.appendChild(document.createTextNode("Start Date: " + startDateInput.value));
+        li.appendChild(startDate);
+
+        // Creates paragraph element for end date and adds it to list
+        var endDate = document.createElement("p");
+        if (presentCheckbox.checked) {
+            endDate.appendChild(document.createTextNode("End Date: Presently Enrolled "));
+        } else {
+            endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
+        }
+        li.appendChild(endDate);
+
+        //Adds new list to experience list
+        ul.appendChild(li);
+
+        // Clears input fields and checkbox
+        employerInput.value = "";
+        jobTitleInput.value = "";
+        startDateInput.value = "";
+        endDateInput.value = "";
+        presentCheckbox.checked = false;
+    }
+
+    function removeLastCertification() {
+        var ul = document.querySelector("#certification-ul");
+        var li = document.querySelector("#certification-ul li:last-child");
+        ul.removeChild(li);
     }
 </script>
-
+-->
 <!--Stops page from being submitted upon pressing enter-->
 <script>
     const form = document.getElementById("myForm");
@@ -365,5 +548,4 @@
         if (e.key === "Enter") {
             e.preventDefault();
         }
-    });
-</script>
+    });</script>
