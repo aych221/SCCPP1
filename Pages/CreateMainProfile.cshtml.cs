@@ -56,6 +56,10 @@ namespace SCCPP1.Pages
                     Colleague.IntroNarrative
                     );
 
+                //Console.WriteLine(Skill.ProgLang);
+                //Console.WriteLine(Skill.OS);
+                //Console.WriteLine(Skill.SoftAndFrame);
+
                 //Account.AddSkills(
                 //    Skill.ProgLang,
                 //    Skill.OS,
@@ -100,7 +104,7 @@ namespace SCCPP1.Pages
                 //    ViewData["UserData"] = "Error Saving";
                 //}
 
-                Account.SaveAll();
+                Account.PersistAll();
             }
 
             return RedirectToPage("/UserHome");

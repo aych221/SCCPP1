@@ -4,7 +4,7 @@
     ViewData["Title"] = "Edit Main Profile";
 }
 
-<!-- This page is used to edit the user's profile. Will only be seen once upon inital login. -->
+<!-- This page is used to create the user's profile. Will only be seen once upon inital login. -->
 <style>
     body {
         font-family: Arial, Helvetica, sans-serif;
@@ -172,12 +172,12 @@
             <br />
 
             <legend><b>Skills:</b></legend>
+
             <label for="ProgLang">Programming Languages:</label>
             <div class="tags-input">
                 <input type="text" asp-for="Skill!.ProgLang" placeholder="What languages do you know?... (Press enter to save)" />
                 <ul class="tags-list"></ul>
             </div>
-
             <br />
 
             <label for="OS">Operating Systems:</label>
@@ -210,15 +210,15 @@
                 <label for="EndDate">End Date:</label>
                 <input type="date" asp-for="Work!.EndDate">
 
-                <label for="present-checkbox">Present Employment:</label>
+                <label for="present-checkbox">Current:</label>
                 <input type="checkbox" id="present-checkbox">
 
                 <button type="button" onclick="addExperience()">Add Experience</button>
                 <ul id="experience-ul">
                 </ul>
+                <br />
+                <button type="button" onclick="removeLastExperience()">Remove Last Experience</button>
             </div>
-            <br />
-            <button onclick="removeLastExperience()">Remove Last Experience</button>
 
             <br />
             <br />
@@ -241,17 +241,15 @@
                 <label for="EndDate">End Date:</label>
                 <input type="date" asp-for="Education!.EndDate">
 
-                <label for="currently-checkbox">Present Employment:</label>
+                <label for="currently-checkbox">Current:</label>
                 <input type="checkbox" id="currently-checkbox">
 
                 <button type="button" onclick="addEducation()">Add Education</button>
                 <ul id="education-ul">
                 </ul>
-
+                <br />
+                <button type="button" onclick="removeLastEducation()">Remove Last Education</button>
             </div>
-            <br />
-
-            <button onclick="removeLastEducation()">Remove Last Education</button>
 
             <br />
             <br />
@@ -277,11 +275,9 @@
                 <button type="button" onclick="addCertification()">Add Certification</button>
                 <ul id="certification-ul">
                 </ul>
-
+                <br />
+                <button type="button" onclick="removeLastCertification()">Remove Last Certification</button>
             </div>
-            <br />
-
-            <button onclick="removeLastCertification()">Remove Last Certification</button>
 
             <br />
             <br />
@@ -292,88 +288,46 @@
     </div>
 </body>
 
+<!-- Input tag script-->
 
-<!--Tag system script-->
 <script>
-    const tagsInput = document.querySelector('.tags-input');
-    const tagsList = document.querySelector('.tags-list');
-    const input = tagsInput.querySelector('input');
+    // Get all the input fields
+    const inputFields = document.querySelectorAll('.tags-input input');
 
-    let tags = [];
+    // Iterate through each input field and attach event listener
+    inputFields.forEach(inputField => {
+        inputField.addEventListener('keyup', function (event) {
+            if (event.key === 'Enter' && event.target.value) {
 
+                // Create a new tag element
+                const tag = document.createElement('li');
+                tag.classList.add('tag');
 
-    // Creates a new HTML `li` element with a label and a close icon, and returns it.
-    function createTag(label) {
-        const li = document.createElement('li');
-        li.classList.add('tag');
-        const span = document.createElement('span');
-        span.innerText = label;
-        const closeIcon = document.createElement('i');
-        closeIcon.classList.add('material-icons');
-        closeIcon.innerText = 'X';
-        closeIcon.addEventListener('click', () => {
-            removeTag(label);
-        });
-        li.appendChild(span);
-        li.appendChild(closeIcon);
-        return li;
-    }
+                // Create a span element for the tag label
+                const label = document.createElement('span');
+                label.innerText = event.target.value;
+                tag.appendChild(label);
 
-    // Removes all tag elements from the `tagsList` element.
-    function clearTags() {
-        tagsList.querySelectorAll('.tag').forEach(tag => {
-            tag.parentElement.removeChild(tag);
-        });
-    }
+                // Create a close icon element
+                const closeIcon = document.createElement('i');
+                closeIcon.classList.add('material-icons');
+                closeIcon.innerText = 'X';
+                closeIcon.addEventListener('click', () => {
+                    tag.parentNode.removeChild(tag);
+                });
+                tag.appendChild(closeIcon);
 
-    // Renders all tags in the `tags` array in reverse order, calling `createTag()` to create the HTML elements.
-    function renderTags() {
-        clearTags();
-        tags.slice().reverse().forEach(tag => {
-            const li = createTag(tag);
-            tagsList.prepend(li);
-        });
-    }
+                // Add the tag element to the tag list
+                const tagsList = event.target.nextElementSibling;
+                tagsList.appendChild(tag);
 
-    function addTag(tag) {
-        tags.push(tag);
-        renderTags();
-    }
-
-    // Removes a tag from the array by label and renders all tags using `renderTags()`.
-    function removeTag(tag) {
-        const index = tags.indexOf(tag);
-        if (index !== -1) {
-            tags.splice(index, 1);
-        }
-        renderTags();
-    }
-
-    //Listens for the keyup event on the input element, and adds a new tag when the user presses the enter key.
-    input.addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') {
-            const tag = input.value.trim();
-            if (tag) {
-                addTag(tag);
-                input.value = '';
+                // Clear the input field
+                event.target.value = '';
             }
-        }
-    });
+        });
+    });</script>
 
-    // Listens for the input event on the input element, and adds a new tag when the user types a comma or space.
-    input.addEventListener('input', () => {
-        const lastChar = input.value.slice(-1);
-        if (lastChar === ',' || lastChar === ' ') {
-            const tag = input.value.slice(0, -1).trim();
-            if (tag) {
-                addTag(tag);
-                input.value = '';
-            }
-        }
-    });
-</script>
-
-<!-- Configurable list script for experience -->
+<!-- Configurable list script -->
 
 <script>
     function addExperience() {
@@ -427,6 +381,7 @@
         var li = document.querySelector("#experience-ul li:last-child");
         ul.removeChild(li);
     }</script>
+
 <!-- Configurable list script for education-->
 <script>
     function addEducation() {
