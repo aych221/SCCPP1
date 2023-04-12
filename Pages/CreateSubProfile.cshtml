@@ -33,6 +33,14 @@
         font-size: 15px;
         transition: 0.4s;
     }
+   
+
+    .panel {
+        padding: 0 18px;
+        display: none;
+        background-color: white;
+        overflow: hidden;
+    }
 
         .active, .accordion:hover {
             background-color: #fff;
@@ -54,17 +62,21 @@
         }
 
     .sidenav {
-  height: 100%; 
-  width: 200px; 
-  position: fixed; 
-  z-index: 1;
-  top: 0; 
+  height: 90%;
+  width: 200px;
+  position: relative;
+  z-index: 5;
   left: 0;
   background-color: white
-  overflow-x: hidden; 
-  padding-top: 150px; 
+  overflow-x: hidden;
+  padding-top: 150px;
+  position: fixed;
 }
 
+.all {
+    position: relative;
+    display: inline;
+}
 
 .printarea {
     margin-left: 200px;
@@ -74,11 +86,13 @@
 </style>
 
 <body>
-   
+  <div id="all" class="all">
   <div id="sidenav" class="sidenav">
-
+     
 
   <FORM name = "personal" method = "post">
+     
+    <br>
         @Html.Raw(ViewData["subTitle"])
         @Html.Raw(ViewData["name"])
         @Html.Raw(ViewData["phone"])
@@ -87,6 +101,7 @@
         @Html.Raw(ViewData["edu"])
         @Html.Raw(ViewData["work"])
         @Html.Raw(ViewData["skills"])
+        @Html.Raw(ViewData["certs"])
          <button type="button" id = "prtButton" onclick="printPDF()">Print</button>
          <input type = "submit" value="Save Profile" />
   </form>  
@@ -105,25 +120,11 @@
   @Html.Raw(ViewData["eduDisplay"])
   @Html.Raw(ViewData["workDisplay"])
   @Html.Raw(ViewData["skillDisplay"])
+  @Html.Raw(ViewData["certDisplay"])
 </div>
-
+</div>
 </body>
-
-<script>
-    var acc = document.getElementsByClassName("accordion");
-    var i;
-
-    for (i = 0; i < acc.length; i++) {
-        acc[i].addEventListener("click", function () {
-            this.classList.toggle("active");
-            var panel = this.nextElementSibling;
-            if (panel.style.display === "block") {
-                panel.style.display = "none";
-            }
-            else { panel.style.display = "block"; }
-        });
-
-    </script>
+   
    
     <script>
         function printPDF(){
@@ -146,5 +147,18 @@
         }
 
        
+   var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function () {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            }
+            else { panel.style.display = "block"; }
+        });
+    }
 
     </script>
