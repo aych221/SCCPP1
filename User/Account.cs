@@ -505,6 +505,7 @@ namespace SCCPP1.User
             ProfileData pd = new ProfileData(this, title,
                 new HashSet<int>(SavedSkills.Keys),
                 new HashSet<int>(SavedEducationHistory.Keys),
+                new HashSet<int>(SavedCertifications.Keys),
                 new HashSet<int>(SavedWorkHistory.Keys),
                 ""
                 );

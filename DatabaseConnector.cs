@@ -2947,23 +2947,27 @@ COMMIT;
                     {
                         int profileID = -1;
 
-                        string sql = @"INSERT INTO profiles (colleague_id, title, education_history_ids, work_history_ids, colleague_skills_ids, ordering) 
-                                    VALUES (@colleague_id, @title, @education_history_ids, @work_history_ids, @colleague_skills_ids, @ordering)
+                        string sql = @"INSERT INTO profiles (colleague_id, title, colleague_skills_ids, education_history_ids, colleague_certs_ids, work_history_ids, ordering) 
+                                    VALUES (@colleague_id, @title, @colleague_skills_ids, @education_history_ids, @colleague_certs_ids, @work_history_ids, @ordering)
                                     RETURNING id;";
 
                         using (SqliteCommand cmd = new SqliteCommand(sql, conn, transaction))
                         {
 
+                            Console.WriteLine("[Profile=" + pd.Title + "] {");
+                            Console.WriteLine("Skills: " + ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
+                            Console.WriteLine("Education: " + ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
+                            Console.WriteLine("Certs: " + ValueCleaner(string.Join(",", pd.SelectedCertificationIDs)));
+                            Console.WriteLine("Work: " + ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
+                            Console.WriteLine("}");
 
-
-                            Console.WriteLine(ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
-                            Console.WriteLine(ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
-                            Console.WriteLine(ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
+                            cmd.Parameters.AddWithValue("@id", ValueCleaner(pd.RecordID));
                             cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(pd.Owner.RecordID));
                             cmd.Parameters.AddWithValue("@title", ValueCleaner(pd.Title));
-                            cmd.Parameters.AddWithValue("@education_history_ids", ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
-                            cmd.Parameters.AddWithValue("@work_history_ids", ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
                             cmd.Parameters.AddWithValue("@colleague_skills_ids", ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
+                            cmd.Parameters.AddWithValue("@education_history_ids", ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
+                            cmd.Parameters.AddWithValue("@colleague_certs_ids", ValueCleaner(string.Join(",", pd.SelectedCertificationIDs)));
+                            cmd.Parameters.AddWithValue("@work_history_ids", ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
                             cmd.Parameters.AddWithValue("@ordering", ValueCleaner(pd.Ordering));
 
                             object? id = cmd.ExecuteScalar();
@@ -3002,21 +3006,26 @@ COMMIT;
                     {
                         int profileID = -1;
 
-                        string sql = @"UPDATE profiles SET colleague_id=@colleague_id, title=@title, education_history_ids=@education_history_ids, work_history_ids=@work_history_ids, colleague_skills_ids=@colleague_skills_ids, ordering=@ordering 
+                        string sql = @"UPDATE profiles SET colleague_id=@colleague_id, title=@title, colleague_skills_ids=@colleague_skills_ids, education_history_ids=@education_history_ids, colleague_certs_ids=@colleague_certs_ids, work_history_ids=@work_history_ids, ordering=@ordering 
                                     WHERE id=@id;";
 
                         using (SqliteCommand cmd = new SqliteCommand(sql, conn, transaction))
                         {
 
-                            Console.WriteLine(ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
-                            Console.WriteLine(ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
-                            Console.WriteLine(ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
+                            Console.WriteLine("[Profile=" + pd.Title + "] {");
+                            Console.WriteLine("Skills: " + ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
+                            Console.WriteLine("Education: " + ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
+                            Console.WriteLine("Certs: " + ValueCleaner(string.Join(",", pd.SelectedCertificationIDs)));
+                            Console.WriteLine("Work: " + ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
+                            Console.WriteLine("}");
+
                             cmd.Parameters.AddWithValue("@id", ValueCleaner(pd.RecordID));
                             cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(pd.Owner.RecordID));
                             cmd.Parameters.AddWithValue("@title", ValueCleaner(pd.Title));
-                            cmd.Parameters.AddWithValue("@education_history_ids", ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
-                            cmd.Parameters.AddWithValue("@work_history_ids", ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
                             cmd.Parameters.AddWithValue("@colleague_skills_ids", ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
+                            cmd.Parameters.AddWithValue("@education_history_ids", ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
+                            cmd.Parameters.AddWithValue("@colleague_certs_ids", ValueCleaner(string.Join(",", pd.SelectedCertificationIDs)));
+                            cmd.Parameters.AddWithValue("@work_history_ids", ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
                             cmd.Parameters.AddWithValue("@ordering", ValueCleaner(pd.Ordering));
 
                             object? id = cmd.ExecuteScalar();
@@ -3054,7 +3063,7 @@ COMMIT;
             {
                 conn.Open();
 
-                string sql = @"SELECT id, colleague_id, title, education_history_ids, work_history_ids, colleague_skills_ids, ordering
+                string sql = @"SELECT id, colleague_id, title, colleague_skills_ids, education_history_ids, colleague_certs_ids, work_history_ids, ordering
                                 FROM profiles
                                 WHERE colleague_id=@colleague_id;";
 
@@ -3067,14 +3076,15 @@ COMMIT;
                         list = new List<ProfileData>();
 
                         ProfileData pd;
-                        string skillIDs, educationIDs, workIDs;
-                        HashSet<int> skills, education, work;
+                        string skillIDs, educationIDs, certIDs, workIDs;
+                        HashSet<int> skills, education, certs, work;
 
                         while (r.Read())
                         {
-                            skillIDs = GetString(r, 5);
-                            educationIDs = GetString(r, 3);
-                            workIDs = GetString(r, 4);
+                            skillIDs = GetString(r, 3);
+                            educationIDs = GetString(r, 4);
+                            certIDs = GetString(r, 5);
+                            workIDs = GetString(r, 6);
 
                             if (string.IsNullOrEmpty(skillIDs))
                             {
@@ -3109,6 +3119,22 @@ COMMIT;
 
 
 
+                            if (string.IsNullOrEmpty(certIDs))
+                            {
+                                certs = new HashSet<int>();
+
+                            }
+                            else if (certIDs.Length == 1)
+                            {
+                                (certs = new HashSet<int>()).Add(int.Parse(certIDs));
+                            }
+                            else
+                            {
+                                certs = new HashSet<int>(certIDs.Split(',').Select(int.Parse));
+                            }
+
+
+
                             if (string.IsNullOrEmpty(workIDs))
                             {
                                 work = new HashSet<int>();
@@ -3130,6 +3156,7 @@ COMMIT;
                                 GetString(r, 2), //populate title
                                 skills, //populate skills ids
                                 education, //populate education history ids
+                                certs, //populate certification ids
                                 work, //populate work history ids
                                 GetString(r, 6) //populate ordering
                                 ));
@@ -3161,7 +3188,7 @@ COMMIT;
             {
                 conn.Open();
 
-                string sql = @"SELECT id, colleague_id, title, education_history_ids, work_history_ids, colleague_skills_ids, ordering
+                string sql = @"SELECT id, colleague_id, title, colleague_skills_ids, education_history_ids, colleague_certs_ids, work_history_ids, ordering
                                 FROM profiles
                                 WHERE colleague_id=@colleague_id;";
 
@@ -3172,16 +3199,17 @@ COMMIT;
                     using (SqliteDataReader r = cmd.ExecuteReader())
                     {
                         list = new List<ProfileData>();
-                        ProfileData pd;
-                        string skillIDs, educationIDs, workIDs;
 
-                        HashSet<int> skills, education, work;
+                        ProfileData pd;
+                        string skillIDs, educationIDs, certIDs, workIDs;
+                        HashSet<int> skills, education, certs, work;
 
                         while (r.Read())
                         {
-                            skillIDs = GetString(r, 5);
-                            educationIDs = GetString(r, 3);
-                            workIDs = GetString(r, 4);
+                            skillIDs = GetString(r, 3);
+                            educationIDs = GetString(r, 4);
+                            certIDs = GetString(r, 5);
+                            workIDs = GetString(r, 6);
 
                             if (string.IsNullOrEmpty(skillIDs))
                             {
@@ -3216,6 +3244,22 @@ COMMIT;
 
 
 
+                            if (string.IsNullOrEmpty(certIDs))
+                            {
+                                certs = new HashSet<int>();
+
+                            }
+                            else if (certIDs.Length == 1)
+                            {
+                                (certs = new HashSet<int>()).Add(int.Parse(certIDs));
+                            }
+                            else
+                            {
+                                certs = new HashSet<int>(certIDs.Split(',').Select(int.Parse));
+                            }
+
+
+
                             if (string.IsNullOrEmpty(workIDs))
                             {
                                 work = new HashSet<int>();
@@ -3237,6 +3281,7 @@ COMMIT;
                                 GetString(r, 2), //populate title
                                 skills, //populate skills ids
                                 education, //populate education history ids
+                                certs, //populate certification ids
                                 work, //populate work history ids
                                 GetString(r, 6) //populate ordering
                                 ));
@@ -3415,10 +3460,14 @@ COMMIT;
 
 
 
+
+
+        #region Debugging
+
         public static List<string> PrintRecords(string table)
-    {
-        using (SqliteConnection conn = new SqliteConnection(connStr))
         {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
                 conn.Open();
                 string sql = $"SELECT * FROM {table};";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
@@ -3447,246 +3496,15 @@ COMMIT;
             }
         }
 
-
-
-        #region Debugging
-
-        #endregion
-
-        public static void TestBrittany()
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                //colleague insertion
-                using (SqliteCommand cmd = new SqliteCommand("INSERT OR IGNORE INTO colleagues (user_hash, role, name, phone, address, intro_narrative) VALUES (@user_hash, @role, @name, @phone, @address, @intro_narrative)", conn))
-                {
-                    // all emails will be lowercased to ensure hash consistency
-                    cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash("BrittL".ToLower()));
-                    // normal user
-                    cmd.Parameters.AddWithValue("@role", 1);
-                    cmd.Parameters.AddWithValue("@name", "Brittany Langosh");
-                    cmd.Parameters.AddWithValue("@phone", "555-555-5555");
-                    cmd.Parameters.AddWithValue("@address", "123 Hopper Lane");
-                    cmd.Parameters.AddWithValue("@intro_narrative", "Brittany Langosh has been a Program Manager for the past 12 years. She has extensive experience in...");
-                    cmd.ExecuteNonQuery();
-                }
-
-            }
-
-        }
-
-
-        public static void TestBrittany1()
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                //colleague insertion
-                using (SqliteCommand cmd = new SqliteCommand("INSERT OR IGNORE INTO colleagues (user_hash, role, name, phone, address, intro_narrative) VALUES (@user_hash, @role, @name, @phone, @address, @intro_narrative)", conn))
-                {
-                    // all emails will be lowercased to ensure hash consistency
-                    cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash("BrittL".ToLower()));
-                    // normal user
-                    cmd.Parameters.AddWithValue("@role", 1);
-                    cmd.Parameters.AddWithValue("@name", "Brittany Langosh");
-                    cmd.Parameters.AddWithValue("@phone", "555-555-5555");
-                    cmd.Parameters.AddWithValue("@address", "123 Hopper Lane");
-                    cmd.Parameters.AddWithValue("@intro_narrative", "Brittany Langosh has been a Program Manager for the past 12 years. She has extensive experience in...");
-                    cmd.ExecuteNonQuery();
-                }
-
-            }
-
-        }
-
-        public static void SaveBrittany(Account account)
-        {
-            account.Name = "Brittany Langosh";
-            account.EmailAddress = "lbrittany02@rsi.com";
-            account.PhoneNumber = 1231231234;
-            account.StreetAddress = "123 Main St";
-            account.IntroNarrative = "Brittany Langosh has been a Product Manager...";
-
-            EducationData ed1 = new EducationData(account),
-                ed2 = new EducationData(account),
-                ed3 = new EducationData(account);
-
-            ed1.EducationType = "Masters of Business Administration";
-            ed1.Description = "in Crypto";
-            ed1.Institution = "Harvard";
-            ed1.StartDate = Utilities.ToDateOnly("August 18 1993");
-
-            ed2.EducationType = "Bachelor of Arts";
-            ed2.Description = "in Computer Design";
-            ed2.Institution = "Aiken Technical College";
-            ed2.StartDate = Utilities.ToDateOnly("August 15 1990");
-
-            ed3.EducationType = "Scrum Master";
-            ed3.Description = "in my Mom's Kitchen";
-            ed3.Institution = "North Augusta High School";
-            ed3.StartDate = Utilities.ToDateOnly("August 8 1980");
-
-
-            WorkData wd1 = new WorkData(account),
-                wd2 = new WorkData(account);
-
-            wd1.Employer = "The Kern Family Foundation";
-            wd1.JobTitle = "Chair Sitting Assistant";
-            wd1.StartDate = Utilities.ToDateOnly("September 1 2006");
-            wd1.EndDate = Utilities.ToDateOnly("September 1 2009");
-
-            wd2.Employer = "Management Research Service";
-            wd2.JobTitle = "Social Media Influencer";
-            wd2.StartDate = Utilities.ToDateOnly("October 12 2009");
-            wd2.EndDate = Utilities.ToDateOnly("April 1 2023");
-
-
-            SkillData sd1 = new SkillData(account),
-                sd2 = new SkillData(account),
-                sd3 = new SkillData(account);
-
-            sd1.SkillName = "Java";
-            sd2.SkillName = "C#";
-            sd3.SkillName = "HTML";
-
-            SaveUser(account);
-            //SaveSkill(")
-            Thread.Sleep(1);
-            SaveEducationHistory(ed1);
-            Thread.Sleep(1);
-            SaveEducationHistory(ed2);
-            Thread.Sleep(1);
-            SaveEducationHistory(ed3);
-            Thread.Sleep(1);
-            SaveWorkHistory(wd1);
-            SaveWorkHistory(wd2);
-            Console.WriteLine("Saved!");
-            /*foreach (string s in GetRawColleagueEducationHistory(account.RecordID))
-                Console.WriteLine(s);
-            foreach (string s in GetRawColleagueWorkHistory(account.RecordID))
-                Console.WriteLine(s);
-            */
-            foreach (string s in PrintRecords("work_history"))
-                Console.WriteLine(s);
-
-            foreach (string s in PrintRecords("education_history"))
-                Console.WriteLine(s);
-
-            foreach (string s in PrintRecords("colleagues"))
-                Console.WriteLine(s);
-        }
-
-        public static void TestBrittany2()
-        {
-
-
-            Account account = new Account(null, false);
-            account.Name = "Brittany Langosh";
-            account.EmailAddress = "lbrittany02@rsi.com";
-            account.PhoneNumber = 1231231234;
-            account.StreetAddress = "123 Main St";
-            account.IntroNarrative = "Brittany Langosh has been a Product Manager...";
-            //account.MainProfileID = 0;
-
-            EducationData ed1 = new EducationData(account),
-                ed2 = new EducationData(account),
-                ed3 = new EducationData(account);
-
-            ed1.EducationType = "Masters of Business Administration";
-           
-            ed1.Description = "in Crypto";
-            ed1.Institution = "Harvard";
-            ed1.StartDate = Utilities.ToDateOnly("August 18 1993");
-            ed1.EndDate = Utilities.ToDateOnly("August 18 2000");
-
-            ed2.EducationType = "Bachelor of Arts";
-            ed2.Description = "in Computer Design";
-            ed2.Institution = "Aiken Technical College";
-            ed2.StartDate = Utilities.ToDateOnly("August 15 1990");
-            ed2.EndDate = Utilities.ToDateOnly("August 18 1993");
-
-            ed3.EducationType = "Scrum Master";
-            ed3.Description = "in my Mom's Kitchen";
-            ed3.Institution = "North Augusta High School";
-            ed3.StartDate = Utilities.ToDateOnly("August 8 1980");
-
-
-            WorkData wd1 = new WorkData(account, 1),
-                wd2 = new WorkData(account, 2);
-
-            wd1.Employer = "The Kern Family Foundation";
-            wd1.JobTitle = "Chair Sitting Assistant";
-            wd1.StartDate = Utilities.ToDateOnly("September 1 2006");
-            wd1.EndDate = Utilities.ToDateOnly("September 1 2009");
-
-            wd2.Employer = "Management Research Service";
-            wd2.JobTitle = "Social Media Influencer";
-            wd2.StartDate = Utilities.ToDateOnly("October 12 2009");
-            wd2.EndDate = Utilities.ToDateOnly("April 1 2023");
-
-
-            SkillData sd1 = new SkillData(account, 1),
-                sd2 = new SkillData(account, 2),
-                sd3 = new SkillData(account, 3);
-
-            sd1.SkillName = "Java";
-            sd2.SkillName = "C#";
-            sd3.SkillName = "HTML";
-
-            /*InsertUser("Britt", 0, "Brittany Langosh", "Britt@noemail.com", 1231231234, "123 Main St", "Brittany Langosh has been a Product Manager...", 0);
-            InsertEducationHistory(0, 0, 0, 0, 0, Utilities.ToDateOnly("July 1 2022"), Utilities.ToDateOnly("July 5 2022"), "Masters of Business Admin");
-            InsertEducationHistory(0, 0, 0, 0, 0, Utilities.ToDateOnly("July 1 2022"), Utilities.ToDateOnly("July 5 2022"), "Bachelor of Arts");
-            InsertEducationHistory(0, 0, 0, 0, 0, Utilities.ToDateOnly("July 1 2022"), Utilities.ToDateOnly("July 5 2022"), "Scrum Master");
-            InsertSkill("Java");
-            InsertSkill("C#");
-            InsertSkill("HTML");
-            //InsertColleageSkills(0, 0, 10);
-            //InsertColleageSkills(0, 0, 6);
-            //missing insert munic, states, institutions
-            InsertWorkHistory(0, 0, 0, 0, 0, Utilities.ToDateOnly("July 1 2022"), Utilities.ToDateOnly("July 5, 2022"), "The Kern Family Foundation");
-            InsertWorkHistory(0, 0, 0, 0, 0, Utilities.ToDateOnly("July 1 2022"), Utilities.ToDateOnly("July 5, 2022"), "Management Research Services");*/
-
-
-        }
-
-
         public static void Thomas(Account account)
         {
             //ww8FDk-bnuBk1KJXVreseNbsDmGnt62pNRpswwgGC7k
-
-           /* account.Name = "Wall, Thomas Joseph";
-            account.EmailAddress = "thwall@augusta.edu";
-            account.PhoneNumber = 1231231234;
-            account.StreetAddress = "123 Main St";
-            account.IntroNarrative = @"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ";
-            */
             account.UpdateData(
                 "Wall, Thomas Joseph",
                 "thwall@augusta.edu",
                 1231231234,
                 @"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. "
             );
-
-
-           /* EducationData ed1 = new EducationData(account),
-                ed2 = new EducationData(account),
-                ed3 = new EducationData(account);
-
-            ed1.EducationType = "Masters of Business Administration";
-            ed1.Description = "in Crypto";
-            ed1.Institution = "Harvard";
-            ed1.StartDate = Utilities.ToDateOnly("August 18 1993");
-
-            ed2.EducationType = "Bachelor of Arts";
-            ed2.Description = "in Computer Design";
-            ed2.Institution = "Aiken Technical College";
-            ed2.StartDate = Utilities.ToDateOnly("August 15 1990");
-
-            ed3.EducationType = "Scrum Master";
-            ed3.Description = "in my Mom's Kitchen";
-            ed3.Institution = "North Augusta High School";
-            ed3.StartDate = Utilities.ToDateOnly("August 8 1980");*/
 
             account.AddEducation(
                 "Harvard",
@@ -3715,19 +3533,6 @@ COMMIT;
                 null
                 );
 
-           /* WorkData wd1 = new WorkData(account),
-                wd2 = new WorkData(account);
-
-            wd1.Employer = "The Kern Family Foundation";
-            wd1.JobTitle = "Chair Sitting Assistant";
-            wd1.StartDate = Utilities.ToDateOnly("September 1 2006");
-            wd1.EndDate = Utilities.ToDateOnly("September 1 2009");
-
-            wd2.Employer = "Management Research Service";
-            wd2.JobTitle = "Social Media Influencer";
-            wd2.StartDate = Utilities.ToDateOnly("October 12 2009");
-            wd2.EndDate = Utilities.ToDateOnly("April 1 2023");*/
-
             account.AddWork(
                 "The Kern Family Foundation",
                 "Chair Sitting Assistant",
@@ -3745,112 +3550,32 @@ COMMIT;
                 Utilities.ToDateOnly("April 1 2023")
                 );
 
-
-            /*SkillData sd1 = new SkillData(account),
-                sd2 = new SkillData(account),
-                sd3 = new SkillData(account);
-
-            
-
-            sd1.SkillName = "Java";
-            sd2.SkillName = "C#";
-            sd3.SkillName = "HTML";*/
-
             account.AddSkills("Programming Lanaguages", "Java", "C#", "HTML");
-
-           /* SaveUser(account);
-            //SaveSkill(")
-            Thread.Sleep(1);
-            SaveEducationHistory(ed1);
-            Thread.Sleep(1);
-            SaveEducationHistory(ed2);
-            Thread.Sleep(1);
-            SaveEducationHistory(ed3);
-            Thread.Sleep(1);
-            SaveWorkHistory(wd1);
-            SaveWorkHistory(wd2);
-            SaveColleageSkills(sd1, sd2, sd3);
-
-            CertificationData cd1 = new CertificationData(account);
-            cd1.CertificationType = "test";
-            cd1.Institution = "somewhere";
-            SaveCertification(cd1);*/
 
             account.AddCertification("Online", "CompTIA S+", null, null);
 
 
             account.PersistAll();
 
+            //create mock profile
+            ProfileData p = account.CreateProfile("Mister Sir");
+            p.RemoveWork(1);
+            p.RemoveEducation(2);
+            p.RemoveEducation(1);
+            p.RemoveSkill(1);
+
+            account.CreateProfile("Main");
+
+            account.PersistProfiles();
+
 
             Console.WriteLine("Saved!");
         }
-
-        private static object ValueCleaner(int val)
-        {
-            if (val == 0 || val == -1)
-                return DBNull.Value;
-
-            return val;
-        }
-
-        private static object ValueCleaner(long val)
-        {
-            if (val == 0 || val == -1)
-                return DBNull.Value;
-
-            return val;
-        }
-
-        private static object ValueCleaner(string val)
-        {
-            if (val == null)
-                return DBNull.Value;
-
-            //Test before using.
-
-            return val;//Utilities.HtmlStripper(val);
-        }
-
-        private static object ValueCleaner(DateOnly? val)
-        {
-            if (val == null)
-                return DBNull.Value;
-
-            return val;
-        }
-
-        private static long GetInt64(SqliteDataReader r, int ordinal)
-        {
-            if (r.IsDBNull(ordinal))
-                return -1;
-            return r.GetInt64(ordinal);
-        }
-
-        private static int GetInt32(SqliteDataReader r, int ordinal)
-        {
-            if (r.IsDBNull(ordinal))
-                return -1;
-            return r.GetInt32(ordinal);
-        }
-
-        private static string GetString(SqliteDataReader r, int ordinal)
-        {
-            if (r.IsDBNull(ordinal))
-                return null;
-            return r.GetString(ordinal);
-        }
-
-        private static DateOnly GetDateOnly(SqliteDataReader r, int ordinal)
-        {
-            if (r.IsDBNull(ordinal))
-                return DateOnly.MinValue;
-            return Utilities.ToDateOnly(r.GetDateTime(ordinal));
-        }
+        #endregion
 
 
         #region Sqlite Helper Methods
 
-        #region Insertion
         /// <summary>
         /// Uses an INSERT OR IGNORE query, then returns the result that was input. Only intended for tables with an id and unique text column.
         /// </summary>
@@ -3923,95 +3648,71 @@ COMMIT;
             return ids;
         }
 
-        /**
-         * 
-        CREATE TABLE colleagues (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          user_hash TEXT NOT NULL,
-          role INTEGER NOT NULL, --0=admin 1=normal
-          name TEXT NOT NULL,
-          email TEXT,
-          phone INTEGER,
-          address TEXT,
-          intro_narrative TEXT
-        );
-         */
-        public static void TestQueryMaker()
+
+
+        private static object ValueCleaner(int val)
         {
+            if (val == 0 || val == -1)
+                return DBNull.Value;
 
-            //DbTable table = new DbTable();
- /*           DbColumn c1 = new DbColumn("user_hash", typeof(string), 1, true, true);
-            DbColumn c2 = new DbColumn("role", typeof(int), 2, true, false);
-            DbColumn c3 = new DbColumn("name", typeof(string), 3, true, false);
-            DbColumn c4 = new DbColumn("email", typeof(string), 4, false, false);
-            DbColumn c5 = new DbColumn("phone", typeof(long), 5, false, false);
-            DbColumn c6 = new DbColumn("address", typeof(string), 6, false, false);
-            DbColumn c7 = new DbColumn("intro_narrative", typeof(string), 7, false, false);
+            return val;
+        }
 
-            DbTuple tuple = new DbTuple(c1, c2, c3, c4, c5, c6, c7);
+        private static object ValueCleaner(long val)
+        {
+            if (val == 0 || val == -1)
+                return DBNull.Value;
 
-            DbTable table = new DbTable("colleagues", tuple);
+            return val;
+        }
 
-            DbTuple record1 = new DbTuple(
-                new DbField<string>(c1, "test"),
-                new DbField<int>(c2, 0),
-                new DbField<string>(c3, "test man2"),
-                new DbField<string>(c4, "test@email.com"),
-                new DbField<long>(c5, 1000000000),
-                new DbField<string>(c6, "1000 Georgian Lane, Augusta GA"),
-                new DbField<string>(c7, "Listen here")
-                );
+        private static object ValueCleaner(string val)
+        {
+            if (val == null)
+                return DBNull.Value;
 
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
+            //Test before using.
 
-                using (SqliteCommand cmd = new SqliteCommand("", conn))
-                {
-                    QueryGenerator.InsertOrIgnore(cmd, table, record1, record1, record1);
+            return val;//Utilities.HtmlStripper(val);
+        }
 
-                    cmd.CommandText = "SELECT * FROM colleagues;";
+        private static object ValueCleaner(DateOnly? val)
+        {
+            if (val == null)
+                return DBNull.Value;
 
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        while (r.Read())
-                        {
-                            Console.WriteLine(GetInt32(r, 0) + " "  + GetString(r, 1) + " " + GetInt32(r, 2) + " " + GetString(r, 3) + " " + GetString(r, 4) + " " + GetInt64(r, 5) + " " + GetString(r, 6) + " " + GetString(r, 7));
-                            
-                        }
-                    }
+            return val;
+        }
 
-                }
-            }*/
+        private static long GetInt64(SqliteDataReader r, int ordinal)
+        {
+            if (r.IsDBNull(ordinal))
+                return -1;
+            return r.GetInt64(ordinal);
+        }
 
+        private static int GetInt32(SqliteDataReader r, int ordinal)
+        {
+            if (r.IsDBNull(ordinal))
+                return -1;
+            return r.GetInt32(ordinal);
+        }
+
+        private static string GetString(SqliteDataReader r, int ordinal)
+        {
+            if (r.IsDBNull(ordinal))
+                return null;
+            return r.GetString(ordinal);
+        }
+
+        private static DateOnly GetDateOnly(SqliteDataReader r, int ordinal)
+        {
+            if (r.IsDBNull(ordinal))
+                return DateOnly.MinValue;
+            return Utilities.ToDateOnly(r.GetDateTime(ordinal));
         }
         #endregion
 
-        #endregion
-
-        /*private static void AddWithValueOrNull(SqliteCommand cmd, string variable, object? value)
-        {
-            if (value == null)
-        }*/
-
-        //TODO make query fields dynamic and optional for calling.
-        /*private static string GenerateQueryFields()
-        {
-            StringBuilder sb = new StringBuilder();
-        }*/
-
-
-        /*
-		 * 
-		USE master;
-		ALTER DATABASE MovieSchedulingDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-
-		DROP DATABASE IF EXISTS MovieSchedulingDB;
-
-
-		CREATE DATABASE MovieSchedulingDB;
-
-		USE MovieSchedulingDB;*/
 
 
         ///<summary>
@@ -4163,9 +3864,10 @@ COMMIT;
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           colleague_id INTEGER NOT NULL,
           title TEXT NOT NULL,          --similar to the file name
+          colleague_skills_ids TEXT,    --list of colleague_skills ids in specified order
           education_history_ids TEXT,   --list of education history ids in specified order
+          colleague_certs_ids TEXT,     --list of colleague_certs ids in specified order
           work_history_ids TEXT,        --list of work history ids in specified order
-          colleague_skills_ids TEXT,    --list of skill ids in specified order
           ordering TEXT,                --The ordering of how the different sections will be (education, work, skills, etc)
           FOREIGN KEY (colleague_id) REFERENCES colleagues(id)
         );
@@ -4228,78 +3930,6 @@ COMMIT;
 
         ";
 
-
-
-
- /*       private static string? QueryGeneratorInsert(string tableName, params InputF[] fields)
-        {
-            if (fields.Length < 1)
-                return null;
-
-            StringBuilder sb = new StringBuilder($"INSERT INTO {tableName} ("),
-                columns = new StringBuilder($"{fields[0].ColumnName}"),
-                values = new StringBuilder($"{fields[0].VariableName}");
-
-            for (int i = 1; i < fields.Length - 1; i ++)
-            {
-                columns.Append($", {fields[i].ColumnName}");
-                values.Append($", {fields[i].VariableName}");
-            }
-
-            sb.Append($"{columns.ToString()}) VALUES (");
-            sb.Append($"{values.ToString()})");
-
-
-            return sb.ToString();
-        }
-
- /*       
-        protected class Field
-        {
-            public readonly string ColumnName;
-
-            public readonly bool IsRequired;
-
-            public object Value;
-
-            public Field(string columnName, object value, bool isRequired)
-            {
-                this.ColumnName = columnName;
-                this.Value = value;
-                this.IsRequired = isRequired;
-            }
-
-            public string VariableName { get { return $"@{this.ColumnName}"; } }
-        }
-        public class InputF
-        {
-            public readonly string ColumnName;
-
-            public object Value;
-
-            public InputF(string columnName, object value)
-            {
-                this.ColumnName = columnName;
-                this.Value = value;
-            }
-
-            public string VariableName { get { return $"@{this.ColumnName}"; } }
-        }
-
-        protected class Record
-        {
-            public readonly string TableName;
-
-            public List<Field> Fields;
-
-            public Record()
-            {
-
-            }
-        }
-        //*/
     }
-
-
 
 }

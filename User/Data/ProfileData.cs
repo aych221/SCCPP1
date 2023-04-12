@@ -22,7 +22,7 @@ namespace SCCPP1.User.Data
         /// <summary>
         /// Used to hold RecordData.RecordIDs that are selected (by the user) to appear on this profile.
         /// </summary>
-        private HashSet<int> _skillIDs, _educationIDs, _workIDs;
+        private HashSet<int> _skillIDs, _educationIDs, _certificationIDs, _workIDs;
 
 
         /// <summary>
@@ -41,6 +41,15 @@ namespace SCCPP1.User.Data
         {
             get { return _educationIDs; }
             protected set { SetField(ref _educationIDs, value); }
+        }
+
+        /// <summary>
+        /// The set of CertificationData.RecordIDs that are selected (by the user) to appear on this profile.
+        /// </summary>
+        public HashSet<int> SelectedCertificationIDs
+        {
+            get { return _certificationIDs; }
+            protected set { SetField(ref _certificationIDs, value); }
         }
 
 
@@ -86,12 +95,13 @@ namespace SCCPP1.User.Data
 
 
         //used when database loads profile
-        public ProfileData(Account owner, int recordID, string title, HashSet<int> skillIDs, HashSet<int> educationIDs, HashSet<int> workIDs, string ordering) :
+        public ProfileData(Account owner, int recordID, string title, HashSet<int> skillIDs, HashSet<int> educationIDs, HashSet<int> certificationIDs, HashSet<int> workIDs, string ordering) :
             this(owner, recordID)
         {
             Title = title;
             SelectedSkillIDs = skillIDs;
             SelectedEducationIDs = educationIDs;
+            SelectedCertificationIDs = certificationIDs;
             SelectedWorkIDs = workIDs;
             Ordering = ordering;
 
@@ -101,8 +111,8 @@ namespace SCCPP1.User.Data
 
 
         //used when user creates profile that needs to be saved
-        public ProfileData(Account owner, string title, HashSet<int> skillIDs, HashSet<int> educationIDs, HashSet<int> workIDs, string ordering) :
-            this(owner, -1, title, skillIDs, educationIDs, workIDs, ordering)
+        public ProfileData(Account owner, string title, HashSet<int> skillIDs, HashSet<int> educationIDs, HashSet<int> certificationIDs, HashSet<int> workIDs, string ordering) :
+            this(owner, -1, title, skillIDs, educationIDs, certificationIDs, workIDs, ordering)
         {
             
             this.NeedsSave = true;
@@ -118,7 +128,8 @@ namespace SCCPP1.User.Data
         /// <param name="skillRecordID">The SkillData.RecordID to be added.</param>
         public void AddSkill(int skillRecordID)
         {
-            SelectedSkillIDs.Add(skillRecordID);
+            if (Owner.SavedSkills.ContainsKey(skillRecordID))
+                SelectedSkillIDs.Add(skillRecordID);
         }
 
 
@@ -128,7 +139,19 @@ namespace SCCPP1.User.Data
         /// <param name="eduRecordID">The EducationData.RecordID to be added.</param>
         public void AddEducation(int eduRecordID)
         {
-            SelectedEducationIDs.Add(eduRecordID);
+            if (Owner.SavedEducationHistory.ContainsKey(eduRecordID))
+                SelectedEducationIDs.Add(eduRecordID);
+        }
+
+
+        /// <summary>
+        /// Adds an CertificationData object to the profile using its RecordID.
+        /// </summary>
+        /// <param name="certRecordID">The CertificationData.RecordID to be added.</param>
+        public void AddCertification(int certRecordID)
+        {
+            if (Owner.SavedCertifications.ContainsKey(certRecordID))
+                SelectedCertificationIDs.Add(certRecordID);
         }
 
 
@@ -138,7 +161,8 @@ namespace SCCPP1.User.Data
         /// <param name="workRecordID">The WorkData.RecordID to be added.</param>
         public void AddWork(int workRecordID)
         {
-            SelectedWorkIDs.Add(workRecordID);
+            if (Owner.SavedWorkHistory.ContainsKey(workRecordID))
+                SelectedWorkIDs.Add(workRecordID);
             //    workHistory.TryAdd(workRecordID, Owner.GetWorkData(workRecordID));
         }
 
@@ -170,6 +194,16 @@ namespace SCCPP1.User.Data
 
 
         /// <summary>
+        /// Removes an CertificationData object from the profile using its RecordID.
+        /// </summary>
+        /// <param name="certRecordID">The CertificationData.RecordID to be removed.</param>
+        public void RemoveCertification(int certRecordID)
+        {
+            SelectedCertificationIDs.Remove(certRecordID);
+        }
+
+
+        /// <summary>
         /// Removes a WorkData object from the profile using its RecordID.
         /// </summary>
         /// <param name="workRecordID">The WorkData.RecordID to be removed.</param>
@@ -182,7 +216,7 @@ namespace SCCPP1.User.Data
 
         public override bool Save()
         {
-            return DatabaseConnector.SaveProfile(this);
+            return NeedsSave = !(IsUpdated = DatabaseConnector.SaveProfile(this));
         }
 
 
