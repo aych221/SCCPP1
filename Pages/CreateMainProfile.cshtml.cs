@@ -29,6 +29,9 @@ namespace SCCPP1.Pages
         [BindProperty]
         public Education? Education { get; set; }
 
+        [BindProperty]
+        public Certification? Certification { get; set; }
+
         // When the Submit button on the form is pressed on, OnPost() starts, grabs the information the user typed and then saves it into the database.
         // If it is successfully saved into the database, redirect the user to "/UserHome", if it fails, return this page.
         public IActionResult OnPost()
@@ -69,12 +72,19 @@ namespace SCCPP1.Pages
                 //    );
 
                 //Account.AddEducation(
-                //    Education.EduCert,
-                //    Education.EduType,
-                //    Education.Study,
+                //    Education.Institution,
+                //    Education.Degree,
+                //    Education.Field,
                 //    Education.Location,
                 //    Education.StartDate,
                 //    Education.EndDate
+                //    );
+
+                //Account.AddCertification(
+                //    Certification.Institution,
+                //    Certification.Certificate,
+                //    Certification.StartDate,
+                //    Certification.EndDate
                 //    );
 
                 //if (DatabaseConnector.SaveUser(Account))

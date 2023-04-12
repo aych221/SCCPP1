@@ -27,6 +27,9 @@ namespace SCCPP1.Pages
         [BindProperty]
         public Education? Education { get; set; }
 
+        [BindProperty]
+        public Certification? Certification { get; set; }
+
         // When this page is initialize OnGet() starts before the instance of the user is created, therefore within our OnGet(),
         // We create a instance of the user and pull the saved data from the database to be displayed.
         public IActionResult OnGet()
