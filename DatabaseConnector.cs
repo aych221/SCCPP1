@@ -6,6 +6,7 @@ using System.Data;
 using System.Text;
 using SCCPP1.Database.Tables;
 using System.Collections.ObjectModel;
+using Microsoft.IdentityModel.Tokens;
 
 namespace SCCPP1
 {
@@ -2871,6 +2872,10 @@ COMMIT;
                         {
 
 
+
+                            Console.WriteLine(ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
+                            Console.WriteLine(ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
+                            Console.WriteLine(ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
                             cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(pd.Owner.RecordID));
                             cmd.Parameters.AddWithValue("@title", ValueCleaner(pd.Title));
                             cmd.Parameters.AddWithValue("@education_history_ids", ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
@@ -2920,7 +2925,9 @@ COMMIT;
                         using (SqliteCommand cmd = new SqliteCommand(sql, conn, transaction))
                         {
 
-
+                            Console.WriteLine(ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
+                            Console.WriteLine(ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
+                            Console.WriteLine(ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
                             cmd.Parameters.AddWithValue("@id", ValueCleaner(pd.RecordID));
                             cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(pd.Owner.RecordID));
                             cmd.Parameters.AddWithValue("@title", ValueCleaner(pd.Title));
@@ -2976,17 +2983,74 @@ COMMIT;
                     {
                         list = new List<ProfileData>();
 
+                        ProfileData pd;
+                        string skillIDs, educationIDs, workIDs;
+                        HashSet<int> skills, education, work;
+
                         while (r.Read())
                         {
-                            list.Add(new ProfileData(
+                            skillIDs = GetString(r, 5);
+                            educationIDs = GetString(r, 3);
+                            workIDs = GetString(r, 4);
+
+                            if (string.IsNullOrEmpty(skillIDs))
+                            {
+                                skills = new HashSet<int>();
+
+                            }
+                            else if (skillIDs.Length == 1)
+                            {
+                                skills = new HashSet<int>();
+                                skills.Add(int.Parse(skillIDs));
+                            }
+                            else
+                            {
+                                skills = new HashSet<int>(skillIDs.Split(',').Select(int.Parse));
+                            }
+
+
+
+                            if (string.IsNullOrEmpty(educationIDs))
+                            {
+                                education = new HashSet<int>();
+
+                            }
+                            else if (educationIDs.Length == 1)
+                            {
+                                (education = new HashSet<int>()).Add(int.Parse(educationIDs));
+                            }
+                            else
+                            {
+                                education = new HashSet<int>(educationIDs.Split(',').Select(int.Parse));
+                            }
+
+
+
+                            if (string.IsNullOrEmpty(workIDs))
+                            {
+                                work = new HashSet<int>();
+
+                            }
+                            else if (workIDs.Length == 1)
+                            {
+                                (work = new HashSet<int>()).Add(int.Parse(workIDs));
+                            }
+                            else
+                            {
+                                work = new HashSet<int>(workIDs.Split(',').Select(int.Parse));
+                            }
+
+
+                            list.Add(pd = new ProfileData(
                                 account,
                                 GetInt32(r, 0), //populate profile record id
                                 GetString(r, 2), //populate title
-                                new HashSet<int>(GetString(r, 5).Split(',').Select(int.Parse)), //populate skills ids
-                                new HashSet<int>(GetString(r, 3).Split(',').Select(int.Parse)), //populate education history ids
-                                new HashSet<int>(GetString(r, 4).Split(',').Select(int.Parse)), //populate work history ids
+                                skills, //populate skills ids
+                                education, //populate education history ids
+                                work, //populate work history ids
                                 GetString(r, 6) //populate ordering
                                 ));
+
                         }
 
                         account.Profiles = list;
@@ -3002,7 +3066,7 @@ COMMIT;
 
         public static bool LoadColleageProfiles(Account account, out Dictionary<int, ProfileData> dict)
         {
-            dict = new();
+            dict = new Dictionary<int, ProfileData>();
 
             if (account == null || account.RecordID < 0)
                 return false;
@@ -3026,17 +3090,71 @@ COMMIT;
                     {
                         list = new List<ProfileData>();
                         ProfileData pd;
+                        string skillIDs, educationIDs, workIDs;
+
+                        HashSet<int> skills, education, work;
 
                         while (r.Read())
                         {
+                            skillIDs = GetString(r, 5);
+                            educationIDs = GetString(r, 3);
+                            workIDs = GetString(r, 4);
+
+                            if (string.IsNullOrEmpty(skillIDs))
+                            {
+                                skills = new HashSet<int>();
+
+                            }
+                            else if (skillIDs.Length == 1)
+                            {
+                                skills = new HashSet<int>();
+                                skills.Add(int.Parse(skillIDs));
+                            }
+                            else
+                            {
+                                skills = new HashSet<int>(skillIDs.Split(',').Select(int.Parse));
+                            }
+
+
+
+                            if (string.IsNullOrEmpty(educationIDs))
+                            {
+                                education = new HashSet<int>();
+
+                            }
+                            else if (educationIDs.Length == 1)
+                            {
+                                (education = new HashSet<int>()).Add(int.Parse(educationIDs));
+                            }
+                            else
+                            {
+                                education = new HashSet<int>(educationIDs.Split(',').Select(int.Parse));
+                            }
+
+
+
+                            if (string.IsNullOrEmpty(workIDs))
+                            {
+                                work = new HashSet<int>();
+
+                            }
+                            else if (workIDs.Length == 1)
+                            {
+                                (work = new HashSet<int>()).Add(int.Parse(workIDs));
+                            }
+                            else
+                            {
+                                work = new HashSet<int>(workIDs.Split(',').Select(int.Parse));
+                            }
+
 
                             list.Add(pd = new ProfileData(
                                 account,
                                 GetInt32(r, 0), //populate profile record id
                                 GetString(r, 2), //populate title
-                                new HashSet<int>(GetString(r, 5).Split(',').Select(int.Parse)), //populate skills ids
-                                new HashSet<int>(GetString(r, 3).Split(',').Select(int.Parse)), //populate education history ids
-                                new HashSet<int>(GetString(r, 4).Split(',').Select(int.Parse)), //populate work history ids
+                                skills, //populate skills ids
+                                education, //populate education history ids
+                                work, //populate work history ids
                                 GetString(r, 6) //populate ordering
                                 ));
 

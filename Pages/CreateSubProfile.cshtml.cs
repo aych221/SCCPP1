@@ -20,6 +20,8 @@ namespace SCCPP1.Pages
 
         //The following binds allow the selection result to be recorded
 
+
+
         [BindProperty]
         public string name { get; set; }
         [BindProperty]
@@ -56,10 +58,7 @@ namespace SCCPP1.Pages
         }
         public IActionResult OnGet()
         {
-            Account.LoadWorkHistory();
-            Account.LoadEducationHistory();
-            Account.LoadSkills();
-
+            Account.CreateProfile(subName);
             if (subName == null)
             {
                 ViewData["subTitle"] = $"<input type = \"text\" placeholder = \"Name this profile\" name=\"subName\" id=\"subName\" required />";
@@ -89,7 +88,7 @@ namespace SCCPP1.Pages
                 string edString = "";
                 eduCollection = "";
                 
-                    foreach (EducationData e in Account.EducationHistory)
+                    foreach (EducationData e in Account.SavedEducationHistory.Values)
                     {
                         edString += $"<input type=\"checkbox\" name=\"eduHist\" value=\"{e.Institution}\" onChange = \"this.form.submit()\" >" +
                         $"<label for=\"about\"> {e.Institution} </label><br>";
@@ -100,7 +99,7 @@ namespace SCCPP1.Pages
 
                 workCollection = "";
                
-                    foreach (WorkData w in Account.WorkHistory)
+                    foreach (WorkData w in Account.SavedWorkHistory.Values)
                     {
                         workString += $"<input type=\"checkbox\" name=\"workHist\" value=\"{w.Employer}\" onChange = \"this.form.submit()\" >" +
                          $"<label for=\"about\"> {w.Employer} </label><br>";
@@ -112,7 +111,7 @@ namespace SCCPP1.Pages
                 string skillString = "";
                 skillsCollection = "";
                 
-                    foreach (SkillData s in Account.Skills)
+                    foreach (SkillData s in Account.SavedSkills.Values)
                     {
                         skillString += $"<input type=\"checkbox\" name=\"skills\" value=\"{s.SkillName}\" onChange = \"this.form.submit()\" >" +
                        $"<label for=\"about\"> {s.SkillName} </label><br>";
@@ -152,7 +151,7 @@ namespace SCCPP1.Pages
 
             string edString = "";
             eduCollection = "";
-            foreach (EducationData e in Account.EducationHistory)
+            foreach (EducationData e in Account.SavedEducationHistory.Values)
             {
                 eduCheck = "";
                 foreach (string ed in eduHist)
@@ -182,7 +181,7 @@ namespace SCCPP1.Pages
             string workString = "";
             workCollection = "";
 
-            foreach (WorkData w in Account.WorkHistory)
+            foreach (WorkData w in Account.SavedWorkHistory.Values)
             {
 
                 workCheck = "";
@@ -214,7 +213,7 @@ namespace SCCPP1.Pages
             string skillString = "";
             skillsCollection = "";
 
-            foreach (SkillData s in Account.Skills)
+            foreach (SkillData s in Account.SavedSkills.Values)
             {
                 skillCheck = "";
                 foreach (string sk in skills)

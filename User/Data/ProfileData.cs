@@ -15,7 +15,7 @@ namespace SCCPP1.User.Data
         public string Title
         {
             get { return title; }
-            set { SetField(ref title, value); }
+            set { SetField(ref title, value == null ? "" : value); }
         }
 
 

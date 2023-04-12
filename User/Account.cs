@@ -221,6 +221,15 @@ namespace SCCPP1.User
             this.EmailAddress = Data.GetUsersEmail();
             this.Name = Data.GetUsersName();
 
+            UnsavedSkills = new List<SkillData>();
+            UnsavedEducationHistory = new List<EducationData>();
+            UnsavedWorkHistory = new List<WorkData>();
+            UnsavedProfiles = new List<ProfileData>();
+
+            SavedSkills = new ReadOnlyDictionary<int, SkillData>(new Dictionary<int, SkillData>());
+            SavedEducationHistory = new ReadOnlyDictionary<int, EducationData>(new Dictionary<int, EducationData>());
+            SavedWorkHistory = new ReadOnlyDictionary<int, WorkData>(new Dictionary<int, WorkData>());
+            SavedProfiles = new ReadOnlyDictionary<int, ProfileData>(new Dictionary<int, ProfileData>());
         }
 
 
