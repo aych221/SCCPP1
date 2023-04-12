@@ -1,4 +1,5 @@
-﻿using SCCPP1.Session;
+﻿using SCCPP1.Models;
+using SCCPP1.Session;
 using SCCPP1.User.Data;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
@@ -305,7 +306,7 @@ namespace SCCPP1.User
 
             foreach (string skillName in skillNames)
             {
-                Skills.Add(new SkillData(this, skillName, -1));
+                //Skills.Add(new SkillData(this, skillName, -1));
                 UnsavedSkills.Add(new SkillData(this, skillName, -1));
             }
 
@@ -325,7 +326,7 @@ namespace SCCPP1.User
 
             foreach (string skillName in skillNames)
             {
-                Skills.Add(new SkillData(this, skillCategory, skillName, -1)); //later will need to remove this
+                //Skills.Add(new SkillData(this, skillCategory, skillName, -1)); //later will need to remove this
                 UnsavedSkills.Add(new SkillData(this, skillCategory, skillName, -1));
             }
 
@@ -341,8 +342,8 @@ namespace SCCPP1.User
 
         public void AddEducation(string institution, string degreeType, string field, Location? location, DateOnly? startDate, DateOnly? endDate)
         {
-            EducationHistory.Add(new EducationData(this, institution, degreeType, field, new Location(), new DateOnly(), new DateOnly()));
-            UnsavedEducationHistory.Add(new EducationData(this, institution, degreeType, field, new Location(), new DateOnly(), new DateOnly()));
+            //EducationHistory.Add(new EducationData(this, institution, degreeType, field, new Location(), new DateOnly(), new DateOnly()));
+            UnsavedEducationHistory.Add(new EducationData(this, institution, degreeType, field, location.GetValueOrDefault(), startDate.GetValueOrDefault(), endDate.GetValueOrDefault()));
             NeedsSave = IsUpdated = true;
         }
 
@@ -356,21 +357,22 @@ namespace SCCPP1.User
 
         public void AddCertification(string institution, string certificationType, string description, Location? location, DateOnly? startDate, DateOnly? endDate)
         {
-            UnsavedCertifications.Add(new CertificationData(this, institution, certificationType, description, new Location(), new DateOnly(), new DateOnly()));
+
+            UnsavedCertifications.Add(new CertificationData(this, institution, certificationType, description, location.GetValueOrDefault(), startDate.GetValueOrDefault(), endDate.GetValueOrDefault()));
             NeedsSave = IsUpdated = true;
         }
 
 
         public void AddCertification(string institution, string certificationType, DateOnly? startDate, DateOnly? endDate)
         {
-            AddCertification(institution, certificationType, null, null, startDate, endDate);
+            AddCertification(institution, certificationType, null, null, startDate.GetValueOrDefault(), endDate.GetValueOrDefault());
         }
 
 
-        public void AddWork(string employer, string jobTitle, string description, Location location, DateOnly startDate, DateOnly endDate)
+        public void AddWork(string employer, string jobTitle, string description, Location? location, DateOnly? startDate, DateOnly? endDate)
         {
-            WorkHistory.Add(new WorkData(this, employer, jobTitle, description, location, startDate, endDate));
-            UnsavedWorkHistory.Add(new WorkData(this, employer, jobTitle, description, location, startDate, endDate));
+            //WorkHistory.Add(new WorkData(this, employer, jobTitle, description, location, startDate, endDate));
+            UnsavedWorkHistory.Add(new WorkData(this, employer, jobTitle, description, location.GetValueOrDefault(), startDate.GetValueOrDefault(), endDate.GetValueOrDefault()));
             NeedsSave = IsUpdated = true;
         }
 
@@ -605,8 +607,8 @@ namespace SCCPP1.User
         /// <returns>true if changes are saved in database, false otherwise.</returns>
         public override bool Save()
         {
-            if (!NeedsSave)
-                return true;
+            /*if (!NeedsSave)
+                return true;*/
 
             return NeedsSave = !(IsUpdated = DatabaseConnector.SaveUser(this));
         }
@@ -732,8 +734,10 @@ namespace SCCPP1.User
             bool success = true;
 
             //save, update, or delete account
-            if (Remove ? !Delete() : !Save())
-                success = false;
+            if (Remove)
+                Delete();
+            else
+                Save();
 
             return success;
         }
@@ -744,11 +748,14 @@ namespace SCCPP1.User
             bool success = true;
             
             //persist all saved skill data
-            foreach (SkillData d in SavedSkills.Values.Concat(UnsavedSkills))
+            foreach (SkillData d in SavedSkills.Values.ToList().Concat(UnsavedSkills))
             {
+                bool skills = true;
                 //delete if remove, else save
-                if (d.Remove ? !d.Delete() : !d.Save())
-                    success = false;
+                if (d.Remove)
+                    d.Delete();
+                else
+                    d.Save();
 
             }
 
@@ -762,7 +769,7 @@ namespace SCCPP1.User
             }
 
             SavedSkills = new ReadOnlyDictionary<int, SkillData>(savedSkills);
-
+            Console.WriteLine("-------------Skills Saved " + UnsavedSkills.Count + ", Skills Loaded " + SavedSkills.Count);
             UnsavedSkills.Clear();
 
             return success;
@@ -777,8 +784,11 @@ namespace SCCPP1.User
             foreach (EducationData d in SavedEducationHistory.Values.Concat(UnsavedEducationHistory))
             {
                 //delete if remove, else save
-                if (d.Remove ? !d.Delete() : !d.Save())
-                    success = false;
+                if (d.Remove)
+                    d.Delete();
+                else
+                    d.Save();
+
 
             }
 
@@ -792,7 +802,7 @@ namespace SCCPP1.User
             }
 
             SavedEducationHistory = new ReadOnlyDictionary<int, EducationData>(savedEducationHistory);
-
+            Console.WriteLine("-------------Education Saved " + UnsavedEducationHistory.Count + ", Education Loaded " + SavedEducationHistory.Count);
             UnsavedEducationHistory.Clear();
 
             return success;
@@ -807,8 +817,11 @@ namespace SCCPP1.User
             foreach (CertificationData d in SavedCertifications.Values.Concat(UnsavedCertifications))
             {
                 //delete if remove, else save
-                if (d.Remove ? !d.Delete() : !d.Save())
-                    success = false;
+                if (d.Remove)
+                    d.Delete();
+                else
+                    d.Save();
+
 
             }
 
@@ -822,7 +835,7 @@ namespace SCCPP1.User
             }
 
             SavedCertifications = new ReadOnlyDictionary<int, CertificationData>(savedCertifications);
-
+            Console.WriteLine("-------------Certifications Saved " + UnsavedCertifications.Count + ", Certifications Loaded " + SavedCertifications.Count);
             UnsavedCertifications.Clear();
 
             return success;
@@ -837,8 +850,11 @@ namespace SCCPP1.User
             foreach (WorkData d in SavedWorkHistory.Values.Concat(UnsavedWorkHistory))
             {
                 //delete if remove, else save
-                if (d.Remove ? !d.Delete() : !d.Save())
-                    success = false;
+                if (d.Remove)
+                    d.Delete();
+                else
+                    d.Save();
+
 
             }
 
@@ -852,7 +868,7 @@ namespace SCCPP1.User
             }
 
             SavedWorkHistory = new ReadOnlyDictionary<int, WorkData>(savedWorkHistory);
-
+            Console.WriteLine("-------------Work Saved " + UnsavedWorkHistory.Count + ", Work Loaded " + SavedWorkHistory.Count);
             UnsavedWorkHistory.Clear();
 
             return success;
@@ -867,8 +883,10 @@ namespace SCCPP1.User
             foreach (ProfileData d in SavedProfiles.Values.Concat(UnsavedProfiles))
             {
                 //delete if remove, else save
-                if (d.Remove ? !d.Delete() : !d.Save())
-                    success = false;
+                if (d.Remove)
+                    d.Delete();
+                else
+                    d.Save();
 
             }
 
@@ -880,7 +898,7 @@ namespace SCCPP1.User
                 success = false;
 
             SavedProfiles = new ReadOnlyDictionary<int, ProfileData>(savedProfiles);
-
+            Console.WriteLine("-------------Profiles Saved " + UnsavedProfiles.Count + ", Profiles Loaded " + SavedProfiles.Count);
             UnsavedProfiles.Clear();
 
             return success;

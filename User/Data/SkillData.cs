@@ -80,8 +80,8 @@
         public override bool Save()
         {
             //save resources if we don't need to save.
-            if (!NeedsSave)
-                return true;
+            /*if (!NeedsSave)
+                return true;*/
 
             return NeedsSave = !(IsUpdated = DatabaseConnector.SaveColleageSkills(this));
         }

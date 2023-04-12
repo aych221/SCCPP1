@@ -96,8 +96,8 @@
         public override bool Save()
         {
             //save resources if we don't need to save.
-            if (!this.NeedsSave)
-                return true;
+            /*if (!this.NeedsSave)
+                return true;*/
 
             return NeedsSave = !(IsUpdated = DatabaseConnector.SaveWorkHistory(this));
         }

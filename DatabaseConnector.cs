@@ -1207,6 +1207,89 @@ namespace SCCPP1
 
             return false;
         }
+
+        /*
+        public static bool SaveColleageSkill1(SkillData skill)
+        {
+            //toInsert are skills with -1 ids, toUpdate are skills with existing ids
+            List<string> toInsert = new List<string>(), updateCases = new List<string>();
+
+            //ids to update
+            List<int> updateIDs = new List<int>(), updateRatings = new List<int>();
+
+
+            //for SaveSkills method
+            string[] skillNames = new string[skills.Length];
+
+            for (int i = 0; i < skills.Length; i++)
+            {
+                skillNames[i] = skills[i].SkillName;
+
+                //toUpdate
+                if (skills[i].RecordID > 0)
+                {
+                    updateIDs.Add(skills[i].RecordID);
+                    updateRatings.Add(skills[i].Rating);
+                    updateCases.Add($"WHEN {skills[i].RecordID} THEN @rating{i}");
+                }
+                else
+                {
+                    toInsert.Add($"({skills[i].Owner.RecordID},@skillID{i})");
+                }
+            }
+
+
+            //insert skills and get ids
+            skill.RecordID = SaveSkill(skill.SkillName);
+
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                //not sure if this is the most efficient solution for this table
+                //will need to run tests
+                string sql;
+
+                //inserts first
+                if (toInsert.Count > 0)
+                {
+                    sql = $"INSERT OR IGNORE INTO colleague_skills(colleague_id, skill_id) VALUES {ValueCleaner(string.Join(",", toInsert))};";
+                    using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                    {
+                        for (int i = 0; i < ids.Length; i++)
+                        {
+                            cmd.Parameters.AddWithValue($"@skillID{i}", ids[i]);
+                        }
+                        Console.WriteLine(cmd.CommandText);
+                        cmd.ExecuteNonQuery();
+
+                    }
+                }
+
+                if (updateIDs.Count > 0)
+                {
+                    //now do updates
+                    sql = $@"UPDATE colleague_skills
+                            SET rating = CASE id {ValueCleaner(string.Join(Environment.NewLine, updateCases))} END
+                            WHERE id IN ({ValueCleaner(string.Join(",", updateIDs))});";
+
+                    using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                    {
+                        for (int i = 0; i < ids.Length; i++)
+                        {
+                            cmd.Parameters.AddWithValue($"@rating{i}", updateRatings[i]);
+                        }
+                        Console.WriteLine(cmd.CommandText);
+                        cmd.ExecuteNonQuery();
+
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
         /* public static bool SaveColleageSkills(params SkillData[] skills)
          {
              string[] skillNames = new string[account.Skills.Count];
@@ -1512,7 +1595,7 @@ namespace SCCPP1
                 string sql = @"SELECT cs.id, cs.colleague_id, sc.name AS skill_category, cs.skill_category_id, s.name AS skill, cs.skill_id, cs.rating
                                             FROM colleague_skills cs
                                             JOIN skills s ON cs.skill_id = s.id
-                                            JOIN skill_categories sc ON cs.skill_category_id = sc.id
+                                            LEFT JOIN skill_categories sc ON cs.skill_category_id = sc.id
                                             WHERE cs.colleague_id=@colleague_id;";
 
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
@@ -1539,7 +1622,7 @@ namespace SCCPP1
                 }
             }
 
-            Console.WriteLine($"Found Education Records: {list?.Count}");
+            Console.WriteLine($"Found Colleage_Skill Records: {dict?.Count}");
 
             return true;
         }
@@ -3572,13 +3655,21 @@ COMMIT;
         {
             //ww8FDk-bnuBk1KJXVreseNbsDmGnt62pNRpswwgGC7k
 
-            account.Name = "Wall, Thomas Joseph";
+           /* account.Name = "Wall, Thomas Joseph";
             account.EmailAddress = "thwall@augusta.edu";
             account.PhoneNumber = 1231231234;
             account.StreetAddress = "123 Main St";
             account.IntroNarrative = @"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. ";
+            */
+            account.UpdateData(
+                "Wall, Thomas Joseph",
+                "thwall@augusta.edu",
+                1231231234,
+                @"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. "
+            );
 
-            EducationData ed1 = new EducationData(account),
+
+           /* EducationData ed1 = new EducationData(account),
                 ed2 = new EducationData(account),
                 ed3 = new EducationData(account);
 
@@ -3595,10 +3686,36 @@ COMMIT;
             ed3.EducationType = "Scrum Master";
             ed3.Description = "in my Mom's Kitchen";
             ed3.Institution = "North Augusta High School";
-            ed3.StartDate = Utilities.ToDateOnly("August 8 1980");
+            ed3.StartDate = Utilities.ToDateOnly("August 8 1980");*/
 
+            account.AddEducation(
+                "Harvard",
+                "Masters",
+                "Business Administration",
+                null,
+                Utilities.ToDateOnly("August 18 1993"),
+                null
+                );
 
-            WorkData wd1 = new WorkData(account),
+            account.AddEducation(
+                "Aiken Technical College",
+                "Bachelor of Arts",
+                "Computer Design",
+                null,
+                Utilities.ToDateOnly("August 15 1990"),
+                null
+                );
+
+            account.AddEducation(
+                "North Augusta High School",
+                "Scrum Master",
+                "in my Mom's Kitchen",
+                null,
+                Utilities.ToDateOnly("August 8 1980"),
+                null
+                );
+
+           /* WorkData wd1 = new WorkData(account),
                 wd2 = new WorkData(account);
 
             wd1.Employer = "The Kern Family Foundation";
@@ -3609,10 +3726,27 @@ COMMIT;
             wd2.Employer = "Management Research Service";
             wd2.JobTitle = "Social Media Influencer";
             wd2.StartDate = Utilities.ToDateOnly("October 12 2009");
-            wd2.EndDate = Utilities.ToDateOnly("April 1 2023");
+            wd2.EndDate = Utilities.ToDateOnly("April 1 2023");*/
+
+            account.AddWork(
+                "The Kern Family Foundation",
+                "Chair Sitting Assistant",
+                "sat in chairs",
+                null,
+                Utilities.ToDateOnly("September 1 2006"),
+                Utilities.ToDateOnly("September 1 2009")
+                );
+            account.AddWork(
+                "Management Research Service",
+                "Social Media Influencer",
+                "made money for absolutely no reason",
+                null,
+                Utilities.ToDateOnly("October 12 2009"),
+                Utilities.ToDateOnly("April 1 2023")
+                );
 
 
-            SkillData sd1 = new SkillData(account),
+            /*SkillData sd1 = new SkillData(account),
                 sd2 = new SkillData(account),
                 sd3 = new SkillData(account);
 
@@ -3620,9 +3754,11 @@ COMMIT;
 
             sd1.SkillName = "Java";
             sd2.SkillName = "C#";
-            sd3.SkillName = "HTML";
+            sd3.SkillName = "HTML";*/
 
-            SaveUser(account);
+            account.AddSkills("Programming Lanaguages", "Java", "C#", "HTML");
+
+           /* SaveUser(account);
             //SaveSkill(")
             Thread.Sleep(1);
             SaveEducationHistory(ed1);
@@ -3638,22 +3774,15 @@ COMMIT;
             CertificationData cd1 = new CertificationData(account);
             cd1.CertificationType = "test";
             cd1.Institution = "somewhere";
-            SaveCertification(cd1);
-            //account.Skills = GetColleagueSkills(account);
+            SaveCertification(cd1);*/
+
+            account.AddCertification("Online", "CompTIA S+", null, null);
+
+
+            account.PersistAll();
+
+
             Console.WriteLine("Saved!");
-            /*foreach (string s in GetRawColleagueEducationHistory(account.RecordID))
-                Console.WriteLine(s);
-            foreach (string s in GetRawColleagueWorkHistory(account.RecordID))
-                Console.WriteLine(s);
-            */
-            /*foreach (string s in PrintRecords("work_history"))
-                Console.WriteLine(s);
-
-            foreach (string s in PrintRecords("education_history"))
-                Console.WriteLine(s);
-
-            foreach (string s in PrintRecords("colleagues"))
-                Console.WriteLine(s);*/
         }
 
         private static object ValueCleaner(int val)
@@ -3678,9 +3807,8 @@ COMMIT;
                 return DBNull.Value;
 
             //Test before using.
-            //Utilities.HtmlStripper(val);
 
-            return val;
+            return val;//Utilities.HtmlStripper(val);
         }
 
         private static object ValueCleaner(DateOnly? val)
