@@ -223,7 +223,7 @@
             <br />
             <br />
 
-            <legend><b>Education/Certification:</b></legend>
+            <legend><b>Education:</b></legend>
 
             <div id="education-list">
                 <label for="Institution"> Institution: </label>
@@ -241,11 +241,11 @@
                 <label for="EndDate">End Date:</label>
                 <input type="date" asp-for="Education!.EndDate">
 
-                <label for="present-checkbox">Present Employment:</label>
-                <input type="checkbox" id="present-checkbox">
+                <label for="currently-checkbox">Present Employment:</label>
+                <input type="checkbox" id="currently-checkbox">
 
                 <button type="button" onclick="addEducation()">Add Education</button>
-                <ul id="experience-ul">
+                <ul id="education-ul">
                 </ul>
 
             </div>
@@ -255,7 +255,9 @@
 
             <br />
             <br />
-            <!--
+
+            <legend><b>Certification:</b></legend>
+
             <div id="certification-list">
                 <label for="Institution"> Institution: </label>
                 <input type="text" asp-for="Certification!.Institution">
@@ -269,11 +271,11 @@
                 <label for="EndDate">End Date:</label>
                 <input type="date" asp-for="Certification!.EndDate">
 
-                <label for="present-checkbox">Present:</label>
-                <input type="checkbox" id="present-checkbox">
+                <label for="current-checkbox">Current:</label>
+                <input type="checkbox" id="current-checkbox">
 
                 <button type="button" onclick="addCertification()">Add Certification</button>
-                <ul id="experience-ul">
+                <ul id="certification-ul">
                 </ul>
 
             </div>
@@ -283,7 +285,7 @@
 
             <br />
             <br />
-                -->
+
             <input type="submit" value="Submit" />
             <input type="submit" value="Save as Draft">
         </form>
@@ -368,7 +370,8 @@
                 input.value = '';
             }
         }
-    });</script>
+    });
+</script>
 
 <!-- Configurable list script for experience -->
 
@@ -424,7 +427,6 @@
         var li = document.querySelector("#experience-ul li:last-child");
         ul.removeChild(li);
     }</script>
-
 <!-- Configurable list script for education-->
 <script>
     function addEducation() {
@@ -434,7 +436,7 @@
         var fieldInput = document.getElementById("Education_Field"); // Input field for job title
         var startDateInput = document.getElementById("Education_StartDate"); // Input field for start date
         var endDateInput = document.getElementById("Education_EndDate"); // Input field for end date
-        var presentCheckbox = document.querySelector("#present-checkbox"); // Present employer checkbox
+        var currentlyCheckbox = document.querySelector("#currently-checkbox"); // Present employer checkbox
 
         // Creates new list item to hold experience details
         var li = document.createElement("li");
@@ -460,8 +462,8 @@
 
         // Creates paragraph element for end date and adds it to list
         var endDate = document.createElement("p");
-        if (presentCheckbox.checked) {
-            endDate.appendChild(document.createTextNode("End Date: Present Education"));
+        if (currentlyCheckbox.checked) {
+            endDate.appendChild(document.createTextNode("End Date: Currently Enrolled"));
         } else {
             endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
         }
@@ -471,11 +473,12 @@
         ul.appendChild(li);
 
         // Clears input fields and checkbox
-        employerInput.value = "";
-        jobTitleInput.value = "";
+        institutionInput.value = "";
+        degreeInput.value = "";
+        fieldInput.value = "";
         startDateInput.value = "";
         endDateInput.value = "";
-        presentCheckbox.checked = false;
+        currentlyCheckbox.checked = false;
     }
 
     function removeLastEducation() {
@@ -485,23 +488,21 @@
     }</script>
 
 <!-- Configurable list script for certification-->
-<!--
 <script>
     function addCertification() {
         var ul = document.querySelector("#certification-ul"); // The list element
         var institutionInput = document.getElementById("Certification_Institution"); // Input field for employer name
-        var degreeInput = document.getElementById("Certification_Degree"); // Input field for job title
-        var fieldInput = document.getElementById("Certification_Field"); // Input field for job title
+        var certificateInput = document.getElementById("Certification_Certificate"); // Input field for job title
         var startDateInput = document.getElementById("Certification_StartDate"); // Input field for start date
         var endDateInput = document.getElementById("Certification_EndDate"); // Input field for end date
-        var presentCheckbox = document.querySelector("#present-checkbox"); // Present employer checkbox
+        var currentCheckbox = document.querySelector("#current-checkbox"); // Present employer checkbox
 
         // Creates new list item to hold experience details
         var li = document.createElement("li");
 
         // Creates paragraph element for employer name and adds it to list
         var company = document.createElement("p");
-        company.appendChild(document.createTextNode("Certificate Institution: " + institutionInput.value));
+        company.appendChild(document.createTextNode("Institution: " + institutionInput.value));
         li.appendChild(company);
 
         // Creates paragraph element for job title and adds it to list
@@ -516,8 +517,8 @@
 
         // Creates paragraph element for end date and adds it to list
         var endDate = document.createElement("p");
-        if (presentCheckbox.checked) {
-            endDate.appendChild(document.createTextNode("End Date: Presently Enrolled "));
+        if (currentCheckbox.checked) {
+            endDate.appendChild(document.createTextNode("End Date: Currently Enrolled"));
         } else {
             endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
         }
@@ -527,20 +528,19 @@
         ul.appendChild(li);
 
         // Clears input fields and checkbox
-        employerInput.value = "";
-        jobTitleInput.value = "";
+        institutionInput.value = "";
+        certificateInput.value = "";
         startDateInput.value = "";
         endDateInput.value = "";
-        presentCheckbox.checked = false;
+        currentCheckbox.checked = false;
     }
 
     function removeLastCertification() {
         var ul = document.querySelector("#certification-ul");
         var li = document.querySelector("#certification-ul li:last-child");
         ul.removeChild(li);
-    }
-</script>
--->
+    }</script>
+
 <!--Stops page from being submitted upon pressing enter-->
 <script>
     const form = document.getElementById("myForm");
