@@ -143,6 +143,16 @@ namespace SCCPP1.User
 
 
 
+        private List<CertificationData> _unsavedCertificates;
+
+        protected List<CertificationData> UnsavedCertifications
+        {
+            get { return _unsavedCertificates; }
+            set { SetField(ref _unsavedCertificates, value); }
+        }
+
+
+
         private List<WorkData> _unsavedWorkHistory;
 
         protected List<WorkData> UnsavedWorkHistory
@@ -180,6 +190,16 @@ namespace SCCPP1.User
         {
             get { return _savedEducationHistory; }
             protected set { SetField(ref _savedEducationHistory, value); }
+        }
+
+
+
+        private ReadOnlyDictionary<int, CertificationData> _savedCertifications;
+
+        public ReadOnlyDictionary<int, CertificationData> SavedCertifications
+        {
+            get { return _savedCertifications; }
+            protected set { SetField(ref _savedCertifications, value); }
         }
 
 
@@ -223,10 +243,12 @@ namespace SCCPP1.User
 
             UnsavedSkills = new List<SkillData>();
             UnsavedEducationHistory = new List<EducationData>();
+            UnsavedCertifications = new List<CertificationData>();
             UnsavedWorkHistory = new List<WorkData>();
             UnsavedProfiles = new List<ProfileData>();
 
             SavedSkills = new ReadOnlyDictionary<int, SkillData>(new Dictionary<int, SkillData>());
+            SavedCertifications = new ReadOnlyDictionary<int, CertificationData>(new Dictionary<int, CertificationData>());
             SavedEducationHistory = new ReadOnlyDictionary<int, EducationData>(new Dictionary<int, EducationData>());
             SavedWorkHistory = new ReadOnlyDictionary<int, WorkData>(new Dictionary<int, WorkData>());
             SavedProfiles = new ReadOnlyDictionary<int, ProfileData>(new Dictionary<int, ProfileData>());
@@ -317,11 +339,31 @@ namespace SCCPP1.User
         }
 
 
-        public void AddEducation(string institution, string educationType, string description, Location location, DateOnly startDate, DateOnly endDate)
+        public void AddEducation(string institution, string degreeType, string field, Location? location, DateOnly? startDate, DateOnly? endDate)
         {
-            EducationHistory.Add(new EducationData(this, institution, educationType, description, location, startDate, endDate));
-            UnsavedEducationHistory.Add(new EducationData(this, institution, educationType, description, location, startDate, endDate));
+            EducationHistory.Add(new EducationData(this, institution, degreeType, field, new Location(), new DateOnly(), new DateOnly()));
+            UnsavedEducationHistory.Add(new EducationData(this, institution, degreeType, field, new Location(), new DateOnly(), new DateOnly()));
             NeedsSave = IsUpdated = true;
+        }
+
+
+        public void AddEducation(string institution, string degreeType, string field)
+        {
+            AddEducation(institution, degreeType, field, null, null, null);
+        }
+
+
+
+        public void AddCertification(string institution, string certificationType, string description, Location? location, DateOnly? startDate, DateOnly? endDate)
+        {
+            UnsavedCertifications.Add(new CertificationData(this, institution, certificationType, description, new Location(), new DateOnly(), new DateOnly()));
+            NeedsSave = IsUpdated = true;
+        }
+
+
+        public void AddCertification(string institution, string certificationType, DateOnly? startDate, DateOnly? endDate)
+        {
+            AddCertification(institution, certificationType, null, null, startDate, endDate);
         }
 
 
@@ -420,10 +462,21 @@ namespace SCCPP1.User
         /// Attempts to fetch a saved ProfileData record.
         /// </summary>
         /// <param name="id"></param>
-        /// <returns>WorkData if object is found, null otherwise</returns>
+        /// <returns>ProfuleData if object is found, null otherwise</returns>
         public ProfileData? GetProfileData(int id)
         {
             return SavedProfiles[id];
+        }
+
+
+        /// <summary>
+        /// Attempts to fetch a saved CertificationData record.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>CertificationData if object is found, null otherwise</returns>
+        public CertificationData? GetCertificationData(int id)
+        {
+            return SavedCertifications[id];
         }
         #endregion
 
@@ -454,7 +507,6 @@ namespace SCCPP1.User
                 ""
                 );
             UnsavedProfiles.Add(pd);
-
             return pd;
         }
 
@@ -667,7 +719,7 @@ namespace SCCPP1.User
         /// <returns>true if the operation was successful, false otherwise.</returns>
         public bool PersistAll()
         {
-            return Persist() && PersistSkills() && PersistEducationHistory() && PersistWorkHistory() && PersistProfiles();
+            return Persist() && PersistSkills() && PersistCertifications() && PersistEducationHistory() && PersistWorkHistory() && PersistProfiles();
         }
 
 
@@ -707,11 +759,11 @@ namespace SCCPP1.User
             if (!DatabaseConnector.LoadColleagueSkills1(this, out savedSkills))
             {
                 success = false;
-
-                SavedSkills = new ReadOnlyDictionary<int, SkillData>(savedSkills);
-
-                UnsavedSkills.Clear();
             }
+
+            SavedSkills = new ReadOnlyDictionary<int, SkillData>(savedSkills);
+
+            UnsavedSkills.Clear();
 
             return success;
         }
@@ -737,11 +789,41 @@ namespace SCCPP1.User
             if (!DatabaseConnector.LoadColleagueEducationHistory1(this, out savedEducationHistory))
             {
                 success = false;
-
-                SavedEducationHistory = new ReadOnlyDictionary<int, EducationData>(savedEducationHistory);
-
-                UnsavedEducationHistory.Clear();
             }
+
+            SavedEducationHistory = new ReadOnlyDictionary<int, EducationData>(savedEducationHistory);
+
+            UnsavedEducationHistory.Clear();
+
+            return success;
+        }
+
+
+        public bool PersistCertifications()
+        {
+            bool success = true;
+
+            //persist all saved education history data
+            foreach (CertificationData d in SavedCertifications.Values.Concat(UnsavedCertifications))
+            {
+                //delete if remove, else save
+                if (d.Remove ? !d.Delete() : !d.Save())
+                    success = false;
+
+            }
+
+            //load the new education history data
+
+            Dictionary<int, CertificationData> savedCertifications;
+
+            if (!DatabaseConnector.LoadColleagueCertifications(this, out savedCertifications))
+            {
+                success = false;
+            }
+
+            SavedCertifications = new ReadOnlyDictionary<int, CertificationData>(savedCertifications);
+
+            UnsavedCertifications.Clear();
 
             return success;
         }
@@ -767,11 +849,11 @@ namespace SCCPP1.User
             if (!DatabaseConnector.LoadColleagueWorkHistory1(this, out savedWorkHistory))
             {
                 success = false;
-
-                SavedWorkHistory = new ReadOnlyDictionary<int, WorkData>(savedWorkHistory);
-
-                UnsavedWorkHistory.Clear();
             }
+
+            SavedWorkHistory = new ReadOnlyDictionary<int, WorkData>(savedWorkHistory);
+
+            UnsavedWorkHistory.Clear();
 
             return success;
         }
@@ -795,13 +877,11 @@ namespace SCCPP1.User
             Dictionary<int, ProfileData> savedProfiles;
 
             if (!DatabaseConnector.LoadColleageProfiles(this, out savedProfiles))
-            {
                 success = false;
 
-                SavedProfiles = new ReadOnlyDictionary<int, ProfileData>(savedProfiles);
+            SavedProfiles = new ReadOnlyDictionary<int, ProfileData>(savedProfiles);
 
-                UnsavedProfiles.Clear();
-            }
+            UnsavedProfiles.Clear();
 
             return success;
         }

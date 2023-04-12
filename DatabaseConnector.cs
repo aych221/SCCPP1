@@ -3167,7 +3167,7 @@ COMMIT;
             }
 
 
-            Console.WriteLine($"Found Profile Records: {list?.Count}");
+            Console.WriteLine($"Found Profile Records: {dict?.Count}");
 
             return true;
         }
@@ -3180,6 +3180,152 @@ COMMIT;
 
             return (pd.RecordID = InsertProfile(pd)) >= 0;
         }
+        #endregion
+
+
+        #region Certification methods
+
+        public static int SaveCertificationType(string certificationType)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+                using (SqliteCommand cmd = new SqliteCommand("", conn))
+                {
+                    return InsertOrIgnore(cmd, "cert_types", "type", certificationType);
+                }
+            }
+        }
+
+
+        public static int InsertCertification(CertificationData cd)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"INSERT INTO 
+                                colleague_certs(colleague_id, cert_type_id, institution_id, municipality_id, state_id, start_date, end_date, description) 
+                                VALUES (@colleague_id, @cert_type_id, @institution_id, @municipality_id, @state_id, @start_date, @end_date, @description)
+                                RETURNING id;";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", cd.Owner.RecordID);
+                    cmd.Parameters.AddWithValue("@cert_type_id", cd.CertificateTypeID);
+                    cmd.Parameters.AddWithValue("@institution_id", cd.InstitutionID);
+                    cmd.Parameters.AddWithValue("@municipality_id", ValueCleaner(cd.Location.MunicipalityID));
+                    cmd.Parameters.AddWithValue("@state_id", ValueCleaner(cd.Location.StateID));
+                    cmd.Parameters.AddWithValue("@start_date", ValueCleaner(cd.StartDate));
+                    cmd.Parameters.AddWithValue("@end_date", ValueCleaner(cd.EndDate));
+                    cmd.Parameters.AddWithValue("@description", ValueCleaner(cd.Description));
+
+                    Console.WriteLine($"Inserting colleague_cert for {cd.Owner.RecordID} certtypeid: {cd.CertificateTypeID}, instid: {cd.InstitutionID}...");
+                    object? id = cmd.ExecuteScalar();
+
+                    if (id == null)
+                        return -1;
+
+                    Console.WriteLine($"Inserted colleague_cert for {cd.Owner.RecordID}, recordID: {Convert.ToInt32(id)}");
+
+                    return Convert.ToInt32(id);//return record ID
+                }
+            }
+        }
+
+        public static int UpdateCertification(CertificationData cd)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"UPDATE colleague_certs SET 
+                                colleague_id=@colleague_id, cert_type_id=@cert_type_id, institution_id=@institution_id, municipality_id=municipality_id, state_id=@state_id, start_date=@start_date, end_date=@end_date, description=@description WHERE id = @id;";
+
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", cd.RecordID);
+                    cmd.Parameters.AddWithValue("@colleague_id", cd.Owner.RecordID);
+                    cmd.Parameters.AddWithValue("@cert_type_id", cd.CertificateTypeID);
+                    cmd.Parameters.AddWithValue("@institution_id", cd.InstitutionID);
+                    cmd.Parameters.AddWithValue("@municipality_id", ValueCleaner(cd.Location.MunicipalityID));
+                    cmd.Parameters.AddWithValue("@state_id", ValueCleaner(cd.Location.StateID));
+                    cmd.Parameters.AddWithValue("@start_date", ValueCleaner(cd.StartDate));
+                    cmd.Parameters.AddWithValue("@end_date", ValueCleaner(cd.EndDate));
+                    cmd.Parameters.AddWithValue("@description", ValueCleaner(cd.Description));
+                    return cmd.ExecuteNonQuery();//rows affected
+                }
+            }
+        }
+
+        public static bool SaveCertification(CertificationData cd)
+        {
+
+            cd.CertificateTypeID = SaveCertificationType(cd.CertificationType);
+            cd.InstitutionID = SaveInstitution(cd.Institution);
+
+            //Thread.Sleep(1);
+            if (cd.RecordID > 0)
+                return UpdateCertification(cd) >= 0;
+            return (cd.RecordID = InsertCertification(cd)) >= 0;
+            //return SaveEducationHistory(ed.RecordID, ed.Owner.RecordID, ed.EducationType, ed.Institution, ed.Location.MunicipalityID, ed.Location.StateID, ed.StartDate, ed.EndDate, ed.Description);
+        }
+
+
+        public static bool LoadColleagueCertifications(Account account, out Dictionary<int, CertificationData> dict)
+        {
+            dict = new Dictionary<int, CertificationData>();
+
+            if (account == null || account.RecordID < 0)
+                return false;
+
+
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+
+                string sql = @"SELECT cc.id, cc.colleague_id, cc.cert_type_id, cc.institution_id, cc.municipality_id, cc.state_id, cc.start_date, cc.end_date, cc.description, ct.type AS cert_type, i.name AS institution
+                                            FROM colleague_certs cc
+                                            JOIN cert_types ct ON cc.cert_type_id = ct.id
+                                            JOIN institutions i ON cc.institution_id = i.id
+                                            WHERE cc.colleague_id=@colleague_id;";
+
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+
+                        CertificationData cd;
+                        while (r.Read())
+                        {
+                            //Account owner, int recordID, string institution, int institutionID, string certificateType, int certificateTypeID, string? description, Location? location, DateOnly? startDate, DateOnly? endDate
+                            cd = new CertificationData(
+                                account,
+                                GetInt32(r, 0),
+                                GetString(r, 10),
+                                GetInt32(r, 3),
+                                GetString(r, 9),
+                                GetInt32(r, 2),
+                                GetString(r, 8),
+                                new Location(GetInt32(r, 4), GetInt32(r, 5)),
+                                GetDateOnly(r, 6),
+                                GetDateOnly(r, 7)
+                                );
+
+                            dict.TryAdd(cd.RecordID, cd);
+                        }
+
+                    }
+                }
+            }
+
+            Console.WriteLine($"Found Certification Records: {dict?.Count}");
+
+            return true;
+        }
+
         #endregion
 
 
@@ -3488,6 +3634,11 @@ COMMIT;
             SaveWorkHistory(wd1);
             SaveWorkHistory(wd2);
             SaveColleageSkills(sd1, sd2, sd3);
+
+            CertificationData cd1 = new CertificationData(account);
+            cd1.CertificationType = "test";
+            cd1.Institution = "somewhere";
+            SaveCertification(cd1);
             //account.Skills = GetColleagueSkills(account);
             Console.WriteLine("Saved!");
             /*foreach (string s in GetRawColleagueEducationHistory(account.RecordID))
@@ -3754,6 +3905,8 @@ COMMIT;
         DROP TABLE IF EXISTS [skills];
         DROP TABLE IF EXISTS [skill_categories];
         DROP TABLE IF EXISTS [colleague_skills];
+        DROP TABLE IF EXISTS [cert_types];
+        DROP TABLE IF EXISTS [colleague_certs];
         DROP TABLE IF EXISTS [profiles];
         COMMIT;
         PRAGMA foreign_keys = 1;
@@ -3802,6 +3955,28 @@ COMMIT;
           description TEXT,
           FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
           FOREIGN KEY (education_type_id) REFERENCES education_types(id),
+          FOREIGN KEY (institution_id) REFERENCES institutions(id),
+          FOREIGN KEY (municipality_id) REFERENCES municipalities(id),
+          FOREIGN KEY (state_id) REFERENCES states(id)
+        );
+        
+        CREATE TABLE cert_types (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          type TEXT UNIQUE NOT NULL
+        );
+        
+        CREATE TABLE colleague_certs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          colleague_id INTEGER NOT NULL,
+          cert_type_id INTEGER NOT NULL,
+          institution_id INTEGER NOT NULL,
+          municipality_id INTEGER,
+          state_id INTEGER,
+          start_date DATE,
+          end_date DATE,
+          description TEXT,
+          FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
+          FOREIGN KEY (cert_type_id) REFERENCES cert_types(id),
           FOREIGN KEY (institution_id) REFERENCES institutions(id),
           FOREIGN KEY (municipality_id) REFERENCES municipalities(id),
           FOREIGN KEY (state_id) REFERENCES states(id)

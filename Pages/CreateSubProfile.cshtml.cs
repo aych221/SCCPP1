@@ -54,7 +54,14 @@ namespace SCCPP1.Pages
         
         public CreateSubProfileModel(SessionHandler sessionHandler, ILogger<PrivacyModel> logger) : base(sessionHandler)
         {
+            Console.WriteLine("[CreateSubProfileModel] constructor called");
             _logger = logger;
+        }
+
+
+        ~CreateSubProfileModel()
+        {
+            Console.WriteLine("[CreateSubProfileModel] destructor called");
         }
         public IActionResult OnGet()
         {

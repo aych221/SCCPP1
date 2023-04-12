@@ -19,5 +19,17 @@ namespace SCCPP1.Session
         {
             this.sessionHandler = sessionHandler;
         }
+
+        ~SessionModel()
+        {
+            Console.WriteLine("[SessionModel] destructor called");
+            PersistAll();
+        }
+
+
+        public bool PersistAll()
+        {
+            return sessionHandler.GetAccount().PersistAll();
+        }
     }
 }
