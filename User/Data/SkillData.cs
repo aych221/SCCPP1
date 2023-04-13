@@ -83,7 +83,7 @@
             /*if (!NeedsSave)
                 return true;*/
 
-            return NeedsSave = !(IsUpdated = DatabaseConnector.SaveColleageSkills(this));
+            return NeedsSave = !(IsUpdated = DatabaseConnector.SaveColleagueSkill(this));
         }
 
 

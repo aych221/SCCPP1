@@ -565,29 +565,6 @@ namespace SCCPP1
         }
 
 
-        #region debug users
-        //old code from my other db
-        private static void printusers()
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"SELECT *  FROM colleagues;";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        while (r.Read())
-                        {
-                            Console.WriteLine($"'{GetString(r, 1)}', '{GetString(r, 2)}'");//user
-                        }
-
-                    }
-                }
-            }
-        }
-        #endregion
-
 
         public static Account? GetUser(string userID)
         {
@@ -780,7 +757,7 @@ namespace SCCPP1
             sb.Append(';');
             string sql = sb.ToString();
 
-            Console.WriteLine(sql);//skillsList.ToString());
+            //Console.WriteLine(sql);//skillsList.ToString());
 
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
@@ -792,7 +769,7 @@ namespace SCCPP1
                     for (int i = 0; i < skillNames.Length; i++)
                         cmd.Parameters.AddWithValue($"@skillName{i}", ValueCleaner(skillNames[i]));
 
-                    Console.WriteLine("Rows effected: " + cmd.ExecuteNonQuery());
+                    //Console.WriteLine("Rows effected: " + cmd.ExecuteNonQuery());
                 }
             }
 
@@ -917,7 +894,7 @@ namespace SCCPP1
                     {
                         cmd.Parameters.AddWithValue($"@skillName{i}", ValueCleaner(skillNames[i]));
                     }
-                    Console.WriteLine(cmd.CommandText);
+                    //Console.WriteLine(cmd.CommandText);
 
                     using (SqliteDataReader r = cmd.ExecuteReader())
                     {
@@ -930,120 +907,14 @@ namespace SCCPP1
                         for (int i = 0; i < skillNames.Length; i++)
                             skillIDs[i] = skillNameResults[skillNames[i]];
 
-                        Console.Write("SkillIDs: ");
-                        Console.WriteLine(string.Join(",", skillIDs));
+                        //Console.Write("SkillIDs: ");
+                        //Console.WriteLine(string.Join(",", skillIDs));
 
                         return skillIDs;
                     }
                 }
             }
         }
-
-
-        /*public static bool GetSkillIDs(out int[] skillIDs, params string[] skillNames)
-        {
-
-            skillIDs = new int[skillNames.Length];
-
-            //create skills list
-            StringBuilder skillsList = new StringBuilder("@name0");
-
-            for (int i = 1; i < skillNames.Length; i++)
-                skillsList.Append($", @name{i}");
-
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = $"SELECT id, name FROM skills WHERE name IN ({skillsList.ToString()})";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-
-                    for (int i = 0; i < skillNames.Length; i++)
-                        cmd.Parameters.AddWithValue($"@name{i}", ValueCleaner(skillNames[i]));
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        while (r.Read())
-                            skillNameResults[GetString(r, 0)] = GetInt32(r, 1);
-
-                        for (int i = 0; i < skillNames.Length; i++)
-                        {
-                            if ((skillIDs[i] = skillNameResults[skillNames[i]]) == -1)
-                                hasMissingRecord = true;
-                        }
-
-                        //returns true if all records were found, false if there was a missing record
-                        return !hasMissingRecord;
-                    }
-                }
-            }
-        }//*/
-
-        /*       /// <summary>
-               /// Saves Colleage's skills,
-               /// </summary>
-               /// <param name="account"></param>
-               /// <returns>true if it was successful, false otherwise</returns>
-               public static bool SaveColleageSkills(Account account)
-               {
-                   //toInsert are skills with -1 ids, toUpdate are skills with existing ids
-                   List<string> toInsert = new List<string>(), updateCases = new List<string>();
-
-                   //ids to update
-                   List<int> updateIDs = new List<int>();
-
-                   List<SkillData> skills = account.Skills;
-
-                   //for SaveSkills method
-                   string[] skillNames = new string[skills.Count];
-
-                   for (int i = 0; i < skills.Count; i++)
-                   {
-                       skillNames[i] = skills[i].Name;
-
-                       //toUpdate
-                       if (skills[i].RecordID > 0)
-                       {
-                           updateIDs.Add(skills[i].RecordID);
-                           updateCases.Add($"WHEN {skills[i].RecordID} THEN {skills[i].Rating}");
-                       }
-                   }
-
-
-                   //insert skills and get ids
-                   int[] ids = SaveSkills(skillNames);
-                   foreach (int id in ids)
-                       toInsert.Add($"({account.RecordID},{id})");
-
-                   using (SqliteConnection conn = new SqliteConnection(connStr))
-                   {
-                       conn.Open();
-                       //not sure if this is the most efficient solution for this table
-                       //will need to run tests
-                       string sql = @"INSERT OR IGNORE INTO colleague_skills(colleague_id, skill_id) VALUES @toInsert;";
-                       using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                       {
-                           //first do inserts
-                           cmd.Parameters.AddWithValue("@toInsert", ValueCleaner(string.Join(",", toInsert)));
-                           cmd.ExecuteNonQuery();
-
-                           //now do updates
-                           sql = @"UPDATE colleague_skills
-                                   SET rating = CASE id
-                                                   @updateCases
-                                               END
-                                   WHERE id IN (@updateIDs);";
-
-                           cmd.Parameters.AddWithValue("@updateCases", ValueCleaner(string.Join(Environment.NewLine, updateCases)));
-                           cmd.Parameters.AddWithValue("@updateIDs", ValueCleaner(string.Join(",", updateIDs)));
-                           cmd.ExecuteNonQuery();
-
-
-                           return true;
-                       }
-                   }
-
-                   return false;
-               }//*/
 
         public static bool SaveColleageSkills(Account account)
         {
@@ -1177,7 +1048,7 @@ namespace SCCPP1
                         {
                             cmd.Parameters.AddWithValue($"@skillID{i}", ids[i]);
                         }
-                        Console.WriteLine(cmd.CommandText);
+                        //Console.WriteLine(cmd.CommandText);
                         cmd.ExecuteNonQuery();
 
                     }
@@ -1196,7 +1067,7 @@ namespace SCCPP1
                         {
                             cmd.Parameters.AddWithValue($"@rating{i}", updateRatings[i]);
                         }
-                        Console.WriteLine(cmd.CommandText);
+                        //Console.WriteLine(cmd.CommandText);
                         cmd.ExecuteNonQuery();
 
                     }
@@ -1207,140 +1078,75 @@ namespace SCCPP1
 
             return false;
         }
+
+
 
         /*
-        public static bool SaveColleageSkill1(SkillData skill)
+         * 
+         * 
+        CREATE TABLE colleague_skills (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          colleague_id INTEGER NOT NULL,
+          skill_id INTEGER NOT NULL,
+          skill_category_id INTEGER,
+          rating INTEGER,
+          FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
+          FOREIGN KEY (skill_id) REFERENCES skills(id),
+          FOREIGN KEY (skill_category_id) REFERENCES skill_categories(id)
+        );
+         */
+        public static bool SaveColleagueSkill(SkillData sd)
         {
-            //toInsert are skills with -1 ids, toUpdate are skills with existing ids
-            List<string> toInsert = new List<string>(), updateCases = new List<string>();
-
-            //ids to update
-            List<int> updateIDs = new List<int>(), updateRatings = new List<int>();
-
-
-            //for SaveSkills method
-            string[] skillNames = new string[skills.Length];
-
-            for (int i = 0; i < skills.Length; i++)
-            {
-                skillNames[i] = skills[i].SkillName;
-
-                //toUpdate
-                if (skills[i].RecordID > 0)
-                {
-                    updateIDs.Add(skills[i].RecordID);
-                    updateRatings.Add(skills[i].Rating);
-                    updateCases.Add($"WHEN {skills[i].RecordID} THEN @rating{i}");
-                }
-                else
-                {
-                    toInsert.Add($"({skills[i].Owner.RecordID},@skillID{i})");
-                }
-            }
-
-
-            //insert skills and get ids
-            skill.RecordID = SaveSkill(skill.SkillName);
-
-
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-                //not sure if this is the most efficient solution for this table
-                //will need to run tests
-                string sql;
-
-                //inserts first
-                if (toInsert.Count > 0)
+                using (SqliteCommand cmd = new SqliteCommand("", conn))
                 {
-                    sql = $"INSERT OR IGNORE INTO colleague_skills(colleague_id, skill_id) VALUES {ValueCleaner(string.Join(",", toInsert))};";
-                    using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                    //insert or get skill and skill category ids
+                    sd.SkillID = SaveSkill(sd.SkillName);
+
+                    //check if null (since category is not required to be set)
+                    if (sd.SkillCategoryName != null)
+                        sd.SkillCategoryID = InsertOrIgnore(cmd, "skill_categories", "name", sd.SkillCategoryName);
+
+                    if (sd.RecordID > 0)
                     {
-                        for (int i = 0; i < ids.Length; i++)
-                        {
-                            cmd.Parameters.AddWithValue($"@skillID{i}", ids[i]);
-                        }
-                        Console.WriteLine(cmd.CommandText);
+                        cmd.CommandText = @"UPDATE colleague_skills
+                                            SET skill_id=@skill_id, skill_category_id=@skill_category_id, rating=@rating
+                                            WHERE id=@id;";
+
+                        cmd.Parameters.AddWithValue("@id", sd.RecordID);
+                        cmd.Parameters.AddWithValue("@skill_id", sd.SkillID);
+                        cmd.Parameters.AddWithValue("@skill_category_id", ValueCleaner(sd.SkillCategoryID));
+                        cmd.Parameters.AddWithValue("@rating", ValueCleaner(sd.Rating));
+
                         cmd.ExecuteNonQuery();
-
                     }
-                }
-
-                if (updateIDs.Count > 0)
-                {
-                    //now do updates
-                    sql = $@"UPDATE colleague_skills
-                            SET rating = CASE id {ValueCleaner(string.Join(Environment.NewLine, updateCases))} END
-                            WHERE id IN ({ValueCleaner(string.Join(",", updateIDs))});";
-
-                    using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                    else
                     {
-                        for (int i = 0; i < ids.Length; i++)
-                        {
-                            cmd.Parameters.AddWithValue($"@rating{i}", updateRatings[i]);
-                        }
-                        Console.WriteLine(cmd.CommandText);
-                        cmd.ExecuteNonQuery();
-
-                    }
-                }
-
-                return true;
-            }
-
-            return false;
-        }
-        /* public static bool SaveColleageSkills(params SkillData[] skills)
-         {
-             string[] skillNames = new string[account.Skills.Count];
-             for (int i = 0; i < skillNames.Length; i++)
-                 skillNames[i] = account.Skills[i].Name;
-
-             //insert skills and get ids
-             int[] ids = SaveSkills(skillNames);
 
 
-             return SaveColleageSkills(skillNames);
-         }*/
+                        cmd.CommandText = @"INSERT INTO colleague_skills(colleague_id, skill_id, skill_category_id, rating)
+                                            VALUES (@colleagueID, @skill_id, @skill_category_id, @rating)
+                                            RETURNING id;";
+
+                        cmd.Parameters.AddWithValue("@colleagueID", sd.Owner.RecordID);
+                        cmd.Parameters.AddWithValue("@skill_id", sd.SkillID);
+                        cmd.Parameters.AddWithValue("@skill_category_id", ValueCleaner(sd.SkillCategoryID));
+                        cmd.Parameters.AddWithValue("@rating", ValueCleaner(sd.Rating));
 
 
-        //TODO: may need to change skills to be a csv string
-        /// <summary>
-        /// Returns all of the saved colleague skills.
-        /// </summary>
-        /// <param name="account">The account associated with the skills</param>
-        /// <returns>a list of strings that stores the colleague_skill_id\skill_id\rating in that format</returns>
-        public static List<string>? GetRawColleagueSkills(Account account)
-        {
-            //session must've not had an account, so user must not exist
-            if (account == null)
-                return null;
+                        object? id = cmd.ExecuteScalar();
 
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"SELECT * FROM colleague_skills WHERE (colleague_id=@id);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@id", account.RecordID);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        List<string> list = new List<string>();
+                        if (id == null)
+                            return false;
 
-                        string s;
-                        while (r.Read())
-                        {
-                            s = GetInt32(r, 0) + "\\"; //colleage skill id
-                            s += GetInt32(r, 2) + "\\"; //skill id
-                            s += GetInt32(r, 3) + ""; //rating for skill
-
-                            list.Add(s);
-                        }
-
-                        return list;
+                        sd.RecordID = Convert.ToInt32(id);
                     }
                 }
             }
+
+            return true;
         }
 
 
@@ -1432,91 +1238,6 @@ namespace SCCPP1
             }
         }
 
-        [Obsolete]
-        /// <summary>
-        /// Loads the colleague's skills into the Account class. This will populate the Account.Skills list.
-        /// </summary>
-        /// <param name="account">The account associated with the skills</param>
-        /// <param name="useCache">optional param</param>
-        /// <returns>true if skills could be loaded, false if not</returns>
-        public static bool LoadColleagueSkills(Account account, bool useCache = false)
-        {
-            //session must've not had an account, so user must not exist
-            if (account == null)
-                return false;
-
-            List<int> skillIds;
-
-            //load skills, return false if failed
-            if ((account.Skills = GetColleagueSkills(account, out skillIds)) == null || skillIds == null)
-                return false;
-
-            string[] skillNames;
-
-            //update the skillnames in the SkillData
-            if (useCache)
-            {
-                skillNames = GetCachedSkills(skillIds.ToArray());
-                int i = 0;
-                foreach (SkillData sd in account.Skills)
-                    sd.SkillName = skillNames[i++];
-
-            }
-            else
-            {
-                skillNames = GetSkillNames(skillIds.ToArray());
-                int i = 0;
-                foreach (SkillData sd in account.Skills)
-                    sd.SkillName = skillNames[i++];
-            }
-
-            return true;
-
-        }
-
-        [Obsolete]
-        /// <summary>
-        /// Loads the colleague's skills into the Account class. This will populate the Account.Skills list.
-        /// </summary>
-        /// <param name="account">The account associated with the skills</param>
-        /// <param name="useCache">optional param</param>
-        /// <returns>true if skills could be loaded, false if not</returns>
-        public static bool LoadColleagueSkills(Account account, out Dictionary<int, SkillData> dict, bool useCache = false)
-        {
-
-            dict = new Dictionary<int, SkillData>();
-
-            //session must've not had an account, so user must not exist
-            if (account == null)
-                return false;
-
-            List<int> skillIds;
-
-            //load skills, return false if failed
-            if ((account.Skills = GetColleagueSkills(account, out skillIds)) == null || skillIds == null)
-                return false;
-
-            string[] skillNames;
-
-            //update the skillnames in the SkillData
-            if (useCache) {
-                skillNames = GetCachedSkills(skillIds.ToArray());
-            } else {
-                skillNames = GetSkillNames(skillIds.ToArray());
-            }
-
-            SkillData sd;
-            for (int i = 0; i < account.Skills.Count; i ++)
-            {
-                sd = account.Skills[i];
-                sd.SkillName = skillNames[i];
-                dict.TryAdd(sd.RecordID, sd);
-            }
-
-            return true;
-
-        }
-
 
         /// <summary>
         /// Loads the colleague's skills into the Account class. This will populate the Account.Skills list.
@@ -1564,7 +1285,7 @@ namespace SCCPP1
                 }
             }
 
-            Console.WriteLine($"Found Colleage_Skill Records: {list?.Count}");
+            //Console.WriteLine($"Found Colleage_Skill Records: {list?.Count}");
 
             return true;
         }
@@ -1612,7 +1333,7 @@ namespace SCCPP1
                             //SkillData(Account owner, int recordID, string skillCategoryName, int skillCategoryID, string skillName, int skillID, int rating)
                             sd = new SkillData(account, GetInt32(r, 0), GetString(r, 2), GetInt32(r, 3), GetString(r, 4), GetInt32(r, 5), GetInt32(r, 6));
 
-                            Console.WriteLine($"Skill: {sd.SkillName} - {sd.SkillID} - {sd.SkillCategoryName} - {sd.SkillCategoryID} - {sd.Rating}");
+                            //Console.WriteLine($"Skill: {sd.SkillName} - {sd.SkillID} - {sd.SkillCategoryName} - {sd.SkillCategoryID} - {sd.Rating}");
                             list.Add(sd);
                             dict.TryAdd(sd.RecordID, sd);
                         }
@@ -1622,7 +1343,7 @@ namespace SCCPP1
                 }
             }
 
-            Console.WriteLine($"Found Colleage_Skill Records: {dict?.Count}");
+            //Console.WriteLine($"Found Colleage_Skill Records: {dict?.Count}");
 
             return true;
         }
@@ -1651,13 +1372,13 @@ namespace SCCPP1
                     cmd.Parameters.AddWithValue("@end_date", ValueCleaner(endDate));
                     cmd.Parameters.AddWithValue("@description", ValueCleaner(description));
 
-                    Console.WriteLine($"Inserting education_history for {colleagueID} edutypeid: {educationTypeID}, instid: {institutionID}...");
+                    //Console.WriteLine($"Inserting education_history for {colleagueID} edutypeid: {educationTypeID}, instid: {institutionID}...");
                     object? educationID = cmd.ExecuteScalar();
 
                     if (educationID == null)
                         return -1;
 
-                    Console.WriteLine($"Inserted education_history for {colleagueID}, recordID: {Convert.ToInt32(educationID)}");
+                    //Console.WriteLine($"Inserted education_history for {colleagueID}, recordID: {Convert.ToInt32(educationID)}");
 
                     return Convert.ToInt32(educationID);//return record ID
                 }
@@ -1697,18 +1418,6 @@ namespace SCCPP1
         public static int UpdateEducationHistory(EducationData ed)
         {
             return UpdateEducationHistory(ed.RecordID, ed.Owner.RecordID, ed.EducationTypeID, ed.InstitutionID, ed.Location.MunicipalityID, ed.Location.StateID, ed.StartDate, ed.EndDate, ed.Description);
-        }
-
-
-        //put -1 if id is unknown
-        public static bool SaveEducationHistory(int id, int colleagueID, string educationType, string institutionName, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
-        {
-            int educationTypeID = SaveEducationType(educationType),
-                institutionID = SaveInstitution(institutionName);
-            //Thread.Sleep(1);
-            if (ExistsEducationHistory(id))
-                return UpdateEducationHistory(id, colleagueID, educationTypeID, institutionID, municipalityID, stateID, startDate, endDate, description) >= 0;
-            return InsertEducationHistory(colleagueID, educationTypeID, institutionID, municipalityID, stateID, startDate, endDate, description) >= 0;
         }
 
         public static bool SaveEducationHistory(EducationData ed)
@@ -1782,13 +1491,13 @@ namespace SCCPP1
                 {
                     cmd.Parameters.AddWithValue("@type", type);
 
-                    Console.WriteLine($"Inserted education_type: {type}");
+                    //Console.WriteLine($"Inserted education_type: {type}");
 
                     object? educationTypeID = cmd.ExecuteScalar();
 
                     if (educationTypeID == null)
                         return -1;
-                    Console.WriteLine($"Inserted education_type: id:{Convert.ToInt32(educationTypeID)}, {type}");
+                    //Console.WriteLine($"Inserted education_type: id:{Convert.ToInt32(educationTypeID)}, {type}");
 
                     return Convert.ToInt32(educationTypeID);//return record ID
                 }
@@ -1865,7 +1574,7 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@name", name);
-                    Console.WriteLine($"Inserting institution: {name}");
+                    //Console.WriteLine($"Inserting institution: {name}");
 
 
                     object? institutionID = cmd.ExecuteScalar();
@@ -1873,7 +1582,7 @@ namespace SCCPP1
                     if (institutionID == null)
                         return -1;
 
-                    Console.WriteLine($"Inserted institution: id:{Convert.ToInt32(institutionID)}, {name}");
+                    //Console.WriteLine($"Inserted institution: id:{Convert.ToInt32(institutionID)}, {name}");
 
                     return Convert.ToInt32(institutionID);//return record ID
                 }
@@ -1916,83 +1625,7 @@ namespace SCCPP1
             }
         }
 
-        public static List<string> GetRawColleagueEducationHistory(int colleagueID)
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"SELECT id, colleague_id, education_type_id, institution_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleague_id);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        List<string> list = new List<string>();
-
-                        //Console.WriteLine($"Attempting to fetch Education record for {colleagueID}");
-                        string s;
-                        while (r.Read())
-                        {
-                            s = GetInt32(r, 0) + "\\"; //record id
-                            s += GetInt32(r, 2) + "\\"; //education type id
-                            s += GetInt32(r, 3) + "\\"; //institution id
-                            s += GetInt32(r, 4) + "\\"; //municipality id
-                            s += GetInt32(r, 5) + "\\"; //state id
-
-                            s += GetDateOnly(r, 6).ToString() + "\\"; //start date
-                            s += GetDateOnly(r, 7).ToString() + "\\"; //end date (might be empty)
-
-                            s += GetString(r, 8) + "\\"; //description (might be empty)
-                            //Console.WriteLine(GetInt32(r, 0) + " record");
-
-                            list.Add(s);
-                        }
-
-                        return list;
-                    }
-                }
-            }
-        }
-
-
-        public static List<EducationData>? GetColleagueEducationHistory(Account account)
-        {
-            if (account == null || account.RecordID < 0)
-                return null;
-
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"SELECT id, colleague_id, education_type_id, institution_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleague_id);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        List<EducationData> list = new List<EducationData>();
-
-                        while (r.Read())
-                        {
-                            EducationData ed = new EducationData(account, GetInt32(r, 0));
-                            ed.EducationTypeID = GetInt32(r, 2);
-                            ed.InstitutionID = GetInt32(r, 3);
-                            ed.Location = new Location(GetInt32(r, 4), GetInt32(r, 5));
-
-                            ed.StartDate = GetDateOnly(r, 6);
-                            ed.EndDate = GetDateOnly(r,7);
-
-                            ed.Description = GetString(r, 8);
-
-                            list.Add(ed);
-                        }
-
-                        return list;
-                    }
-                }
-            }
-        }
-
-
+        [Obsolete ("Use the LoadColleagueEducationHistory1 method instead.")]
         /// <summary>
         /// Loads the education history of a colleague into the Account class. This method populates the Account.EducationHistory list.
         /// </summary>
@@ -2070,7 +1703,7 @@ namespace SCCPP1
                 if (account.EducationHistory == null || account.EducationHistory.Count < 1)
                     return false;
 
-                Console.WriteLine($"Found Education Records: {list.Count}");
+                //Console.WriteLine($"Found Education Records: {list.Count}");
 
                 //load edu types.
                 using (SqliteCommand cmd = new SqliteCommand(sqlEduType.ToString(), conn))
@@ -2084,7 +1717,7 @@ namespace SCCPP1
 
                     }
                 }
-                Console.WriteLine($"Found EducationTypes: {educationTypes.Count}");
+                //Console.WriteLine($"Found EducationTypes: {educationTypes.Count}");
 
                 //load institution names.
                 using (SqliteCommand cmd = new SqliteCommand(sqlInsti.ToString(), conn))
@@ -2099,7 +1732,7 @@ namespace SCCPP1
                     }
                 }
 
-                Console.WriteLine($"Found Institutions: {institutionNames.Count}");
+                //Console.WriteLine($"Found Institutions: {institutionNames.Count}");
             }
 
             //these should always have at least 1 count if one record is loaded.
@@ -2113,7 +1746,7 @@ namespace SCCPP1
                 ed.Institution = institutionNames[ed.InstitutionID];
             }
 
-            Console.WriteLine($"Loaded {list.Count} education records!");
+            //Console.WriteLine($"Loaded {list.Count} education records!");
 
             return true;
         }
@@ -2165,7 +1798,7 @@ namespace SCCPP1
                 }
             }
 
-            Console.WriteLine($"Found Education Records: {list?.Count}");
+            //Console.WriteLine($"Found Education Records: {list?.Count}");
 
             return true;
         }
@@ -2223,7 +1856,7 @@ namespace SCCPP1
                 }
             }
 
-            Console.WriteLine($"Found Education Records: {list?.Count}");
+            //Console.WriteLine($"Found Education Records: {list?.Count}");
 
             return true;
         }
@@ -2241,29 +1874,7 @@ namespace SCCPP1
                                 work_history(colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description) 
                                 VALUES (@colleague_id, @employer_id, @job_title_id, @municipality_id, @state_id, @start_date, @end_date, @description)
                                 RETURNING id;";
-                /*
-                 * 
-                 * 
-                 * BEGIN TRANSACTION;
 
-INSERT OR IGNORE INTO employer (name) VALUES ('Acme Inc.');
-INSERT INTO work_history (colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description)
-VALUES (
-    @colleague_id, 
-    (SELECT COALESCE((SELECT id FROM employer WHERE name = 'Acme Inc.'), last_insert_rowid())),
-    (SELECT COALESCE((SELECT id FROM job_title WHERE name = @job_title_name), 
-                     (INSERT INTO job_title (name) VALUES (@job_title_name); SELECT last_insert_rowid()))), 
-    (SELECT COALESCE((SELECT id FROM municipality WHERE name = @municipality_name), 
-                     (INSERT INTO municipality (name) VALUES (@municipality_name); SELECT last_insert_rowid()))), 
-    @state_id, 
-    @start_date, 
-    @end_date, 
-    @description
-);
-
-COMMIT;
-
-                 */
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
@@ -2275,14 +1886,14 @@ COMMIT;
                     cmd.Parameters.AddWithValue("@end_date", ValueCleaner(endDate));
                     cmd.Parameters.AddWithValue("@description", ValueCleaner(description));
 
-                    Console.WriteLine($"Inserting work_history for {colleagueID}...");
+                    //Console.WriteLine($"Inserting work_history for {colleagueID}...");
                     //TODO fix empty values
                     object? workID = cmd.ExecuteScalar();
 
                     if (workID == null)
                         return -1;
 
-                    Console.WriteLine($"Inserted work_history for {colleagueID}, recordID: {Convert.ToInt32(workID)}");
+                    //Console.WriteLine($"Inserted work_history for {colleagueID}, recordID: {Convert.ToInt32(workID)}");
                     return Convert.ToInt32(workID);//return record ID
                 }
             }
@@ -2302,8 +1913,9 @@ COMMIT;
                         int workHistoryID = -1, employerID, jobTitleID, municipalityID;
 
                         string sql = @"INSERT INTO OR IGNORE work_history (colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description) 
-                        VALUES (@colleague_id, @employer_id, @job_title_id, @municipality_id, @state_id, @start_date, @end_date, @description);
-                        SELECT last_insert_rowid();";
+                                        VALUES (@colleague_id, @employer_id, @job_title_id, @municipality_id, @state_id, @start_date, @end_date, @description);
+                                        SELECT last_insert_rowid();";
+
                         using (SqliteCommand cmd = new SqliteCommand("", conn, transaction))
                         {
                             employerID = InsertOrIgnore(cmd, "employers", "name", employer);
@@ -2336,7 +1948,7 @@ COMMIT;
                     catch (Exception ex)
                     {
                         transaction.Rollback();
-                        Console.WriteLine(ex.Message);
+                        //Console.WriteLine(ex.Message);
                         throw;
                     }
                 }
@@ -2406,19 +2018,6 @@ COMMIT;
         }
 
 
-
-
-        //put -1 if id is unknown
-        public static bool SaveWorkHistory(int id, int colleagueID, string employer, string jobTitle, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
-        {
-            int employerID = SaveEmployer(employer),
-                jobTitleID = SaveJobTitle(jobTitle);
-
-            if (ExistsWorkHistory(id))
-                return UpdateWorkHistory(id, colleagueID, employerID, jobTitleID, municipalityID, stateID, startDate, endDate, description) >= 0;
-            return InsertWorkHistory(colleagueID, employerID, jobTitleID, municipalityID, stateID, startDate, endDate, description) >= 0;
-        }
-
         public static bool SaveWorkHistory(WorkData wd)
         {
             wd.EmployerID = SaveEmployer(wd.Employer);
@@ -2429,6 +2028,7 @@ COMMIT;
 
             return (wd.RecordID = InsertWorkHistory(wd)) >= 0;
         }
+
 
         #region Employer
         public static int GetEmployerID(string employer)
@@ -2510,14 +2110,14 @@ COMMIT;
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@name", name);
-                    Console.WriteLine($"Inserting employer: {name}");
+                    //Console.WriteLine($"Inserting employer: {name}");
 
                     object? employerID = cmd.ExecuteScalar();
 
                     if (employerID == null)
                         return -1;
 
-                    Console.WriteLine($"Inserted employer: id:{Convert.ToInt32(employerID)}, {name}");
+                    //Console.WriteLine($"Inserted employer: id:{Convert.ToInt32(employerID)}, {name}");
 
                     return Convert.ToInt32(employerID);//return record ID
                 }
@@ -2594,13 +2194,13 @@ COMMIT;
                 {
                     cmd.Parameters.AddWithValue("@title", title);
 
-                    Console.WriteLine($"Inserting job_title: {title}");
+                    //Console.WriteLine($"Inserting job_title: {title}");
 
                     object? jobTitleID = cmd.ExecuteScalar();
 
                     if (jobTitleID == null)
                         return -1;
-                    Console.WriteLine($"Inserted job_title: id:{Convert.ToInt32(jobTitleID)}, {title}");
+                    //Console.WriteLine($"Inserted job_title: id:{Convert.ToInt32(jobTitleID)}, {title}");
 
                     return Convert.ToInt32(jobTitleID);//return record ID
                 }
@@ -2622,82 +2222,7 @@ COMMIT;
 
 
 
-
-        public static List<string> GetRawColleagueWorkHistory(int colleagueID)
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"SELECT id, colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description FROM work_history WHERE (colleague_id=@colleague_id);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@colleague_id", colleagueID);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        List<string> list = new List<string>();
-
-                        //Console.WriteLine($"Attempting to fetch Work record for {colleagueID}");
-                        string s;
-                        while (r.Read())
-                        {
-                            s = GetInt32(r, 0) + "\\"; //record id
-                            s += GetInt32(r, 2) + "\\"; //employer id
-                            s += GetInt32(r, 3) + "\\"; // job title id
-                            s += GetInt32(r, 4) + "\\"; //municipality id
-                            s += GetInt32(r, 5) + "\\"; //state id
-
-                            s += r.GetDateTime(6) + "\\"; //start date
-                            s += r.GetDateTime(7) + "\\"; //end date (might be empty)
-
-                            s += GetString(r, 8) + ""; //description (might be empty)
-
-                            list.Add(s);
-                        }
-
-                        return list;
-                    }
-                }
-            }
-        }
-
-
-        public static List<WorkData>? GetColleagueWorkHistory(Account account)
-        {
-            if (account == null || account.RecordID < 0)
-                return null;
-
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"SELECT id, colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleague_id);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        List<WorkData> list = new List<WorkData>();
-
-                        while (r.Read())
-                        {
-                            WorkData wd = new WorkData(account, GetInt32(r, 0));
-                            wd.EmployerID = GetInt32(r, 2);
-                            wd.JobTitleID = GetInt32(r, 3);
-                            wd.Location = new Location(GetInt32(r, 4), GetInt32(r, 5));
-
-                            wd.StartDate = Utilities.ToDateOnly(r.GetDateTime(6));
-                            wd.EndDate = Utilities.ToDateOnly(r.GetDateTime(7));
-
-                            wd.Description = GetString(r, 8);
-
-                            list.Add(wd);
-                        }
-
-                        return list;
-                    }
-                }
-            }
-        }
-
+        [Obsolete("Use LoadColleagueWorkHistory1 instead.")]
         public static bool LoadColleagueWorkHistory(Account account, bool useCache = false)
         {
             if (account == null || account.RecordID < 0)
@@ -2772,7 +2297,7 @@ COMMIT;
                 if (account.WorkHistory == null || account.WorkHistory.Count < 1)
                     return false;
 
-                Console.WriteLine($"Found Work Records: {list.Count}");
+                //Console.WriteLine($"Found Work Records: {list.Count}");
 
                 //load employers
                 using (SqliteCommand cmd = new SqliteCommand(sqlEmp.ToString(), conn))
@@ -2787,7 +2312,7 @@ COMMIT;
                     }
                 }
 
-                Console.WriteLine($"Found Employers: {employers.Count}");
+                //Console.WriteLine($"Found Employers: {employers.Count}");
 
                 //load job titles.
                 using (SqliteCommand cmd = new SqliteCommand(sqlJob.ToString(), conn))
@@ -2802,7 +2327,7 @@ COMMIT;
                     }
                 }
 
-                Console.WriteLine($"Found Job Titles: {jobTitles.Count}");
+                //Console.WriteLine($"Found Job Titles: {jobTitles.Count}");
             }
 
             //these should always have at least 1 count if one record is loaded.
@@ -2816,13 +2341,14 @@ COMMIT;
                 wd.JobTitle = jobTitles[wd.JobTitleID];
             }
 
-            Console.WriteLine($"Loaded {list.Count} work experience records!");
+            //Console.WriteLine($"Loaded {list.Count} work experience records!");
 
             return true;
 
         }
 
-        //need to test this to see if this is more efficient.
+
+
         public static bool LoadColleagueWorkHistory1(Account account, bool useCache = false)
         {
             if (account == null || account.RecordID < 0)
@@ -2869,7 +2395,7 @@ COMMIT;
             }
 
 
-            Console.WriteLine($"Found Work Records: {list?.Count}");
+            //Console.WriteLine($"Found Work Records: {list?.Count}");
 
             return true;
         }
@@ -2924,7 +2450,7 @@ COMMIT;
             }
 
 
-            Console.WriteLine($"Found Work Records: {list?.Count}");
+            //Console.WriteLine($"Found Work Records: {list?.Count}");
 
             return true;
         }
@@ -3169,7 +2695,7 @@ COMMIT;
             }
 
 
-            Console.WriteLine($"Found Profile Records: {list?.Count}");
+            //Console.WriteLine($"Found Profile Records: {list?.Count}");
 
             return true;
         }
@@ -3295,7 +2821,7 @@ COMMIT;
             }
 
 
-            Console.WriteLine($"Found Profile Records: {dict?.Count}");
+            //Console.WriteLine($"Found Profile Records: {dict?.Count}");
 
             return true;
         }
@@ -3347,13 +2873,13 @@ COMMIT;
                     cmd.Parameters.AddWithValue("@end_date", ValueCleaner(cd.EndDate));
                     cmd.Parameters.AddWithValue("@description", ValueCleaner(cd.Description));
 
-                    Console.WriteLine($"Inserting colleague_cert for {cd.Owner.RecordID} certtypeid: {cd.CertificateTypeID}, instid: {cd.InstitutionID}...");
+                    //Console.WriteLine($"Inserting colleague_cert for {cd.Owner.RecordID} certtypeid: {cd.CertificateTypeID}, instid: {cd.InstitutionID}...");
                     object? id = cmd.ExecuteScalar();
 
                     if (id == null)
                         return -1;
 
-                    Console.WriteLine($"Inserted colleague_cert for {cd.Owner.RecordID}, recordID: {Convert.ToInt32(id)}");
+                    //Console.WriteLine($"Inserted colleague_cert for {cd.Owner.RecordID}, recordID: {Convert.ToInt32(id)}");
 
                     return Convert.ToInt32(id);//return record ID
                 }
@@ -3449,7 +2975,7 @@ COMMIT;
                 }
             }
 
-            Console.WriteLine($"Found Certification Records: {dict?.Count}");
+            //Console.WriteLine($"Found Certification Records: {dict?.Count}");
 
             return true;
         }
@@ -3559,10 +3085,11 @@ COMMIT;
 
             //create mock profile
             ProfileData p = account.CreateProfile("Mister Sir");
-            p.RemoveWork(1);
-            p.RemoveEducation(2);
-            p.RemoveEducation(1);
-            p.RemoveSkill(1);
+            p.AddWork(1);
+            p.AddWork(2);
+            p.AddEducation(2);
+            p.AddEducation(1);
+            p.AddSkill(3);
 
             account.CreateProfile("Main");
 
@@ -3609,6 +3136,7 @@ COMMIT;
 
             return Convert.ToInt32(o);
         }
+
 
         protected static List<int> InsertOrIgnore(SqliteCommand cmd, string tableName, string fieldName, List<string> values)
         {

@@ -502,13 +502,14 @@ namespace SCCPP1.User
             PersistAll();
 
             //might want to create these hashsets in LoadAll() method to reduce memory and computations
-            ProfileData pd = new ProfileData(this, title,
-                new HashSet<int>(SavedSkills.Keys),
-                new HashSet<int>(SavedEducationHistory.Keys),
-                new HashSet<int>(SavedCertifications.Keys),
-                new HashSet<int>(SavedWorkHistory.Keys),
-                ""
-                );
+            ProfileData pd = new ProfileData(this, title);
+
+                //new HashSet<int>(SavedSkills.Keys),
+                //new HashSet<int>(SavedEducationHistory.Keys),
+                //new HashSet<int>(SavedCertifications.Keys),
+                //new HashSet<int>(SavedWorkHistory.Keys),
+                //""
+                //);
             UnsavedProfiles.Add(pd);
             return pd;
         }

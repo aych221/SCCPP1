@@ -119,6 +119,15 @@ namespace SCCPP1.User.Data
         }
 
 
+        //used when user creates profile that needs to be saved
+        public ProfileData(Account owner, string title)
+            : this(owner, -1, title, new(), new(), new(), new(), "")
+        {
+
+            this.NeedsSave = true;
+        }
+
+
         //Content add methods
         #region Add Methods
 
