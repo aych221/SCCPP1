@@ -101,6 +101,7 @@
         padding: 20px;
     }
 
+    /* Experience configurable list styling */
     #experience-list ul {
         list-style: none;
         margin: 0;
@@ -113,6 +114,7 @@
         border: 1px solid black;
     }
 
+    /* Education configurable list styling */
     #education-list ul {
         list-style: none;
         margin: 0;
@@ -125,6 +127,7 @@
         border: 1px solid black;
     }
 
+    /* Certification configurable list styling */
     #certification-list ul {
         list-style: none;
         margin: 0;
@@ -294,7 +297,7 @@
     // Get all the input fields
     const inputFields = document.querySelectorAll('.tags-input input');
 
-    // Iterate through each input field and attach event listener
+    // Goes through each input field and attach event listener
     inputFields.forEach(inputField => {
         inputField.addEventListener('keyup', function (event) {
             if (event.key === 'Enter' && event.target.value) {
@@ -317,17 +320,17 @@
                 });
                 tag.appendChild(closeIcon);
 
-                // Add the tag element to the tag list
+                // Add the tag element to the list
                 const tagsList = event.target.nextElementSibling;
                 tagsList.appendChild(tag);
 
-                // Clear the input field
+                // Clear input field
                 event.target.value = '';
             }
         });
     });</script>
 
-<!-- Configurable list script -->
+<!-- Configurable list script for experience -->
 
 <script>
     function addExperience() {
@@ -359,7 +362,7 @@
         // Creates paragraph element for end date and adds it to list
         var endDate = document.createElement("p");
         if (presentCheckbox.checked) {
-            endDate.appendChild(document.createTextNode("End Date: Present Employer"));
+            endDate.appendChild(document.createTextNode("End Date: Currently Employed"));
         } else {
             endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
         }
@@ -386,9 +389,9 @@
 <script>
     function addEducation() {
         var ul = document.querySelector("#education-ul"); // The list element
-        var institutionInput = document.getElementById("Education_Institution"); // Input field for employer name
-        var degreeInput = document.getElementById("Education_Degree"); // Input field for job title
-        var fieldInput = document.getElementById("Education_Field"); // Input field for job title
+        var institutionInput = document.getElementById("Education_Institution"); // Input field for institution name
+        var degreeInput = document.getElementById("Education_Degree"); // Input field for degree
+        var fieldInput = document.getElementById("Education_Field"); // Input field for field
         var startDateInput = document.getElementById("Education_StartDate"); // Input field for start date
         var endDateInput = document.getElementById("Education_EndDate"); // Input field for end date
         var currentlyCheckbox = document.querySelector("#currently-checkbox"); // Present employer checkbox
@@ -396,19 +399,20 @@
         // Creates new list item to hold experience details
         var li = document.createElement("li");
 
-        // Creates paragraph element for employer name and adds it to list
-        var company = document.createElement("p");
-        company.appendChild(document.createTextNode("Education Institution: " + institutionInput.value));
-        li.appendChild(company);
+        // Creates paragraph element for institution and adds it to list
+        var institution = document.createElement("p");
+        institution.appendChild(document.createTextNode("Institution: " + institutionInput.value));
+        li.appendChild(institution);
 
-        // Creates paragraph element for job title and adds it to list
-        var jobTitle = document.createElement("p");
-        jobTitle.appendChild(document.createTextNode("Degree: " + degreeInput.value));
-        li.appendChild(jobTitle);
+        // Creates paragraph element for degree and adds it to list
+        var degree = document.createElement("p");
+        degree.appendChild(document.createTextNode("Degree: " + degreeInput.value));
+        li.appendChild(degree);
 
-        var jobTitle = document.createElement("p");
-        jobTitle.appendChild(document.createTextNode("Field: " + fieldInput.value));
-        li.appendChild(jobTitle);
+        // Creates paragraph element for field and adds it to list
+        var field = document.createElement("p");
+        field.appendChild(document.createTextNode("Field: " + fieldInput.value));
+        li.appendChild(field);
 
         // Creates paragraph element for start date and adds it to list
         var startDate = document.createElement("p");
@@ -446,8 +450,8 @@
 <script>
     function addCertification() {
         var ul = document.querySelector("#certification-ul"); // The list element
-        var institutionInput = document.getElementById("Certification_Institution"); // Input field for employer name
-        var certificateInput = document.getElementById("Certification_Certificate"); // Input field for job title
+        var institutionInput = document.getElementById("Certification_Institution"); // Input field for institution name
+        var certificateInput = document.getElementById("Certification_Certificate"); // Input field for certificate
         var startDateInput = document.getElementById("Certification_StartDate"); // Input field for start date
         var endDateInput = document.getElementById("Certification_EndDate"); // Input field for end date
         var currentCheckbox = document.querySelector("#current-checkbox"); // Present employer checkbox
@@ -455,15 +459,15 @@
         // Creates new list item to hold experience details
         var li = document.createElement("li");
 
-        // Creates paragraph element for employer name and adds it to list
-        var company = document.createElement("p");
-        company.appendChild(document.createTextNode("Institution: " + institutionInput.value));
-        li.appendChild(company);
+        // Creates paragraph element for institution and adds it to list
+        var institution = document.createElement("p");
+        institution.appendChild(document.createTextNode("Institution: " + institutionInput.value));
+        li.appendChild(institution);
 
-        // Creates paragraph element for job title and adds it to list
-        var jobTitle = document.createElement("p");
-        jobTitle.appendChild(document.createTextNode("Certificate: " + certificateInput.value));
-        li.appendChild(jobTitle);
+        // Creates paragraph element for certificate and adds it to list
+        var certificate = document.createElement("p");
+        certificate.appendChild(document.createTextNode("Certificate: " + certificateInput.value));
+        li.appendChild(certificate);
 
         // Creates paragraph element for start date and adds it to list
         var startDate = document.createElement("p");
@@ -494,7 +498,8 @@
         var ul = document.querySelector("#certification-ul");
         var li = document.querySelector("#certification-ul li:last-child");
         ul.removeChild(li);
-    }</script>
+    }
+</script>
 
 <!--Stops page from being submitted upon pressing enter-->
 <script>
