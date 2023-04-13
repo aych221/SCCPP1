@@ -12,6 +12,15 @@ namespace SCCPP1.User
         protected readonly SessionData Data;
 
 
+        private ProfileData chosenProfile;
+        public void ChooseProfile(ProfileData pd)
+        {
+            chosenProfile = pd;
+        }
+        public ProfileData ChosenProfile()
+        {
+            return chosenProfile;
+        }
         #region Account Data properties
         //TODO: change all properties to use protected sets
         //0 = admin, 1 = normal user

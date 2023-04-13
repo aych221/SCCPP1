@@ -20,8 +20,6 @@ namespace SCCPP1.Pages
 
         //The following binds allow the selection result to be recorded
 
-
-
         [BindProperty]
         public string name { get; set; }
         [BindProperty]
@@ -38,8 +36,7 @@ namespace SCCPP1.Pages
         public List<string> skills { get; set; }
         [BindProperty]
         public List<string> certs { get; set; }
-        [BindProperty]
-        public string subName { get; set; }
+
 
 
         //used for determining whether a selction is selected
@@ -53,6 +50,8 @@ namespace SCCPP1.Pages
         private string skillsCollection;
         private string certCollection;
 
+        //holds the currently selected profile
+        private ProfileData p;
 
 
         public CreateSubProfileModel(SessionHandler sessionHandler, ILogger<PrivacyModel> logger) : base(sessionHandler)
@@ -66,84 +65,174 @@ namespace SCCPP1.Pages
         {
             Console.WriteLine("[CreateSubProfileModel] destructor called");
         }
+
+
+
+
+
+
+
+
         public IActionResult OnGet()
         {
-            Account.PersistAll();
+            
 
-            if (subName == null)
-            {
-                ViewData["subTitle"] = $"<input type = \"text\" placeholder = \"Name this profile\" name=\"subName\" id=\"subName\" required />";
+            //imports chosen profile
+            p = Account.ChosenProfile();
+          
 
-            }
-            else
-            {
+                // ViewData["subTitle"] = $"<input type = \"text\" placeholder = \"Name this profile\" name=\"subName\" id=\"subName\" value = \"{subName}\" readonly >";
+                ViewData["subTitle"] = $"<b>{p.Title}</b><br>";
 
-                ViewData["subTitle"] = $"<input type = \"text\" placeholder = \"Name this profile\" name=\"subName\" id=\"subName\" value = \"{subName}\" readonly >";
-
-
-                //Displays the initial checkboxes, including all that have been used
-                ViewData["name"] = $"<input type=\"checkbox\" id=\"name\" name=\"name\" onChange = \"this.form.submit()\" >" +
+                //Displays the initial checkboxes, including all that have been used. Initially all Personal information is checked
+                ViewData["name"] = $"<input type=\"checkbox\" id=\"name\" name=\"name\" onChange = \"this.form.submit()\" Checked>" +
                     $"<label for=\"about\"> Name </label><br>";
 
-                ViewData["phone"] = $"<input type=\"checkbox\" id=\"phone\" name=\"phone\" onChange = \"this.form.submit()\"> " +
+                ViewData["phone"] = $"<input type=\"checkbox\" id=\"phone\" name=\"phone\" onChange = \"this.form.submit()\" Checked> " +
                     $"<label for=\"about\"> Phone Number </label><br>";
 
-                ViewData["email"] = $"<input type=\"checkbox\" id=\"email\" name=\"email\" onChange = \"this.form.submit()\">" +
+                ViewData["email"] = $"<input type=\"checkbox\" id=\"email\" name=\"email\" onChange = \"this.form.submit()\" Checked>" +
                     $"<label for=\"about\"> Email </label><br>";
 
-                ViewData["introNar"] = $"<input type=\"checkbox\" id=\"introNar\" name=\"introNar\" onChange = \"this.form.submit()\">" +
+                ViewData["introNar"] = $"<input type=\"checkbox\" id=\"introNar\" name=\"introNar\" onChange = \"this.form.submit()\" Checked>" +
         $"<label for=\"about\"> Introduction Narrative </label><br>";
 
 
 
-                string edString = "";
+
+            /* The following will check all education data stored in this account, check to see if that record is part of the profile, and if it is checks it. 
+            It also generates checkboxes for each, and if they are checked, adds that information to the "PDF"
+            */
+            string edString = "";
                 eduCollection = "";
 
-                foreach (EducationData e in Account.SavedEducationHistory.Values)
+                foreach (EducationData e in Account.SavedEducationHistory.Values) //cycles through all saved data
                 {
-                    edString += $"<input type=\"checkbox\" name=\"eduHist\" value=\"{e.Institution}\" onChange = \"this.form.submit()\" >" +
+                    if (p.SelectedEducationIDs.Contains(e.RecordID)) //checks if this item is part of profile
+                        eduCheck = "Checked";
+
+                    //adds a checkbox
+                    edString += $"<input type=\"checkbox\" name=\"eduHist\" value=\"{e.Institution}\" onChange = \"this.form.submit()\" {eduCheck} >" +
                     $"<label for=\"about\"> {e.Institution} </label><br>";
+                
+                    //if checked, adds the info to PDF
+                    if (eduCheck == "Checked")
+                    {
+                        eduCollection += $"<br> {e.Institution}<br>{e.StartDate} to {e.EndDate}<br>{e.Description}<br>";
+                    }
+
+                    eduCheck = "";
                 }
 
-                string workString = "";
-                ViewData["edu"] = edString;
+                //This is to add the category only if something in it has been selected
+                if (eduCollection != "")
+                {
+                    eduCollection = $"<div class=\"education\"><h5><i class=\"fa fa-graduation-cap\"></i><b> Education </b></h5><p id=\"blue\">{eduCollection}</p></div>";
+                }
+
+
+            ViewData["edu"] = edString;
+
+
+            //Same as Education, but for work
+            string workString = "";
 
                 workCollection = "";
 
                 foreach (WorkData w in Account.SavedWorkHistory.Values)
                 {
-                    workString += $"<input type=\"checkbox\" name=\"workHist\" value=\"{w.Employer}\" onChange = \"this.form.submit()\" >" +
+                    if (p.SelectedWorkIDs.Contains(w.RecordID))
+                        workCheck = "Checked";
+                    workString += $"<input type=\"checkbox\" name=\"workHist\" value=\"{w.Employer}\" onChange = \"this.form.submit()\" {workCheck}>" +
                      $"<label for=\"about\"> {w.Employer} </label><br>";
+
+                    if (workCheck == "Checked")
+                    {
+                        workCollection += $"<br>{w.JobTitle}<br>{w.Employer} {w.StartDate} to {w.EndDate}<br>{w.Description}";
+                    }
+
+                    workCheck = "";
+                }
+
+
+                if (workCollection != "")
+                {
+                    workCollection = $"<div class=\"experience\"> <h5><i class=\"fa fa-briefcase\"></i><b> Experience </b></h5> <p id=\"red\">{workCollection}</p></div>";
                 }
 
                 ViewData["work"] = workString;
 
 
+
+                //Same as above for skills
                 string skillString = "";
                 skillsCollection = "";
 
                 foreach (SkillData s in Account.SavedSkills.Values)
                 {
-                    skillString += $"<input type=\"checkbox\" name=\"skills\" value=\"{s.SkillName}\" onChange = \"this.form.submit()\" >" +
+                    if (p.SelectedSkillIDs.Contains(s.RecordID))
+                        skillCheck = "Checked";
+                    skillString += $"<input type=\"checkbox\" name=\"skills\" value=\"{s.SkillName}\" onChange = \"this.form.submit()\" {skillCheck}>" +
                    $"<label for=\"about\"> {s.SkillName} </label><br>";
+
+                    if (skillCheck == "Checked")
+                    {
+                        skillsCollection += $"<br>{s.SkillName}";
+                    }
+
+                    skillCheck = "";
+                }
+
+                if (skillsCollection != "")
+                {
+                    skillsCollection = $"<div class=\"skill\"><h5><i class=\"fa fa-lightbulb-o\"></i><b> Skills </b></h5><p id=\"blue\">{skillsCollection}</p></div>";
                 }
 
                 ViewData["skills"] = skillString;
 
 
+            
+
+                //Same as above, for Certs
                 string certString = "";
                 certCollection = "";
 
                 foreach (CertificationData c in Account.SavedCertifications.Values)
                 {
+                    if (p.SelectedCertificationIDs.Contains(c.RecordID))
+                        certCheck = "Checked";
                     certString += $"<input type=\"checkbox\" name=\"certs\" value=\"{c.CertificationType}\" onChange = \"this.form.submit()\" >" +
                        $"<label for=\"about\"> {c.CertificationType} </label><br>";
+
+                    if (certCheck == "Checked")
+                    {
+                        certCollection += $"<br> {c.Institution}<br>{c.CertificationType} <br> {c.StartDate} to {c.EndDate}<br>";
+                    }
+
+
+
+                    certCheck = "";
+                }
+
+                if (certCollection != "")
+                {
+                    certCollection = $"<div class=\"education\"><h5><i class=\"fa fa-graduation-cap\"></i><b> Certiications </b></h5><p id=\"blue\">{certCollection}</p></div>";
                 }
 
 
                 ViewData["certs"] = certString;
-            }
+            
 
+
+                //These ViewDatas add the selected information to the PDF section of HTML
+                ViewData["nameDisplay"] = $"<h1><b> {Account.Name} </b></h1>";
+                ViewData["phoneDisplay"] = $" <h6><i class=\"fa fa-phone\"></i> {Account.PhoneNumber} </h6>";
+                ViewData["emailDisplay"] = $"<h6><i class=\"fa fa-envelope\"></i> {Account.EmailAddress}</h6>";
+                ViewData["introNarDisplay"] = $"<div id=\"about\"><h5><i class=\"fa fa-user\"></i><b> About </b> </h5> <p id=\"red\">{Account.IntroNarrative}</p></div>";
+                ViewData["eduDisplay"] = eduCollection;
+                ViewData["workDisplay"] = workCollection;
+                ViewData["skillDisplay"] = skillsCollection;
+                ViewData["certDisplay"] = certCollection;
 
             return Page();
 
@@ -153,10 +242,14 @@ namespace SCCPP1.Pages
 
 
 
+
+
+
         public IActionResult OnPost()
         {
-            Account.PersistAll();
-            ViewData["subTitle"] = $"<input type = \"text\" placeholder = \"Name this profile\" name=\"subName\" id=\"subName\" value = \"{subName}\" readonly> <br>";
+            p = Account.ChosenProfile();
+            ViewData["subTitle"] = $"<b>{p.Title}</b><br>";
+
 
             nameCheck = (name == "on") ? "checked" : "";
             phoneCheck = (phone == "on") ? "checked" : "";
@@ -177,21 +270,36 @@ namespace SCCPP1.Pages
     $"<label for=\"about\"> Introduction Narrative </label><br>";
 
 
+
+
+            //These are the same as in OnGet, with the addition of a check to see if it is currently checked
+
             string edString = "";
             eduCollection = "";
             foreach (EducationData e in Account.SavedEducationHistory.Values)
             {
                 eduCheck = "";
-                foreach (string ed in eduHist)
+                foreach (string ed in eduHist) //This loop cycles through all of the responses from the Post, and checks to see if any match, and if so, ensure they stay checked
                 {
                     if (e.Institution == ed)
                     {
                         eduCheck = "checked";
+                        p.AddEducation(e.RecordID);
                         break;
                     }
                 }
+
+
                 edString += $"<input type=\"checkbox\" name =\"eduHist\" value=\"{e.Institution}\" onChange = \"this.form.submit()\" {eduCheck}>" +
                 $"<label for=\"about\"> {e.Institution} </label><br>";
+               
+                
+                
+                if (!eduCheck.Equals("checked"))
+                {
+                    p.RemoveEducation(e.RecordID);
+                }
+
 
                 if (eduCheck == "checked")
                 {
@@ -206,6 +314,10 @@ namespace SCCPP1.Pages
             }
 
 
+
+
+
+
             string workString = "";
             workCollection = "";
 
@@ -218,9 +330,17 @@ namespace SCCPP1.Pages
                     if (w.Employer == work)
                     {
                         workCheck = "checked";
+                        p.AddWork(w.RecordID);
                         break;
                     }
                 }
+
+                if (!workCheck.Equals("checked"))
+                {
+                    p.RemoveWork(w.RecordID);
+                }
+
+
                 workString += $"<input type=\"checkbox\" name=\"workHist\" value=\"{w.Employer}\" onChange = \"this.form.submit()\" {workCheck}>" +
                  $"<label for=\"about\"> {w.Employer} </label><br>";
 
@@ -238,6 +358,10 @@ namespace SCCPP1.Pages
 
 
 
+
+
+
+
             string skillString = "";
             skillsCollection = "";
 
@@ -249,12 +373,19 @@ namespace SCCPP1.Pages
                     if (s.SkillName == sk)
                     {
                         skillCheck = "checked";
+                        p.AddSkill(s.RecordID);
                         break;
                     }
                 }
 
                 skillString += $"<input type=\"checkbox\" name=\"skills\" value=\"{s.SkillName}\" onChange = \"this.form.submit()\" {skillCheck} >" +
                $"<label for=\"about\"> {s.SkillName} </label><br>";
+
+                if (!skillCheck.Equals("checked"))
+                {
+                    p.RemoveSkill(s.RecordID);
+                }
+
                 if (skillCheck == "checked")
                 {
                     skillsCollection += $"<br>{s.SkillName}";
@@ -268,6 +399,14 @@ namespace SCCPP1.Pages
                 skillsCollection = $"<div class=\"skill\"><h5><i class=\"fa fa-lightbulb-o\"></i><b> Skills </b></h5><p id=\"blue\">{skillsCollection}</p></div>";
             }
 
+
+
+
+
+
+
+
+
             string certString = "";
             certCollection = "";
 
@@ -280,19 +419,24 @@ namespace SCCPP1.Pages
                     if (c.CertificationType == ch)
                     {
                         certCheck = "Checked";
+                        p.AddCertification(c.RecordID);
                         break;
                     }
-
-
-                    certString += $"<input type=\"checkbox\" name=\"certs\" value=\"{c.CertificationType}\" onChange = \"this.form.submit()\" {certCheck} >" +
-                       $"<label for=\"about\"> {c.CertificationType} </label><br>";
-
-                    if (certCheck == "checked")
-                    {
-                        certCollection += $"<br> {c.Institution}<br>{c.CertificationType} <br> {c.StartDate} to {c.EndDate}<br>";
-                    }
-
                 }
+
+                certString += $"<input type=\"checkbox\" name=\"certs\" value=\"{c.CertificationType}\" onChange = \"this.form.submit()\" {certCheck} >" +
+                   $"<label for=\"about\"> {c.CertificationType} </label><br>";
+
+                if (!certCheck.Equals("checked"))
+                {
+                    p.RemoveCertification(c.RecordID);
+                }
+                if (certCheck == "Checked")
+                {
+                    certCollection += $"<br> {c.Institution}<br>{c.CertificationType} <br> {c.StartDate} to {c.EndDate}<br>";
+                }
+
+
 
                 if (certCollection != "")
                 {
@@ -319,8 +463,9 @@ namespace SCCPP1.Pages
             ViewData["skillDisplay"] = skillsCollection;
             ViewData["certDisplay"] = certCollection;
 
-
-
+            p.Save();
+            Account.PersistAll();
+            
 
             return Page();
         }

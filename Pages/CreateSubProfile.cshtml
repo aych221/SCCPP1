@@ -89,7 +89,7 @@
   <div id="all" class="all">
   <div id="sidenav" class="sidenav">
      
-
+      @* This form contains all of the generated checkboxes*@
   <FORM name = "personal" method = "post">
      
     <br>
@@ -106,7 +106,7 @@
          <input type = "submit" value="Save Profile" />
   </form>  
 </div>
-
+@*This section is the main "PDF"*@
 <div id="printarea" class="printarea">
     <div id="pgHeader">
     <br>
@@ -127,6 +127,7 @@
    
    
     <script>
+        //this function strips away everything except the "PDF", and then returns it after completion
         function printPDF(){
              var x = document.getElementById("topbar");
              var y = document.getElementById("sidenav");

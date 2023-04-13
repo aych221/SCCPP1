@@ -37,6 +37,10 @@
     .dropdown:hover .dropbtn {
         background-color: #3e8e41;
     }
+    .transport{
+        
+        padding:45px;
+    }
 </style>
 
 <html>
@@ -48,16 +52,16 @@
 <body>
     <h1>@ViewData["Title"]</h1>
 
-    <br>
+    @*<br>
     <h1>Main Profile</h1>
     <br>
 
     <div class=" dropdown">
-        <i style='font-size:120px' class='far'>&#xf15c;</i> <!--Unicode for page icon-->
-        <div class="dropdown-content">
-            <a href="EditMainProfile">Edit Main Profile</a>
-            <a href="ViewPDF">View as PDF</a>
-        </div>
+    <i style='font-size:120px' class='far'>&#xf15c;</i> <!--Unicode for page icon-->
+    <div class="dropdown-content">
+    <a href="EditMainProfile">Edit Main Profile</a>
+    <a href="ViewPDF">View as PDF</a>
+    </div>
     </div>
 
     <br>
@@ -65,16 +69,26 @@
     <h1>Sub Profile</h1>
     <br>
     <div class=" dropdown">
-        <i style='font-size:120px' class='far'>&#xf15c;</i> <!--Unicode for page icon-->
-        <div class="dropdown-content">
-            <a href="EditSubProfile">Edit Sub Profile</a>
-            <a href="ViewPDF">View as PDF</a>
-        </div>
+    <i style='font-size:120px' class='far'>&#xf15c;</i> <!--Unicode for page icon-->
+    <div class="dropdown-content">
+    <a href="EditSubProfile">Edit Sub Profile</a>
+    <a href="ViewPDF">View as PDF</a>
+    </div>
     </div>
     <br>
     <br>
-    <a href="CreateSubProfile"> <button style='font-size:24px'> Create Sub-Profile </button></a>
+    <a href="CreateSubProfile"> <button style='font-size:24px'> Create Sub-Profile </button></a>*@
+    
 
+
+
+    @* this provides the link to edit the main page, followed by the placing of the profiles*@
+    <a class="transport" href="EditMainProfile"><button>Edit Main Profile</button></a>
+    <form method="post">
+        @Html.Raw(ViewData["subProfiles"])
+        <br>
+        <input type = "text" name="newSubP" placeholder="Enter a name to create a new Profile!" />
+        <input type = "submit" name="newProf" />
+    </form>
 </body>
 </html>
-

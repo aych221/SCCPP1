@@ -82,10 +82,12 @@ namespace SCCPP1.Session
 
             //debug only
             Account acc;
-
+            //DatabaseConnector.Thomas(acc = new Account(Data, false));
+            //page = "/UserHome";
+            //Console.WriteLine("[IsReturning = True]");
             //Debug use only
             //TODO: make easier to use debugs with SSO
-           if (Data.Username.Equals("ww8FDk-bnuBk1KJXVreseNbsDmGnt62pNRpswwgGC7k"))
+            if (Data.Username.Equals("ww8FDk-bnuBk1KJXVreseNbsDmGnt62pNRpswwgGC7k"))
             {
                 DatabaseConnector.Thomas(acc = new Account(Data, false));
                 page = "/UserHome";
