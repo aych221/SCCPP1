@@ -1,4 +1,6 @@
-﻿namespace SCCPP1.User
+﻿using SCCPP1.Database.Entity;
+
+namespace SCCPP1.User
 {
     public abstract class RecordData
     {
@@ -26,6 +28,9 @@
         /// Message that is used to relay information back after a save attempt was made
         /// </summary>
         protected string SaveAttemptMessage { get; set; }
+
+
+        public DbColumn DbReference { get; protected set; }
 
 
         public RecordData(int id = -1)

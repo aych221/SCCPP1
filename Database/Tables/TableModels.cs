@@ -1,99 +1,24 @@
-﻿using SCCPP1.Database.Entity;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using SCCPP1.Database.Entity;
 
 namespace SCCPP1.Database.Tables
 {
     public class TableModels
     {
 
-        /// <summary>
-        /// The colleagues table model
-        /// </summary>
-        public readonly DbTable Colleagues;
-
-
-        /// <summary>
-        /// The municipalities table model
-        /// </summary>
-        public readonly DbTable Municipalities;
-
-
-        /// <summary>
-        /// The states table model
-        /// </summary>
-        public readonly DbTable States;
-
-
-        /// <summary>
-        /// The education_types table model
-        /// </summary>
-        public readonly DbTable EducationTypes;
-
-
-        /// <summary>
-        /// The institutions table model
-        /// </summary>
-        public readonly DbTable Institutions;
-
-
-        /// <summary>
-        /// The education_histories table model
-        /// </summary>
-        public readonly DbTable EducationHistories;
-
-
-        /// <summary>
-        /// The employers table model
-        /// </summary>
-        public readonly DbTable Employers;
-        
-
-        /// <summary>
-        /// The job_titles table model
-        /// </summary>
-        public readonly DbTable JobTitles;
-
-
-        /// <summary>
-        /// The work_histories table model
-        /// </summary>
-        public readonly DbTable WorkHistories;
-
-
-        /// <summary>
-        /// The skills table model
-        /// </summary>
-        public readonly DbTable Skills;
-
-
-        /// <summary>
-        /// The skill_categories table model
-        /// </summary>
-        public readonly DbTable SkillCategories;
-
-
-        /// <summary>
-        /// The colleague_skills table model
-        /// </summary>
-        public readonly DbTable ColleagueSkills;
-
-
-        /// <summary>
-        /// The profiles table model
-        /// </summary>
-        public readonly DbTable Profiles;
-
-
-        public readonly List<DbTable> Tables;
+        public readonly Dictionary<string, DbTable> Tables;
 
 
 
         public TableModels()
         {
-            Tables = new List<DbTable>();
+            Tables = new();
 
-            DbColumn profile_id, colleague_id, education_histories_id, education_type_id,
-                work_histories_id, employer_id, job_title_id, colleague_skills_id,
-                skill_id, skill_category_id, institution_id, municipality_id, state_id;
+            DbColumn profile_id, colleague_id, municipality_id, state_id,
+                skill_id, skill_category_id, colleague_skills_id,
+                institution_id, education_type_id, education_histories_id,
+                employer_id, job_title_id, work_histories_id,
+                certification_type_id, colleague_certifications_id;
 
 
             //create common fields
@@ -104,7 +29,7 @@ namespace SCCPP1.Database.Tables
                 municipalityF, stateF;
 
             //Create the colleagues table model
-            Colleagues = new DbTable("colleagues",
+            colleague_id = CreateTable(Tables, "colleagues",
                 new Field("user_hash", typeof(string), true, true),
                 new Field("role", typeof(int), true, false),
                 new Field("name", typeof(string), true, false),
@@ -112,24 +37,18 @@ namespace SCCPP1.Database.Tables
                 new Field("phone", typeof(long), false, false),
                 new Field("address", typeof(string), false, false),
                 new Field("intro_narrative", typeof(string), false, false)
-                );
-
-            colleague_id = Colleagues.PrimaryKey;
-            Tables.Add(Colleagues);
+                ).PrimaryKey;
 
 
             //Create the municipalites table model
-            Tables.Add(Municipalities = new DbTable("municipalities", valF));
-            municipality_id = Municipalities.PrimaryKey;
+            municipality_id = CreateTable(Tables, "municipalities", valF).PrimaryKey;
 
 
             //Create the states table model
-            States = new DbTable("states",
+            state_id = CreateTable(Tables, "states",
                 new Field("name", typeof(string), true, true),
                 new Field("abbreviation", typeof(string), true, true)
-                );
-            state_id = States.PrimaryKey;
-            Tables.Add(States);
+                ).PrimaryKey;
 
 
             //set fields to reuse
@@ -137,19 +56,34 @@ namespace SCCPP1.Database.Tables
             stateF = new Field("state_id", typeof(int), false, false, state_id);
 
 
-
-            //Create the institutions table model
-            Tables.Add(Institutions = new DbTable("institutions", valF));
-            institution_id = Institutions.PrimaryKey;
+            //Create the skills table model
+            skill_id = CreateTable(Tables, "skills", valF).PrimaryKey;
 
 
-            //Create the institutions table model
-            Tables.Add(EducationTypes = new DbTable("education_types", valF));
-            education_type_id = EducationTypes.PrimaryKey;
+            //Create the skills table model
+            skill_category_id = CreateTable(Tables, "skill_categories", valF).PrimaryKey;
 
 
             //Create the education_histories table model
-            EducationHistories = new DbTable("education_histories",
+            colleague_skills_id = CreateTable(Tables, "colleague_skills",
+                new Field("colleague_id", typeof(int), true, false, colleague_id),
+                new Field("skill_id", typeof(int), true, false, skill_id),
+                new Field("skill_category_id", typeof(int), false, false, skill_category_id),
+                new Field("rating", typeof(int), false, false)
+                ).PrimaryKey;
+
+
+
+            //Create the institutions table model
+            institution_id = CreateTable(Tables, "institutions", valF).PrimaryKey;
+
+
+            //Create the education_types table model
+            education_type_id = CreateTable(Tables, "education_types", valF).PrimaryKey;
+
+
+            //Create the education_histories table model
+            education_histories_id = CreateTable(Tables, "education_histories",
                 new Field("colleague_id", typeof(int), true, false, colleague_id),
                 new Field("education_type_id", typeof(int), true, false, education_type_id),
                 new Field("institution_id", typeof(int), true, false, institution_id),
@@ -158,23 +92,37 @@ namespace SCCPP1.Database.Tables
                 startDateF,
                 endDateF,
                 descriptionF
-                );
-            education_histories_id = EducationHistories.PrimaryKey;
-            Tables.Add(EducationHistories);
+                ).PrimaryKey;
+
+
+
+            //Create the certification_types table model
+            certification_type_id = CreateTable(Tables, "certification_types", valF).PrimaryKey;
+
+
+            //Create the colleague_certifications table model
+            colleague_certifications_id = CreateTable(Tables, "colleague_certifications",
+                new Field("colleague_id", typeof(int), true, false, colleague_id),
+                new Field("education_type_id", typeof(int), true, false, certification_type_id),
+                new Field("institution_id", typeof(int), true, false, institution_id),
+                municipalityF,
+                stateF,
+                startDateF,
+                endDateF,
+                descriptionF
+                ).PrimaryKey;
 
 
             //Create the employers table model
-            Tables.Add(Employers = new DbTable("employers", valF));
-            employer_id = Employers.PrimaryKey;
+            employer_id = CreateTable(Tables, "employers", valF).PrimaryKey;
 
 
             //Create the job_titles table model
-            Tables.Add(JobTitles = new DbTable("job_titles", valF));
-            job_title_id = JobTitles.PrimaryKey;
+            job_title_id = CreateTable(Tables, "job_titles", valF).PrimaryKey;
 
 
-            //Create the education_histories table model
-            WorkHistories = new DbTable("work_histories",
+            //Create the work_histories table model
+            work_histories_id = CreateTable(Tables, "work_histories",
                 new Field("colleague_id", typeof(int), true, false, colleague_id),
                 new Field("employer_id", typeof(int), true, false, employer_id),
                 new Field("job_title_id", typeof(int), true, false, job_title_id),
@@ -183,52 +131,67 @@ namespace SCCPP1.Database.Tables
                 startDateF,
                 endDateF,
                 descriptionF
-                );
-            work_histories_id = WorkHistories.PrimaryKey;
-            Tables.Add(WorkHistories);
+                ).PrimaryKey;
 
 
-            //Create the skills table model
-            Tables.Add(Skills = new DbTable("skills", valF));
-            skill_id = Skills.PrimaryKey;
-
-
-            //Create the skills table model
-            Tables.Add(SkillCategories = new DbTable("skill_categories", valF));
-            skill_category_id = SkillCategories.PrimaryKey;
-
-
-            //Create the education_histories table model
-            ColleagueSkills = new DbTable("colleague_skills",
-                new Field("colleague_id", typeof(int), true, false, colleague_id),
-                new Field("skill_id", typeof(int), true, false, skill_id),
-                new Field("skill_category_id", typeof(int), false, false, skill_category_id),
-                new Field("rating", typeof(int), false, false)
-                );
-            colleague_skills_id = ColleagueSkills.PrimaryKey;
-            Tables.Add(ColleagueSkills);
-
-
-            //Create the education_histories table model
-            Profiles = new DbTable("profiles",
+            //Create the profiles table model
+            profile_id = CreateTable(Tables, "profiles",
                 new Field("colleague_id", typeof(int), true, false, colleague_id),
                 new Field("title", typeof(string), true, false),
-                new Field("education_histories_ids", typeof(string), false, false),
-                new Field("work_histories_ids", typeof(int), false, false),
                 new Field("colleague_skills_ids", typeof(string), false, false),
+                new Field("education_histories_ids", typeof(string), false, false),
+                new Field("colleague_certifications_ids", typeof(string), false, false),
+                new Field("work_histories_ids", typeof(int), false, false),
                 new Field("ordering", typeof(string), false, false)
-                );
-            profile_id = ColleagueSkills.PrimaryKey;
-            Tables.Add(Profiles);
+                ).PrimaryKey;
+
+
+
 
             //TODO add after query is done
-            //Colleagues.AddCols(new Field("main_profile_id", typeof(int), false, false, profile_id));
+            //may be able to just turn pragma off then do this.
+            Tables["colleagues"].AddCols(new Field("main_profile_id", typeof(int), false, false, profile_id));
 
-            foreach (DbTable t in Tables)
+            foreach (DbTable t in Tables.Values)
                 Console.WriteLine(QueryGenerator.CreateTableSql(t));
-
 
         }
 
+
+        protected DbTable CreateTable(Dictionary<string, DbTable> dict, string name, params Field[] fields)
+        {
+            DbTable t = new DbTable(name, NextAlias(), fields);
+            dict.TryAdd(name, t);
+            return t;
+        }
+
+
+        protected void LoadTables()
+        {
+
+        }
+
+
+
+        /// <summary>
+        /// Alias indexers. Used to keep track of the current alias step.
+        /// </summary>
+        private int _ai, _aj;
+
+        /// <summary>
+        /// Alias chars, does not contain vowels to ensure no keywords are generated.
+        /// </summary>
+        private char[] _aliasChars = new char[] {'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'z'};
+        private string NextAlias()
+        {
+            if (_ai >= _aliasChars.Length)
+                _ai = 0;
+            if (_aj >= _aliasChars.Length)
+            {
+                _aj = 0;
+                _ai++;
+            }
+            return $"{_aliasChars[_ai]}{_aliasChars[_aj++]}";
+        }
     }
 }

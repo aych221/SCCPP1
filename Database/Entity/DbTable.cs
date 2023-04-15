@@ -1,35 +1,85 @@
-﻿using System;
+﻿using Microsoft.IdentityModel.Tokens;
+using SCCPP1.Database.Policies;
+using System;
+using System.Collections.ObjectModel;
 
 namespace SCCPP1.Database.Entity
 {
     public class DbTable
     {
 
-        private int _ordinal;
+        public readonly ForeignKeyDeletePolicy DefaultDeletePolicyFK;
 
-        public readonly string Name;
+        private string _name;
+        public virtual string Name
+        { 
+            get { return _name; }
+            protected set
+            {
+                _name = value;
+                _quotedName = $"[{_name}]";
+            }
+        }
+
+        private string _quotedName;
+        public virtual string QuotedName
+        {
+            get { return _quotedName; }
+        }
+
+
+        public readonly string Alias;
 
         public readonly DbColumn PrimaryKey;
 
-        public DbColumn[] Columns { get; protected set; }
+        public DbColumn[]? Columns { get; protected set; }
 
-        public DbColumn[] ForeignKeys { get; protected set; }
+        public DbColumn[]? ForeignKeys { get; protected set; }
 
         public bool HasForeignKeys { get; protected set; }
 
 
+        //might want to use stack for this
+        /// <summary>
+        /// Columns that need to be added to the table.
+        /// </summary>
+        protected List<DbColumn>? _toAlterColumns;
 
-        public DbTable(string name, params Field[] fields)
+
+        private bool _isAltered;
+
+        /// <summary>
+        /// Determines if the table needs to run an alter query.
+        /// </summary>
+        public bool IsAltered
+        { 
+            get { return _toAlterColumns == null || _toAlterColumns.Count == 0; }
+        }
+
+
+        public QueryStatements Statements { get; protected set; }
+
+
+
+        public DbTable(string name, string alias, params Field[] fields)
         {
             Name = name;
+            Alias = alias;
 
             //create primary key field for table
             PrimaryKey = new DbColumn(this, 0, "id", typeof(int), true, true);
 
             AddCols(fields);
 
+            //don't want to set alter flag to true, so empty after inital AddCols().
+            _toAlterColumns = null;
         }
 
+
+
+
+
+        private int _ordinalCount;
 
         public DbTable AddCols(params Field[] fields)
         {
@@ -64,10 +114,12 @@ namespace SCCPP1.Database.Entity
                 }
             }
 
+            _toAlterColumns = new List<DbColumn>(fields.Length);
             //add new columns
             for (int j = 0; j < fields.Length; j++)
             {
-                col = columns[i + j] = new DbColumn(this, _ordinal++, fields[j]);
+                col = columns[i + j] = new DbColumn(this, _ordinalCount++, fields[j]);
+                _toAlterColumns.Add(col);
 
                 if (col.IsForeignKey)
                     foreignKeys.Add(col);
@@ -81,6 +133,7 @@ namespace SCCPP1.Database.Entity
 
             return this;
         }
+
 
         /// <summary>
         /// Copies the columns for this table, starting after the primary key.
@@ -120,5 +173,47 @@ namespace SCCPP1.Database.Entity
             Array.Copy(Columns, columns, Columns.Length);
             return columns;
         }
+
+
+
+        public void GenerateQueryStatements()
+        {
+
+        }
+
+
     }
+
+    public struct QueryStatements
+    {
+        public string InsertAll { get; private set; }
+        public string InsertRequiredOnly { get; private set; }
+        public string InsertOrIgnoreAll { get; private set; }
+        public string InsertOrIgnoreRequiredOnly { get; private set; }
+        public string SelectAll { get; private set; }
+        public string SelectRequiredOnly { get; private set; }
+        public string UpdateAll { get; private set; }
+        public string UpdateRequiredOnly { get; private set; }
+        public string DeleteAll { get; private set; }
+        public string DeleteFrom { get; private set; }
+
+
+        public QueryStatements(string insertAll, string insertRequiredOnly, string insertOrIgnoreAll, string insertOrIgnoreRequiredOnly,
+                       string selectAll, string selectRequiredOnly, string updateAll, string updateRequiredOnly,
+                       string deleteAll, string deleteFrom)
+        {
+            InsertAll = insertAll;
+            InsertRequiredOnly = insertRequiredOnly;
+            InsertOrIgnoreAll = insertOrIgnoreAll;
+            InsertOrIgnoreRequiredOnly = insertOrIgnoreRequiredOnly;
+            SelectAll = selectAll;
+            SelectRequiredOnly = selectRequiredOnly;
+            UpdateAll = updateAll;
+            UpdateRequiredOnly = updateRequiredOnly;
+            DeleteAll = deleteAll;
+            DeleteFrom = deleteFrom;
+        }
+
+    }
+
 }

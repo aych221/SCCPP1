@@ -123,6 +123,31 @@ namespace SCCPP1
             return strippedString;
         }
 
+        public static string RemoveHtmlTags(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            StringBuilder sb = new StringBuilder();
+            bool tagFlag = false;
+
+            foreach (char c in input)
+            {
+                if (c == '<')
+                {
+                    tagFlag = true;
+                    continue;
+                }
+                else if (c == '>')
+                    tagFlag = false;
+
+                if (!tagFlag)
+                    sb.Append(c);
+            }
+
+            return sb.ToString();
+        }
+
 
         //Prevents any CS from running by stripping anything with @
         public static string CodeStripper(string input)
@@ -139,6 +164,7 @@ namespace SCCPP1
 
             return strippedstring;
         }
+
 
     }
 }

@@ -1,12 +1,56 @@
 ﻿using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using SCCPP1.Database.Policies;
 
 namespace SCCPP1.Database.Entity
 {
     public class DbColumn : Field
     {
 
-        public readonly DbTable Table;
+        public readonly ForeignKeyDeletePolicy DeletePolicyFK;
+
+
+
+        private DbTable _table;
+
+        public DbTable Table
+        {
+            get { return _table; }
+            protected set
+            {
+                _table = value;
+                QualifiedName = $"[{Table.Name}].{QuotedName}";
+            }
+        }
+
+
+        public override string Name
+        {
+            protected set
+            {
+                base.Name = value;
+
+                if (Table != null)
+                    QualifiedName = $"[{Table.Name}].{QuotedName}";
+            }
+        }
+
+
+        private string _qualifiedName;
+
+        /// <summary>
+        /// The fully qualified i.e. [table_name].[column_name]
+        /// </summary>
+        public string QualifiedName
+        {
+            get { return _qualifiedName; }
+            protected set
+            {
+                _qualifiedName = value;
+            }
+        }
+
 
         public readonly int Ordinal;
 
@@ -50,7 +94,34 @@ namespace SCCPP1.Database.Entity
     public class Field
     {
 
-        public readonly string Name;
+
+        private string _name;
+
+        public virtual string Name
+        {
+            get { return _name; }
+            protected set
+            {
+                _name = value;
+                QuotedName = _name;
+            }
+        }
+
+
+        private string _quotedName;
+
+        /// <summary>
+        /// The quoted identifier i.e. [column_name]
+        /// </summary>
+        public virtual string QuotedName
+        {
+            get { return _quotedName; }
+            protected set
+            {
+                _quotedName = $"[{value}]";
+            }
+        }
+
 
         public Type ValueType { get; protected set; }
 
@@ -66,28 +137,6 @@ namespace SCCPP1.Database.Entity
             IsRequired = isRequired;
             IsUnique = isUnique;
             IsForeignKey = (ForeignKey = foreignKey) != null;
-        }
-
-    }
-
-
-    public class DbField<T> : DbColumn//  where T : class
-    {
-
-        public override object Value { get; set; }
-
-
-        /*public DbField(DbTable table, string name, int ordinal, bool isPrimaryKey, bool isRequired, bool isUnique, DbColumn foreignKey, T value) :
-            base(table, name, ordinal, isPrimaryKey, isRequired, isUnique, foreignKey)
-        {
-            Value = value;
-        }*/
-
-        public DbField(DbColumn column, T value) :
-            base(column)
-        {
-            ValueType = typeof(T);
-            Value = value;
         }
 
     }

@@ -46,7 +46,7 @@ namespace SCCPP1.Database.Entity
          */
         public DbColleagueData(Account account) : base(account)
         {
-            DbTable table = DatabaseConnector.TableModels.Colleagues;
+            DbTable table = DatabaseConnector.TableModels.Tables["colleagues"];
 
             Columns = table.CopyColumnsNoPK();
 
@@ -67,7 +67,7 @@ namespace SCCPP1.Database.Entity
 
         public DbStateData(string state, string abbreviation) : base(null)
         {
-            DbTable table = DatabaseConnector.TableModels.States;
+            DbTable table = DatabaseConnector.TableModels.Tables["states"];
 
             Columns = table.CopyColumnsNoPK();
 

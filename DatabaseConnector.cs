@@ -7,6 +7,8 @@ using System.Text;
 using SCCPP1.Database.Tables;
 using System.Collections.ObjectModel;
 using Microsoft.IdentityModel.Tokens;
+using SCCPP1.Database;
+using SCCPP1.Database.Entity;
 
 namespace SCCPP1
 {
@@ -31,20 +33,21 @@ namespace SCCPP1
 
         public static void CreateDatabase(bool loadCaches = false)
         {
-            /*
+            
             TableModels = new TableModels();
+            Dictionary<string, DbTable> Tables =  TableModels.Tables;
 
             StringBuilder sql = new StringBuilder();
 
             //drop tables if exists
-            sql.AppendLine(QueryGenerator.DropTables(TableModels.Tables));
+            sql.AppendLine(QueryGenerator.DropTables(Tables));
 
             //generate sql for tables
-            foreach (DbTable table in TableModels.Tables)
+            foreach (DbTable table in Tables.Values)
                 sql.AppendLine(QueryGenerator.CreateTableSql(table));
 
             //add foreign key to colleagues table
-            sql.AppendLine(QueryGenerator.AlterTableAddForeignKeys(TableModels.Colleagues, new Field("main_profile_id", typeof(int), false, false, TableModels.Profiles.PrimaryKey)));
+            sql.AppendLine(QueryGenerator.AlterTableAddForeignKeys(Tables["colleagues"], new Field("main_profile_id", typeof(int), false, false, Tables["profiles"].PrimaryKey)));
 
             DbRecord[] states = new DbRecord[]
             {
@@ -99,13 +102,21 @@ namespace SCCPP1
                 new DbRecord(new DbStateData("Wisconsin", "WI")),
                 new DbRecord(new DbStateData("Wyoming", "WY"))
             };
-            */
 
-
-
+            Account t = new Account("testuser");
+            t.UpdateData("Testing", "Some", "User", "test@user.edu", 1231231234, "Nothing interesting");
+            //Console.WriteLine(QueryGenerator.InsertOrIgnore(Tables["colleagues"], new DbRecord(new DbColleagueData(t))));
+            Console.WriteLine();
+            Console.WriteLine(QueryGenerator.Select(Tables["work_histories"].Columns[1], true));
+            Console.WriteLine();
+            Console.WriteLine(QueryGenerator.UpdateAll(Tables["colleagues"]));
+            Console.WriteLine();
+            Console.WriteLine(QueryGenerator.UpdateRequiredOnly(Tables["colleagues"]));
+            
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
+                Console.WriteLine("Server Version: " + conn.ServerVersion);
                 using (SqliteCommand cmd = new SqliteCommand(dbSQL, conn))
                 {
                     cmd.ExecuteNonQuery();
@@ -2605,6 +2616,17 @@ namespace SCCPP1
                         string skillIDs, educationIDs, certIDs, workIDs;
                         HashSet<int> skills, education, certs, work;
 
+                        void CreateHashSet(string values, out HashSet<int> hashSet)
+                        {
+                            if (string.IsNullOrEmpty(values))
+                                hashSet = new HashSet<int>();
+                            else if (values.Length == 1)
+                                (hashSet = new HashSet<int>()).Add(int.Parse(values));
+                            else
+                                hashSet = new HashSet<int>(values.Split(',').Select(int.Parse));
+                        }
+
+
                         while (r.Read())
                         {
                             skillIDs = GetString(r, 3);
@@ -2612,69 +2634,10 @@ namespace SCCPP1
                             certIDs = GetString(r, 5);
                             workIDs = GetString(r, 6);
 
-                            if (string.IsNullOrEmpty(skillIDs))
-                            {
-                                skills = new HashSet<int>();
-
-                            }
-                            else if (skillIDs.Length == 1)
-                            {
-                                skills = new HashSet<int>();
-                                skills.Add(int.Parse(skillIDs));
-                            }
-                            else
-                            {
-                                skills = new HashSet<int>(skillIDs.Split(',').Select(int.Parse));
-                            }
-
-
-
-                            if (string.IsNullOrEmpty(educationIDs))
-                            {
-                                education = new HashSet<int>();
-
-                            }
-                            else if (educationIDs.Length == 1)
-                            {
-                                (education = new HashSet<int>()).Add(int.Parse(educationIDs));
-                            }
-                            else
-                            {
-                                education = new HashSet<int>(educationIDs.Split(',').Select(int.Parse));
-                            }
-
-
-
-                            if (string.IsNullOrEmpty(certIDs))
-                            {
-                                certs = new HashSet<int>();
-
-                            }
-                            else if (certIDs.Length == 1)
-                            {
-                                (certs = new HashSet<int>()).Add(int.Parse(certIDs));
-                            }
-                            else
-                            {
-                                certs = new HashSet<int>(certIDs.Split(',').Select(int.Parse));
-                            }
-
-
-
-                            if (string.IsNullOrEmpty(workIDs))
-                            {
-                                work = new HashSet<int>();
-
-                            }
-                            else if (workIDs.Length == 1)
-                            {
-                                (work = new HashSet<int>()).Add(int.Parse(workIDs));
-                            }
-                            else
-                            {
-                                work = new HashSet<int>(workIDs.Split(',').Select(int.Parse));
-                            }
-
+                            CreateHashSet(skillIDs, out skills);
+                            CreateHashSet(educationIDs, out education);
+                            CreateHashSet(certIDs, out certs);
+                            CreateHashSet(workIDs, out work);
 
                             list.Add(pd = new ProfileData(
                                 account,
@@ -2730,6 +2693,16 @@ namespace SCCPP1
                         string skillIDs, educationIDs, certIDs, workIDs;
                         HashSet<int> skills, education, certs, work;
 
+                        void CreateHashSet(string values, out HashSet<int> hashSet)
+                        {
+                            if (string.IsNullOrEmpty(values))
+                                hashSet = new HashSet<int>();
+                            else if (values.Length == 1)
+                                (hashSet = new HashSet<int>()).Add(int.Parse(values));
+                            else
+                                hashSet = new HashSet<int>(values.Split(',').Select(int.Parse));
+                        }
+
                         while (r.Read())
                         {
                             skillIDs = GetString(r, 3);
@@ -2737,68 +2710,10 @@ namespace SCCPP1
                             certIDs = GetString(r, 5);
                             workIDs = GetString(r, 6);
 
-                            if (string.IsNullOrEmpty(skillIDs))
-                            {
-                                skills = new HashSet<int>();
-
-                            }
-                            else if (skillIDs.Length == 1)
-                            {
-                                skills = new HashSet<int>();
-                                skills.Add(int.Parse(skillIDs));
-                            }
-                            else
-                            {
-                                skills = new HashSet<int>(skillIDs.Split(',').Select(int.Parse));
-                            }
-
-
-
-                            if (string.IsNullOrEmpty(educationIDs))
-                            {
-                                education = new HashSet<int>();
-
-                            }
-                            else if (educationIDs.Length == 1)
-                            {
-                                (education = new HashSet<int>()).Add(int.Parse(educationIDs));
-                            }
-                            else
-                            {
-                                education = new HashSet<int>(educationIDs.Split(',').Select(int.Parse));
-                            }
-
-
-
-                            if (string.IsNullOrEmpty(certIDs))
-                            {
-                                certs = new HashSet<int>();
-
-                            }
-                            else if (certIDs.Length == 1)
-                            {
-                                (certs = new HashSet<int>()).Add(int.Parse(certIDs));
-                            }
-                            else
-                            {
-                                certs = new HashSet<int>(certIDs.Split(',').Select(int.Parse));
-                            }
-
-
-
-                            if (string.IsNullOrEmpty(workIDs))
-                            {
-                                work = new HashSet<int>();
-
-                            }
-                            else if (workIDs.Length == 1)
-                            {
-                                (work = new HashSet<int>()).Add(int.Parse(workIDs));
-                            }
-                            else
-                            {
-                                work = new HashSet<int>(workIDs.Split(',').Select(int.Parse));
-                            }
+                            CreateHashSet(skillIDs, out skills);
+                            CreateHashSet(educationIDs, out education);
+                            CreateHashSet(certIDs, out certs);
+                            CreateHashSet(workIDs, out work);
 
 
                             list.Add(pd = new ProfileData(
