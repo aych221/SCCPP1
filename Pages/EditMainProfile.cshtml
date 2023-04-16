@@ -178,10 +178,65 @@
 
             <label for="ProgLang">Programming Languages:</label>
             <div class="tags-input">
-                <input type="text" asp-for="Skill!.ProgLang" placeholder="What languages do you know?... (Press enter to save)" />
-                <ul class="tags-list"></ul>
-                <ul class="hidden-tags-list" id="prog-lang-tags-list"></ul>
+                <input type="text" class="tags-input-field" data-list-selector="#prog-lang-list" placeholder="What languages do you know?... (Press enter to save)" onkeydown="onKeyDown(event)" />
+                <input type="text" asp-for="Skill!.ProgLang" style="display:none;" />
+                @Html.HiddenFor(m => m.Skill.ProgLang, new { id = "prog-lang-input" })
+                <ul class="tags-list" id="prog-lang-list"></ul>
             </div>
+
+            <script>
+                function onKeyDown(event) {
+                    if (event.keyCode === 13) { // Enter key pressed
+                        event.preventDefault(); // prevent form submission
+                        const input = event.target;
+                        const listSelector = input.getAttribute("data-list-selector");
+                        const list = document.querySelector(listSelector);
+                        const tag = document.createElement("li");
+                        tag.classList.add("tag");
+                        tag.textContent = input.value;
+
+                        const xButton = document.createElement("button");
+                        xButton.classList.add("tag-close-btn");
+                        xButton.innerHTML = "&times;";
+                        xButton.addEventListener("click", function () {
+                            const tagToRemove = this.parentNode;
+                            tagToRemove.parentNode.removeChild(tagToRemove);
+                            updateHiddenInput(list);
+                        });
+                        tag.appendChild(xButton);
+
+                        list.appendChild(tag);
+                        input.value = "";
+                        updateHiddenInput(list);
+                    }
+                }
+
+                function updateHiddenInput(list) {
+                    const csv = Array.from(list.children).map(tag => tag.textContent.replace(/\u00D7/g, "").trim()).join(",");
+                    const hiddenInput = document.getElementById("@Html.IdFor(m => m.Skill.ProgLang)");
+                    hiddenInput.value = csv;
+                }
+            </script>
+
+<!--            <script>
+                function onKeyDown(event) {
+                    if (event.keyCode === 13) { // Enter key pressed
+                        event.preventDefault(); // prevent form submission
+                        const input = event.target;
+                        const listSelector = input.getAttribute("data-list-selector");
+                        const list = document.querySelector(listSelector);
+                        const tag = document.createElement("li");
+                        tag.classList.add("tag");
+                        tag.textContent = input.value;
+                        list.appendChild(tag);
+                        input.value = "";
+
+                        const csv = Array.from(list.children).map(tag => tag.textContent).join(",");
+                        const hiddenInput = document.getElementById("@Html.IdFor(m => m.Skill.ProgLang)");
+                        hiddenInput.value = csv;
+                    }
+                }
+            </script>-->
             <br />
 
             <label for="OS">Operating Systems:</label>
@@ -348,10 +403,11 @@
         });
     });</script>
 
+
+
 <!-- Configurable list script for experience -->
 
-<script>
-    function addExperience() {
+<script>function addExperience() {
         var ul = document.querySelector("#experience-ul"); // The visible experience list element
         var hiddenUl = document.querySelector("#hidden-experience-ul"); // The hidden experience list element
         var employerInput = document.getElementById("Work_Employer"); // Input field for employer name
@@ -408,8 +464,7 @@
     }</script>
 
 <!-- Configurable list script for education -->
-<script>
-    function addEducation() {
+<script>function addEducation() {
         var ul = document.querySelector("#education-ul"); // The visible education list element
         var hiddenUl = document.querySelector("#hidden-education-ul"); // The hidden education list element
         var institutionInput = document.getElementById("Education_Institution"); // Input field for institution name
@@ -473,8 +528,7 @@
     }</script>
 
 <!-- Configurable list script for certification-->
-<script>
-    function addCertification() {
+<script>function addCertification() {
         var ul = document.querySelector("#certification-ul"); // The visible certification list element
         var hiddenUl = document.querySelector("#hidden-certification-ul"); // The hidden certification list element
         var institutionInput = document.getElementById("Certification_Institution"); // Input field for institution name
@@ -531,8 +585,7 @@
     }</script>
 
 <!--Stops page from being submitted upon pressing enter-->
-<script>
-    const form = document.getElementById("myForm");
+<script>const form = document.getElementById("myForm");
     form.addEventListener("keypress", function (e) {
         if (e.key === "Enter") {
             e.preventDefault();

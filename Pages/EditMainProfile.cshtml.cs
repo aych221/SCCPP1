@@ -74,6 +74,7 @@ namespace SCCPP1.Pages
                 Account.PhoneNumber = Colleague.PhoneNumber;
                 Account.IntroNarrative = Colleague.IntroNarrative;
 
+                Console.WriteLine(Skill.ProgLang);
                 //Account.AddSkills(
                 //    Skill.ProgLang,
                 //    Skill.OS,
