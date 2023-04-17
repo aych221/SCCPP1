@@ -39,6 +39,12 @@ namespace SCCPP1.Database.Entity
         public bool HasForeignKeys { get; protected set; }
 
 
+        /// <summary>
+        /// Determines if the table is a value storage table. A value storage table is a table that only has two columns, the primary key and the value column.
+        /// </summary>
+        public bool IsValueStorageOnly { get { return Columns?.Length == 2; } }
+
+
         //might want to use stack for this
         /// <summary>
         /// Columns that need to be added to the table.

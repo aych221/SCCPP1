@@ -19,7 +19,7 @@
         public DbRecordData RecordData;
 
         public DbRecord(DbRecordData recordData) :
-            base(recordData.Columns)
+            base(recordData.Table.Columns)
         {
             RecordData = recordData;
         }

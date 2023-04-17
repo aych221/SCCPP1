@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using Microsoft.IdentityModel.Tokens;
 using SCCPP1.Database;
 using SCCPP1.Database.Entity;
+using SCCPP1.Database.Sqlite;
 
 namespace SCCPP1
 {
@@ -49,7 +50,7 @@ namespace SCCPP1
             //add foreign key to colleagues table
             sql.AppendLine(QueryGenerator.AlterTableAddForeignKeys(Tables["colleagues"], new Field("main_profile_id", typeof(int), false, false, Tables["profiles"].PrimaryKey)));
 
-            DbRecord[] states = new DbRecord[]
+/*            DbRecord[] states = new DbRecord[]
             {
                 new DbRecord(new DbStateData("Alabama", "AL")),
                 new DbRecord(new DbStateData("Alaska", "AK")),
@@ -101,13 +102,13 @@ namespace SCCPP1
                 new DbRecord(new DbStateData("West Virginia", "WV")),
                 new DbRecord(new DbStateData("Wisconsin", "WI")),
                 new DbRecord(new DbStateData("Wyoming", "WY"))
-            };
+            };*/
 
             Account t = new Account("testuser");
             t.UpdateData("Testing", "Some", "User", "test@user.edu", 1231231234, "Nothing interesting");
             //Console.WriteLine(QueryGenerator.InsertOrIgnore(Tables["colleagues"], new DbRecord(new DbColleagueData(t))));
             Console.WriteLine();
-            Console.WriteLine(QueryGenerator.Select(Tables["work_histories"].Columns[1], true));
+            Console.WriteLine(new DbQueryString().SelectAll(Tables["work_histories"].Columns[1]));
             Console.WriteLine();
             Console.WriteLine(QueryGenerator.UpdateAll(Tables["colleagues"]));
             Console.WriteLine();

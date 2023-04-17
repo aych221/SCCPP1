@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using SCCPP1.Controllers;
-using SCCPP1.Models;
+using SCCPP1.Database.Entity;
+using SCCPP1.Database.Sqlite;
 using SCCPP1.Session;
 using SCCPP1.User;
-using SCCPP1.User.Data;
 
 namespace SCCPP1.Pages
 {
@@ -62,6 +54,7 @@ namespace SCCPP1.Pages
             Certifications = LoadModel(Account.SavedCertifications);
 
             WorkHistory = LoadModel(Account.SavedWorkHistory);
+
 
 
 

@@ -1,4 +1,6 @@
-﻿namespace SCCPP1.User.Data
+﻿using SCCPP1.Database.Entity;
+
+namespace SCCPP1.User.Data
 {
     public class SkillData : OwnerRecordData
     {
@@ -99,6 +101,12 @@
             //TODO put database remove method
             //NeedsSave = !(IsUpdated
             return true;
+        }
+
+
+        public DbColleagueSkillsRecord ToDbRecord()
+        {
+            return new DbColleagueSkillsRecord(this);
         }
     }
 }

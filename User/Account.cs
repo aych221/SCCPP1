@@ -1,4 +1,7 @@
-﻿using SCCPP1.Models;
+﻿using SCCPP1.Database;
+using SCCPP1.Database.Entity;
+using SCCPP1.Database.Sqlite;
+using SCCPP1.Models;
 using SCCPP1.Session;
 using SCCPP1.User.Data;
 using System.Collections.Immutable;
@@ -754,6 +757,23 @@ namespace SCCPP1.User
         /// <returns>true if the operation was successful, false otherwise.</returns>
         public bool PersistAll()
         {
+            if (SavedSkills.Count > 0)
+            {
+                DbColleagueSkillsRecord rd;
+                Console.WriteLine(
+                    new DbQueryString()
+                    .Insert(rd = SavedSkills[1].ToDbRecord())
+                    .AppendLine()
+                    .SelectAll(rd.Table)
+                    .AppendLine()
+                    .SelectRequired(rd.Table.PrimaryKey)
+                    .AppendLine()
+                    .UpdateAll(rd.Table)
+                    );
+                Console.WriteLine(
+                    new DbQueryString()
+                    .SelectAll(SavedSkills[1].ToDbRecord().Table.PrimaryKey));
+            }
             return Persist() && PersistSkills() && PersistCertifications() && PersistEducationHistory() && PersistWorkHistory() && PersistProfiles();
         }
 
@@ -940,5 +960,9 @@ namespace SCCPP1.User
         #endregion
 
 
+        public DbAccountRecord ToDbRecord()
+        {
+            return new DbAccountRecord(this);
+        }
     }
 }
