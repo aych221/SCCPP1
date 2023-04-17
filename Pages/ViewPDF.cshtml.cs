@@ -63,24 +63,13 @@ namespace SCCPP1.Pages
 
             WorkHistory = LoadModel(Account.SavedWorkHistory);
 
-/*            Certifications = Account.SavedCertifications.Select(s => new CheckBoxViewModel
-            {
-                RecordID = s.Value.RecordID,
-                IsSelected = true
-            }).ToList();
-
-            WorkHistory = Account.SavedWorkHistory.Select(s => new CheckBoxViewModel
-            {
-                RecordID = s.Value.RecordID,
-                IsSelected = true
-            }).ToList();*/
 
 
 
             return Page();
         }
 
-        public IActionResult OnPost(List<CheckBoxViewModel> skills, List<CheckBoxViewModel> eduHist, List<CheckBoxViewModel> certs, List<CheckBoxViewModel> workHist)
+        public IActionResult OnPost(List<CheckBoxViewModel> Skills, List<CheckBoxViewModel> EducationHistory, List<CheckBoxViewModel> Certifications, List<CheckBoxViewModel> WorkHistory)
         {
             // Handle form submission
             if (!ModelState.IsValid)
@@ -88,18 +77,35 @@ namespace SCCPP1.Pages
                 return Page();
             }
 
-
-
-            foreach (var skill in skills)
+            foreach (var v in Skills)
             {
-                if (skill.IsSelected)
+                if (v.IsSelected)
                 {
-                    Console.WriteLine($"Looking up skill with ID {skill.RecordID}");
-                    foreach (var key in Account.SavedSkills.Keys)
-                    {
-                        Console.WriteLine($"  Key: {key}");
-                    }
-                    Console.WriteLine("Is selected");
+                    Console.WriteLine($"Skill {v.RecordID} is selected");
+                }
+            }
+
+            foreach (var v in EducationHistory)
+            {
+                if (v.IsSelected)
+                {
+                    Console.WriteLine($"EDU {v.RecordID} is selected");
+                }
+            }
+
+            foreach (var v in Certifications)
+            {
+                if (v.IsSelected)
+                {
+                    Console.WriteLine($"Cert {v.RecordID} is selected");
+                }
+            }
+
+            foreach (var v in WorkHistory)
+            {
+                if (v.IsSelected)
+                {
+                    Console.WriteLine($"WORK {v.RecordID} is selected");
                 }
             }
 
@@ -107,6 +113,7 @@ namespace SCCPP1.Pages
 
             return Page();
         }
+
 
     }
 }
