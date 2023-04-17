@@ -9,7 +9,7 @@ namespace SCCPP1.User
     public class Account : RecordData
     {
 
-        protected readonly SessionData Data;
+        public readonly SessionData Data;
 
 
         private ProfileData chosenProfile;

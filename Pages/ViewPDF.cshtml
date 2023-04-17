@@ -5,45 +5,9 @@
 }
 
 
-<!--<h1>@ViewData["Title"]</h1>
 
-<!--<p> Allows user to view final PDF version of the main/sub profile of their choosing. </p>
-<h3>@Html.Raw(@ViewData["FullName"])</h3>
-
-<br />
-<h4>Contact</h4>
-<p>
-@Html.Raw(ViewData["Contact"])
-</p>
-
-<br />
-<h4>Intro Narrative</h4>
-<p>
-@Html.Raw(ViewData["Intro"])
-</p>
-
-<br />
-<h4>Education History</h4>
-<p>
-@Html.Raw(ViewData["Education"])
-@Html.Raw(ViewData["TestData"])
-</p>
-
-<br />
-<h4>Work History</h4>
-<p>
-@Html.Raw(ViewData["Work"])
-</p>
-
-<br />
-<h4>Skills</h4>
-<p>
-@Html.Raw(ViewData["Skills"])
-</p>-->
-<!-- Mock PDF -->
 
 <style>
-
     body {
         font-family: sans-serif;
     }
@@ -60,10 +24,189 @@
         margin: 10px
     }
 
+    .accordion {
+        background-color: #eee;
+        color: #444;
+        cursor: pointer;
+        padding: 18px;
+        width: 20%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 15px;
+        transition: 0.4s;
+    }
+
+
+    .panel {
+        padding: 0 18px;
+        background-color: white;
+    }
+
+    .active, .accordion:hover {
+        background-color: #fff;
+    }
+
+    input[type=submit] {
+        background-color: white;
+        color: #0062F3;
+        padding: 12px 20px;
+        border: 1px solid #0062F3;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        input[type=submit]:hover {
+            background-color: #0062F3;
+            color: white;
+            border: 1px solid #0062F3;
+        }
+
+    .sidenav {
+        height: 90%;
+        width: 200px;
+        position: relative;
+        z-index: 5;
+        left: 0;
+        background-color: white overflow-x: hidden;
+        padding-top: 150px;
+        position: fixed;
+    }
+
 </style>
 
 <!-- We need to figure out how to -->
 <body>
+
+    <form method="post">
+        <input type="submit" name="submit" value="Submit" />
+
+    <button class="accordion">About</button>
+    <div class="panel">
+        <input type="checkbox" id="aboutme" name="about">
+        <label for="about"> Employee description</label><br>
+    </div>
+    <br>
+
+    <button class="accordion">Skills</button>
+    <div class="panel">
+
+        @for (int i = 0; i < Model.Skills.Count; i++)
+        {
+            <div>
+                <input type="checkbox" asp-for="@Model.Skills[i].IsSelected" />
+                <input type="hidden" asp-for="@Model.Skills[i].RecordID" />
+                <b>@Model.Account.GetSkillData(@Model.Skills[i].RecordID).SkillName</b>
+            </div>
+        }
+        <br>
+
+        <button class="accordion">Programming Languages</button>
+        <div class="panel">
+            <input type="checkbox" id="plang" name="plang">
+            <label for="clang"> C#</label>
+            <br>
+
+            <input type="checkbox" id="plang" name="plang">
+            <label for="clang"> HTML </label>
+            <br>
+
+            <input type="checkbox" id="plang" name="plang">
+            <label for="clang"> CSS </label>
+            <br>
+
+            <input type="checkbox" id="plang" name="plang">
+            <label for="clang"> JavaScript </label>
+            <br>
+
+            <input type="checkbox" id="plang" name="plang">
+            <label for="clang"> Python </label>
+        </div>
+        <br>
+
+        <button class="accordion">Operating Systems</button>
+        <div class="panel">
+            <input type="checkbox" id="opsys" name="opsys">
+            <label for="opsys"> Windows </label>
+            <br>
+
+            <input type="checkbox" id="opsys" name="opsys">
+            <label for="opsys"> MacOS </label>
+            <br>
+
+            <input type="checkbox" id="opsys" name="opsys">
+            <label for="opsys"> Android </label>
+            <br>
+
+            <input type="checkbox" id="opsys" name="opsys">
+            <label for="opsys"> Linux </label>
+            <br>
+
+            <input type="checkbox" id="opsys" name="opsys">
+            <label for="opsys"> Ubuntu </label>
+        </div>
+        <br>
+
+        <button class="accordion">Software & Frameworks</button>
+        <div class="panel">
+            <input type="checkbox" id="sandf" name="sandf">
+            <label for="sandf"> ASP.net </label>
+            <br>
+
+            <input type="checkbox" id="sandf" name="sandf">
+            <label for="sandf"> React Native </label>
+            <br>
+
+            <input type="checkbox" id="sandf" name="sandf">
+            <label for="sandf"> AngularJS </label>
+            <br>
+
+            <input type="checkbox" id="sandf" name="sandf">
+            <label for="sandf"> Unity </label>
+            <br>
+
+            <input type="checkbox" id="sandf" name="sandf">
+            <label for="sandf"> Ruby </label>
+        </div>
+    </div>
+    <br>
+
+    <button class="accordion">Education & Certification</button>
+    <div class="panel">
+        <button class="accordion">Degrees</button>
+        <div class="panel">
+
+            @for (int i = 0; i < Model.EducationHistory.Count; i++)
+            {
+                <div>
+                    <input type="checkbox" asp-for="@Model.EducationHistory[i].IsSelected" />
+                    <input type="hidden" asp-for="@Model.EducationHistory[i].RecordID" />
+                    <b>@Model.Account.GetEducationData(@Model.EducationHistory[i].RecordID).EducationType</b>
+                    <b>@Model.Account.GetEducationData(@Model.EducationHistory[i].RecordID).Institution</b>
+                </div>
+            }
+
+        </div>
+        <br>
+        <button class="accordion">Certification</button>
+        <div class="panel">
+
+            @for (int i = 0; i < Model.Certifications.Count; i++)
+            {
+                <div>
+                    <input type="checkbox" asp-for="@Model.Certifications[i].IsSelected" />
+                    <input type="hidden" asp-for="@Model.Certifications[i].RecordID" />
+                    <b>@Model.Account.GetCertificationData(@Model.Certifications[i].RecordID).CertificationType</b>
+                    <b>@Model.Account.GetCertificationData(@Model.Certifications[i].RecordID).Description</b>
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+    </form>
+
 
     <h1><b>Wang Ho Chiu</b></h1>
     <h6>

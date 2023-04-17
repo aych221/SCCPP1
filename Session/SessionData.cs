@@ -1,10 +1,14 @@
 ﻿using SCCPP1.User;
+using System.Collections;
+using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace SCCPP1.Session
 {
-    public class SessionData
+    public class SessionData : IDictionary<string, object>
     {
+
+
         //This is the session ID, not necessarily the Colleages ID
         public int ID { get; set; }
         public string Username { get; set; }
@@ -18,13 +22,19 @@ namespace SCCPP1.Session
         public ClaimsPrincipal User { get; set; }
 
 
-        public SessionData(string username)
+        private SessionData()
+        {
+            _dict = new Dictionary<string, object>();
+            Console.WriteLine("[SessionData] constructor called");
+        }
+
+        public SessionData(string username) : this()
         { 
             this.SignedOn = true;
             this.Username = username;
         }
 
-        public SessionData(ClaimsPrincipal sessionUser)
+        public SessionData(ClaimsPrincipal sessionUser) : this()
         {
             this.User = sessionUser;
 
@@ -34,6 +44,10 @@ namespace SCCPP1.Session
         }
 
 
+        ~SessionData()
+        {
+            Console.WriteLine("[SessionData] destructor called");
+        }
 
         public bool IsAuthenticated()
         {
@@ -82,5 +96,89 @@ namespace SCCPP1.Session
             return User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
 
+
+
+        #region dictionary implementation
+        private readonly Dictionary<string, object> _dict;
+
+        public object this[string key]
+        {
+            get
+            {
+                if (!_dict.ContainsKey(key))
+                    Add(key, null);
+
+                return _dict[key];
+            }
+            set
+            {
+                _dict[key] = value;
+            }
+        }
+
+        public ICollection<string> Keys => _dict.Keys;
+
+        public ICollection<object> Values => _dict.Values;
+
+        public int Count => _dict.Count;
+
+        public bool IsReadOnly => false;
+
+        public void Add(string key, object value)
+        {
+            _dict.Add(key, value);
+        }
+
+        public void Add(KeyValuePair<string, object> item)
+        {
+            ((IDictionary<string, object>)_dict).Add(item);
+        }
+
+        public void Clear()
+        {
+            _dict.Clear();
+        }
+
+        public bool Contains(KeyValuePair<string, object> item)
+        {
+            return ((IDictionary<string, object>)_dict).Contains(item);
+        }
+
+        public bool ContainsKey(string key)
+        {
+            return _dict.ContainsKey(key);
+        }
+
+        public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
+        {
+            ((IDictionary<string, object>)_dict).CopyTo(array, arrayIndex);
+        }
+
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        {
+            return _dict.GetEnumerator();
+        }
+
+        public bool Remove(string key)
+        {
+            return _dict.Remove(key);
+        }
+
+        public bool Remove(KeyValuePair<string, object> item)
+        {
+            return ((IDictionary<string, object>)_dict).Remove(item);
+        }
+
+        public bool TryGetValue(string key, out object value)
+        {
+            return _dict.TryGetValue(key, out value);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _dict.GetEnumerator();
+        }
     }
+    #endregion
+
 }

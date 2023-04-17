@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using SCCPP1;
+using SCCPP1.Controllers;
 using SCCPP1.Session;
 
 internal class Program
@@ -22,6 +23,8 @@ internal class Program
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 
+       
+
         builder.Services.AddAuthorization(options =>
         {
             options.FallbackPolicy = options.DefaultPolicy;
@@ -31,6 +34,7 @@ internal class Program
         //these allow the session classes to be used without conflicting with the MS Identity's packages
         builder.Services.AddSingleton<SessionHandler>();
         builder.Services.AddSingleton<SessionModel>();
+
 
         var app = builder.Build();
 
