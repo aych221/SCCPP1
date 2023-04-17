@@ -16,7 +16,10 @@ namespace SCCPP1.Pages
             _logger = logger;
         }
 
-        // The [BindProperty] attribute, takes the data from the POST request and maps it to our Model which can then be intereacted with our database.
+
+
+        // The [BindProperty] attribute, takes the data from the OnPost() request and maps it to our Models.
+        // After which, it can then intereact with our database.
         [BindProperty]
         public Colleague? Colleague { get; set; }
 
@@ -32,8 +35,10 @@ namespace SCCPP1.Pages
         [BindProperty]
         public Certification? Certification { get; set; }
 
-        // When the Submit button on the form is pressed on, OnPost() starts, grabs the information the user typed and then saves it into the database.
-        // If it is successfully saved into the database, redirect the user to "/UserHome", if it fails, return this page.
+
+
+        // Is called when submit button on the form is pressed. Saves the information into the database.
+        // If successfully saved, redirect the user to "/UserHome", else, return to this page.
         public IActionResult OnPost()
         {
             if (!ModelState.IsValid)
@@ -41,20 +46,60 @@ namespace SCCPP1.Pages
 
             if (Colleague != null)
             {
+                // Save the "About" of the user
+                Account.UpdateData(
+                    Colleague.FirstName, 
+                    Colleague.MiddleName, 
+                    Colleague.LastName, 
+                    Colleague.EmailAddress, 
+                    Colleague.PhoneNumber, 
+                    Colleague.IntroNarrative);
+
+                // Print to console (checks to see if it saved)
+                Console.WriteLine(Colleague.FirstName);
+                Console.WriteLine(Colleague.MiddleName);
+                Console.WriteLine(Colleague.LastName);
+                Console.WriteLine(Colleague.EmailAddress);
+                Console.WriteLine(Colleague.PhoneNumber);
+                Console.WriteLine(Colleague.IntroNarrative);
+
+
+
+                // Save the "Skills" of the user
+                
+                // Print to console (checks to see if it saved)
+
+
+
+                // Save the "Experience" of the user
+
+                // Print to console (checks to see if it saved)
+
+
+
+                // Save the "Education" of the user
+
+                // Print to console (checks to see if it saved)
+
+
+
+                // Save the "Certification" of the user
+
+                // Print to console (checks to see it it saved)
+
+
+
+
+
+
+
                 //Account.Name = $"{Colleague.LastName}, {Colleague.FirstName} {Colleague.MiddleName?.ToString()} ";
                 //Account.EmailAddress = Colleague.EmailAddress;
                 //Account.PhoneNumber = Utilities.ParsePhoneNumber(Colleague.PhoneNumber);
                 //Account.IntroNarrative = Colleague.IntroNarrative;
                 //// Account.EducationHistory[0].Remove.RecordID;
 
-                Account.UpdateData(
-                    Colleague.FirstName, 
-                    Colleague.MiddleName, 
-                    Colleague.LastName, 
-                    Colleague.EmailAddress, 
-                    Colleague.PhoneNumber,
-                    Colleague.IntroNarrative
-                    );
+
 
                 //Console.WriteLine(Skill.ProgLang);
                 //Console.WriteLine(Skill.OS);
@@ -65,6 +110,9 @@ namespace SCCPP1.Pages
                 //    Skill.OS,
                 //    Skill.SoftAndFrame
                 //    );
+                //ProgLang.Split()
+                // and then loop,
+                // also check the info before going into account
 
                 //Account.AddWork(
                 //    Work.Employer,
@@ -106,9 +154,7 @@ namespace SCCPP1.Pages
 
                 Account.PersistAll();
             }
-
             return RedirectToPage("/UserHome");
-
         }
     }
 }

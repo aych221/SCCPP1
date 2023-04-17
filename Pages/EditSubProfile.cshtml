@@ -5,6 +5,361 @@
 }
 
 <style>
+
+    body {
+        font-family: sans-serif;
+    }
+
+    .navbar {
+        margin-bottom: 10px !important;
+        top: 0;
+    }
+
+    .footer {
+        margin-top: 10px !important;
+        bottom: 0;
+    }
+
+    #container {
+        display: flex;
+    }
+
+    #red {
+        padding: 10px;
+        border-left: 5px solid #e4002b;
+        margin: 10px
+    }
+
+    #blue {
+        padding: 10px;
+        border-left: 5px solid #002b49;
+        margin: 10px
+    }
+
+    .left {
+        width: 20vw;
+        height: auto;
+        padding: 10px;
+        border: solid #002b49;
+        margin: 10px;
+    }
+
+    .right {
+        width: 80vw;
+        height: auto;
+        padding: 10px;
+        margin: 10px;
+    }
+
+    .accordion {
+        background-color: #0062f3;
+        color: #f2f2f2;
+        cursor: pointer;
+        padding: 10px;
+        border: none;
+        text-align: left;
+        outline: none;
+        transition: 0.4s;
+        width: 15vw;
+    }
+
+    input[type=submit] {
+        background-color: white;
+        color: #0062F3;
+        padding: 12px 20px;
+        border: 1px solid #0062F3;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    input[type=submit]:hover {
+            background-color: #0062F3;
+            color: white;
+            border: 1px solid #0062F3;
+    }
+
+</style>
+
+
+
+<body>
+
+    <div id="container">
+        <div class="left" id="left">
+            <form method="post">
+                <center><button class="accordion"><b>About</b></button></center>
+                <input type="checkbox" id="aboutme" name="about">
+                <label for="about">Introduction</label>
+                <br />
+                <br />
+
+
+
+                <center><button class="accordion"><b>Skills</b></button></center>
+                @for (int i = 0; i < Model.Skills.Count; i++)
+                {
+                    <div>
+                        <input type="checkbox" asp-for="@Model.Skills[i].IsSelected" />
+                        <input type="hidden" asp-for="@Model.Skills[i].RecordID" />
+                        <b>@Model.Account.GetSkillData(@Model.Skills[i].RecordID).SkillName</b>
+                    </div>
+                }
+
+                <input type="checkbox" id="plang" name="plang" />
+                <label for="plang"><b>Programming Languages</b></label>
+                <br />
+
+                <input type="checkbox" id="plang" name="plang" />
+                <label for="plang">JavaScript</label>
+                <br />
+
+                <input type="checkbox" id="plang" name="plang" />
+                <label for="plang">Python</label>
+                <br />
+
+                <input type="checkbox" id="plang" name="plang" />
+                <label for="plang">C#</label>
+                <br />
+
+                <input type="checkbox" id="plang" name="plang" />
+                <label for="plang">Unity</label>
+                <br />
+
+                <input type="checkbox" id="plang" name="plang" />
+                <label for="plang">Rust</label>
+                <br />
+
+                <br />
+                
+                <input type="checkbox" id="opsys" name="opsys" />
+                <label for="opsys"><b>Operating System</b></label>
+                <br />
+
+                <input type="checkbox" id="opsys" name="opsys" />
+                <label for="opsys">Windows</label>
+                <br />
+
+                <input type="checkbox" id="opsys" name="opsys" />
+                <label for="opsys">iOS</label>
+                <br />
+
+                <input type="checkbox" id="opsys" name="opsys" />
+                <label for="opsys">Android</label>
+                <br />
+
+                <br />
+
+                <input type="checkbox" id="sandf" name="sandf" />
+                <label for="sandf"><b>Software & Framework</b></label>
+                <br />
+
+                <input type="checkbox" id="sandf" name="sandf" />
+                <label for="sandf">ASP.Net</label>
+                <br />
+
+                <input type="checkbox" id="sandf" name="sandf" />
+                <label for="sandf">jQuery</label>
+                <br />
+                <br />
+
+
+
+                <center><button class="accordion"><b>Experience</b></button></center>
+                @for (int i = 0; i < Model.WorkHistory.Count; i++)
+                {
+                    <div>
+                        <input type="checkbox" asp-for="@Model.WorkHistory[i].IsSelected" />
+                        <input type="hidden" asp-for="@Model.WorkHistory[i].RecordID" />
+                        <b>@Model.Account.GetWorkData(@Model.WorkHistory[i].RecordID).JobTitle</b>
+                        <b>@Model.Account.GetWorkData(@Model.WorkHistory[i].RecordID).Employer</b>
+                    </div>
+                }
+                
+                <input type="checkbox" id="work" name="work" />
+                <label for="work">The Kern Family Foundation</label>
+                <br />
+                <br />
+
+
+
+                <center><button class="accordion"><b>Education</b></button></center>
+                @for (int i = 0; i < Model.EducationHistory.Count; i++)
+                {
+                    <div>
+                        <input type="checkbox" asp-for="@Model.EducationHistory[i].IsSelected" />
+                        <input type="hidden" asp-for="@Model.EducationHistory[i].RecordID" />
+                        <b>@Model.Account.GetEducationData(@Model.EducationHistory[i].RecordID).EducationType</b>
+                        <b>@Model.Account.GetEducationData(@Model.EducationHistory[i].RecordID).Institution</b>
+                    </div>
+                }
+
+                <input type="checkbox" id="edu" name="edu" />
+                <label for="edu">Bachelor of Computer Science</label>
+                <br />
+
+                <input type="checkbox" id="edu" name="edu" />
+                <label for="edu">Master of None</label>
+                <br />
+                <br />
+
+
+
+                <center><button class="accordion"><b>Certification</b></button></center>
+                @for (int i = 0; i < Model.Certifications.Count; i++)
+                {
+                    <div>
+                        <input type="checkbox" asp-for="@Model.Certifications[i].IsSelected" />
+                        <input type="hidden" asp-for="@Model.Certifications[i].RecordID" />
+                        <b>@Model.Account.GetCertificationData(@Model.Certifications[i].RecordID).CertificationType</b>
+                        <b>@Model.Account.GetCertificationData(@Model.Certifications[i].RecordID).Description</b>
+                    </div>
+                }
+
+                <input type="checkbox" id="cert" name="cert" />
+                <label for="cert">Cyber Defender Certificate</label>
+                <br />
+                <br />
+
+                <center>
+                    <input type="submit" name="submit" value="Submit" />
+                    <br /> <br />
+                    <button type="button" id="prtButton" onclick="printPDF()">Print</button>
+                </center>
+
+            </form>
+        </div>
+
+        <div class="right" id="right">
+            <h1><b>Wang Ho Chiu</b></h1>
+            <h6>
+                | <i class="fa fa-phone"></i> (987) 654-3210 | <i class="fa fa-envelope"></i> wchiu@augusta.edu |
+            </h6>
+            <br />
+
+            <div id="about">
+                <h5><i class="fa fa-user"></i><b> About </b></h5>
+                <p id="red">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    Ante in nibh mauris cursus mattis. Auctor neque vitae tempus quam pellentesque. Suspendisse faucibus interdum posuere lorem ipsum dolor.
+                    Ipsum consequat nisl vel pretium lectus quam id leo.
+                    Quis lectus nulla at volutpat diam ut venenatis.
+                    Ut aliquam purus sit amet luctus.
+                    Odio ut enim blandit volutpat maecenas volutpat blandit aliquam.
+                    Fermentum odio eu feugiat pretium.
+                    At volutpat diam ut venenatis tellus in metus vulputate eu.
+                    Sed sed risus pretium quam vulputate dignissim.
+                    Imperdiet proin fermentum leo vel orci porta non pulvinar.
+                    Malesuada proin libero nunc consequat interdum.
+                </p>
+            </div>
+            <br />
+
+            <div class="skill">
+                <h5><i class="fa fa-lightbulb-o"></i><b> Skills </b></h5>
+                <p id="blue">
+                    <b>Programming Languages:</b> JavaScript, Python, C#, Unity, Rust
+                    <br />
+                    <b>Operating System:</b> Windows, iOS, Android
+                    <br />
+                    <b>Software & Framework:</b> ASP.Net, jQuery
+                </p>
+            </div>
+            <br />
+
+            <div class="experience">
+                <h5><i class="fa fa-briefcase"></i><b> Experience </b></h5>
+                <p id="red">
+                    <b>Job Title</b>
+                    <br />
+                    Employer | Start Date - End Date
+                    <br />
+                    Experience Description - Currently does not exist for user.
+                    <br /> <br />
+
+                    <b>The Kern Family Foundation</b>
+                    <br />
+                    Kern Kernbert | 2012 - 2021
+                    <br />
+                    Led a four-week product discovery effort yo establish alignmnet on the problem statement.
+                    Conducted qualitative and quantitative user research to elicit requirements and identify highest business value features.
+                    Facilitated sessions with key stakeholders to align on priority.
+                    Conducted ongoing discovery to influence the product strategy, roadmap, and backlog.
+                    <br />
+                </p>
+            </div>
+            <br />
+
+            <div class="education">
+                <h5><i class="fa fa-graduation-cap"></i><b> Education </b></h5>
+                <p id="blue">
+                    <b>Education Title</b>
+                    <br />
+                    University/College | Start Date - End Date
+                    <br /> <br />
+
+                    <b>Bachelor of Computer Science</b>
+                    <br />
+                    Augusta University | 2019 - 2023
+                    <br /> <br />
+
+                    <b>Master of None</b>
+                    <br />
+                    Talentless University | Birth - Present
+                    <br />
+                </p>
+            </div>
+            <br />
+
+            <div class="certificate">
+                <h5><i class="fa fa-certificate"></i><b> Certificate </b></h5>
+                <p id="red">
+                    <b>Certificate Title</b>
+                    <br />
+                    Institution | Start Date - End Date
+                    <br /> <br />
+
+                    <b>Cyber Defender Certificate</b>
+                    <br />
+                    Augusta University | 2016 - 2021
+                    <br />
+                </p>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+
+
+<script>
+
+    // Strips away everything aside from the PDF to print/save
+    function printPDF() {
+        var a = document.getElementById("right")
+        var b = document.getElementById("left");
+        var c = document.getElementById("topbar");
+        var d = document.getElementById("footer");
+
+
+        a.style.marginLeft = 0;
+        b.style.display = "none";
+        c.style.display = "none";
+        d.style.display = "none";
+
+        window.print();
+
+        a.style.display = "block";
+        b.style.display = "block";
+        c.style.display = "block";
+        d.style.display = "block";
+    }
+
+</script>
+
+
+
+<!--
+<style>
     /* accordion dropdown styling */
     .accordion {
         background-color: #eee;
@@ -46,8 +401,9 @@
             border: 1px solid #0062F3;
         }
 </style>
-
+-->
 <!--Live PDF viewer will be displayed to the right of the checkboxes hence the empty space on the right side of the page-->
+<!--
 <body>
 
     <br>
@@ -173,8 +529,9 @@
 
 
 </body>
-
+-->
 <!-- Script for acordion functionality of the dropdown https://stackoverflow.com/questions/71484299/how-to-external-javascript-in-html-and-css-->
+<!--
 <script>
     var acc = document.getElementsByClassName("accordion");
     var i;
@@ -190,3 +547,4 @@
         });
     }
 </script>
+-->
