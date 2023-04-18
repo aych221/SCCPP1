@@ -24,6 +24,16 @@ namespace SCCPP1.User
         public bool Remove;
 
 
+        private bool _isRemoved = false;
+        /// <summary>
+        /// This is true if the record has been removed from the database. False if it has not been removed. (This is not a remove flag, see <see cref="Remove"/>)
+        /// </summary>
+        public bool IsRemoved { 
+            get { return _isRemoved; }
+            set { _isRemoved = value; }
+        }
+
+
         /// <summary>
         /// Message that is used to relay information back after a save attempt was made
         /// </summary>

@@ -92,10 +92,10 @@ namespace SCCPP1.User.Data
         public override bool Save()
         {
             //save resources if we don't need to save.
-            /*if (!this.NeedsSave)
-                return true;*/
+            /* if (!NeedsSave)
+                 return true;*/
 
-            return NeedsSave = !(IsUpdated = DatabaseConnector.SaveEducationHistory(this));
+            return !(NeedsSave = !(IsUpdated = DatabaseConnector.SaveEducationHistory(this)));
         }
 
 
@@ -105,12 +105,7 @@ namespace SCCPP1.User.Data
         /// <returns>true if record was removed from database, false otherwise.</returns>
         public override bool Delete()
         {
-            if (!Remove)
-                return true;
-
-            //TODO put database remove method
-            //NeedsSave = !(IsUpdated
-            return true;
+            return Remove = NeedsSave = IsUpdated = true;
         }
 
     }

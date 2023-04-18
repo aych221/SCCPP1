@@ -37,7 +37,8 @@ namespace SCCPP1.Pages
 
         public IActionResult OnGet()
         {
-
+            Console.WriteLine("[ViewPDFModel] OnGet called");
+            Console.WriteLine($"Profiles loaded: {Account.SavedProfiles.Count}");
             List<CheckBoxViewModel> LoadModel<T>(ReadOnlyDictionary<int, T> dict) where T : RecordData
             {
                 return dict.Select(v => new CheckBoxViewModel

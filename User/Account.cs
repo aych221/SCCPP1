@@ -24,6 +24,8 @@ namespace SCCPP1.User
         {
             return chosenProfile;
         }
+
+
         #region Account Data properties
         //TODO: change all properties to use protected sets
         //0 = admin, 1 = normal user
@@ -236,6 +238,32 @@ namespace SCCPP1.User
         #endregion
 
 
+        #region Delete Data Lists
+        private List<SkillData> _deletedSkills;
+
+        protected List<SkillData> DeletedSkills { get; set; }
+
+        private List<EducationData> _deletedEducation;
+
+        protected List<EducationData> DeletedEducation { get; set; }
+
+
+        private List<CertificationData> _deletedCertifications;
+
+        protected List<CertificationData> DeletedCertifications { get; set; }
+
+
+        private List<WorkData> _deletedWork;
+
+        protected List<WorkData> DeletedWork { get; set; }
+
+
+        private List<ProfileData> _deletedProfiles;
+
+        protected List<ProfileData> DeletedProfiles { get; set; }
+
+        #endregion
+
 
 
 
@@ -285,6 +313,14 @@ namespace SCCPP1.User
             SavedEducationHistory = new ReadOnlyDictionary<int, EducationData>(new Dictionary<int, EducationData>());
             SavedWorkHistory = new ReadOnlyDictionary<int, WorkData>(new Dictionary<int, WorkData>());
             SavedProfiles = new ReadOnlyDictionary<int, ProfileData>(new Dictionary<int, ProfileData>());
+
+            //may not need these
+            DeletedSkills = new List<SkillData>();
+            DeletedEducation = new List<EducationData>();
+            DeletedCertifications = new List<CertificationData>();
+            DeletedWork = new List<WorkData>();
+            DeletedProfiles = new List<ProfileData>();
+
         }
 
 
@@ -366,12 +402,6 @@ namespace SCCPP1.User
         }
 
 
-        public void RemoveSkills(params string[] skillNames)
-        {
-            //TODO, need to make DB methods to remove colleague records that are requested
-        }
-
-
         public void AddEducation(string institution, string degreeType, string field, Location? location, DateOnly? startDate, DateOnly? endDate)
         {
             //EducationHistory.Add(new EducationData(this, institution, degreeType, field, new Location(), new DateOnly(), new DateOnly()));
@@ -409,39 +439,70 @@ namespace SCCPP1.User
         }
 
 
-        [Obsolete("Use GetSkillData() instead.")]
-        /// <summary>
-        /// Saves current skill data and attempts to fetch the record
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public SkillData EditSkillData(int id)
+        #region Remove Data methods
+        public void RemoveSkills(params string[] skillNames)
         {
-            //save skills
-            //need to find better way to reference specific objects, might use UUID upon object creation.
-            SaveSkills();
 
-            //need to make better way that isn't O(n). use dictionaries later
-            return Skills.Find(x => x.RecordID == id);
+            //TODO, need to make DB methods to remove colleague records that are requested
         }
 
-        [Obsolete("Use GetEducationData() instead.")]
-        public EducationData EditEducationData(int id)
+        public void RemoveSkills(params int[] ids)
         {
-            //save education
-            SaveEducationHistory();
-
-            return EducationHistory.Find(x => x.RecordID == id);
+            foreach (int id in ids)
+            {
+                //delete all in the dictionary
+                if ((GetSkillData(id)?.Delete()) is null)
+                    UnsavedSkills.Find(x => x.RecordID == id)?.Delete();
+            }
         }
 
-        [Obsolete("Use GetWorkData() instead.")]
-        public WorkData EditWorkData(int id)
+        public void RemoveEducations(params int[] ids)
         {
-            //save work
-            SaveWorkHistory();
-
-            return WorkHistory.Find(x => x.RecordID == id);
+            foreach (int id in ids)
+            {
+                //delete all in the dictionary
+                if ((GetEducationData(id)?.Delete()) is null)
+                    UnsavedEducationHistory.Find(x => x.RecordID == id)?.Delete();
+            }
         }
+
+        public void RemoveCertifications(params int[] ids)
+        {
+            foreach (int id in ids)
+            {
+                //delete all in the dictionary
+                if ((GetCertificationData(id)?.Delete()) is null)
+                    UnsavedCertifications.Find(x => x.RecordID == id)?.Delete();
+            }
+        }
+
+        public void RemoveWorks(params int[] ids)
+        {
+            foreach (int id in ids)
+            {
+                //delete all in the dictionary
+                if ((GetWorkData(id)?.Delete()) is null)
+                    UnsavedWorkHistory.Find(x => x.RecordID == id)?.Delete();
+            }
+        }
+
+
+
+        public void RemoveProfiles(params int[] ids)
+        {
+            foreach (int id in ids)
+            {
+                bool? success = false; ;
+                Console.WriteLine("Removing profile with id: " + id);
+                //delete all in the dictionary
+                if ((success = (GetProfileData(id)?.Delete())) is null)
+                    success = (UnsavedProfiles.Find(x => x.RecordID == id)?.Delete());
+                if ((success is not null) && success.Value)
+                    Console.WriteLine("Profile " + id + " has remove flag set");
+            }
+        }
+
+        #endregion
         #endregion
 
 
@@ -468,7 +529,9 @@ namespace SCCPP1.User
         /// <returns>SkillData if object is found, null otherwise</returns>
         public SkillData? GetSkillData(int id)
         {
-            return SavedSkills[id];
+            if (SavedSkills.TryGetValue(id, out SkillData data))
+                return data;
+            return null;
         }
 
 
@@ -479,7 +542,9 @@ namespace SCCPP1.User
         /// <returns>EducationData if object is found, null otherwise</returns>
         public EducationData? GetEducationData(int id)
         {
-            return SavedEducationHistory[id];
+            if (SavedEducationHistory.TryGetValue(id, out EducationData data))
+                return data;
+            return null;
         }
 
 
@@ -490,7 +555,9 @@ namespace SCCPP1.User
         /// <returns>WorkData if object is found, null otherwise</returns>
         public WorkData? GetWorkData(int id)
         {
-            return SavedWorkHistory[id];
+            if (SavedWorkHistory.TryGetValue(id, out WorkData data))
+                return data;
+            return null;
         }
 
 
@@ -501,7 +568,9 @@ namespace SCCPP1.User
         /// <returns>ProfuleData if object is found, null otherwise</returns>
         public ProfileData? GetProfileData(int id)
         {
-            return SavedProfiles[id];
+            if (SavedProfiles.TryGetValue(id, out ProfileData data))
+                return data;
+            return null;
         }
 
 
@@ -511,9 +580,13 @@ namespace SCCPP1.User
         /// <param name="id"></param>
         /// <returns>CertificationData if object is found, null otherwise</returns>
         public CertificationData? GetCertificationData(int id)
-        {
-            return SavedCertifications[id];
+    {
+            if (SavedCertifications.TryGetValue(id, out CertificationData data))
+                return data;
+            return null;
         }
+
+
         #endregion
 
 
@@ -522,7 +595,8 @@ namespace SCCPP1.User
         #region Profile methods
 
         /// <summary>
-        /// Creates a new profile object, which also saves all data in the account to the database, excluding other profiles.
+        /// Creates a new profile object. It is important to call <see cref="PersistAll"/> before creating a new profile or multiple profiles.
+        /// A profile can only use data that has been saved to the database.
         /// </summary>
         /// <param name="title"></param>
         /// <returns>A new profile object for the user</returns>
@@ -533,7 +607,7 @@ namespace SCCPP1.User
 
 
             //may not need in the future, considered an expensive call.
-            PersistAll();
+            //PersistAll();
 
             //might want to create these hashsets in LoadAll() method to reduce memory and computations
             ProfileData pd = new ProfileData(this, title);
@@ -643,89 +717,10 @@ namespace SCCPP1.User
         /// <returns>true if changes are saved in database, false otherwise.</returns>
         public override bool Save()
         {
-            /*if (!NeedsSave)
+           /* if (!NeedsSave)
                 return true;*/
 
-            return NeedsSave = !(IsUpdated = DatabaseConnector.SaveUser(this));
-        }
-
-
-        [Obsolete("Use PersistAll() instead.")]
-        /// <summary>
-        /// Saves everything for the user. All associated data is saved to the database.
-        /// </summary>
-        /// <returns>true if changes are saved in the database, false otherwise.</returns>
-        public bool SaveAll()
-        {
-
-            //TODO add list of saves
-            //List<SkillData> skillSaves = new List<SkillData>();
-
-            return Save() && SaveSkills() && SaveEducationHistory() && SaveWorkHistory();
-        }
-
-
-        [Obsolete("Use PersistSkills() instead.")]
-        /// <summary>
-        /// Saves all Skill data for the user.
-        /// </summary>
-        /// <returns>true if changes are saved in the database, false otherwise.</returns>
-        protected bool SaveSkills()
-        {
-            bool failed = false;
-
-            //Save the saved skills
-            foreach (SkillData sd in Skills)
-                if (!sd.Save())
-                    failed = true;
-
-            return failed;
-        }
-
-
-        [Obsolete("Use PersistEducationHistory() instead.")]
-        /// <summary>
-        /// Saves all Education data for the user.
-        /// </summary>
-        /// <returns>true if changes are saved in the database, false otherwise.</returns>
-        protected bool SaveEducationHistory()
-        {
-            bool failed = false;
-
-            foreach (EducationData ed in EducationHistory)
-                if (!ed.Save())
-                    failed = true;
-
-            return failed;
-        }
-
-
-
-        [Obsolete("Use PersistWorkHistory() instead.")]
-        /// <summary>
-        /// Saves all Work data for the user.
-        /// </summary>
-        /// <returns>true if changes are saved in the database, false otherwise.</returns>
-        protected bool SaveWorkHistory()
-        {
-            bool failed = false;
-
-            foreach (WorkData wd in WorkHistory)
-                if (!wd.Save())
-                    failed = true;
-
-            return failed;
-        }
-
-
-        [Obsolete("Use PersistProfiles() instead.")]
-        protected bool SaveProfiles()
-        {
-            bool failed = false;
-            foreach (ProfileData pd in Profiles)
-                if (!pd.Save())
-                    failed = true;
-            return failed;
+            return !(NeedsSave = !(IsUpdated = DatabaseConnector.SaveUser(this)));
         }
 
         #endregion
@@ -739,12 +734,7 @@ namespace SCCPP1.User
         /// <returns>true if records were removed from database, false otherwise.</returns>
         public override bool Delete()
         {
-            if (!Remove)
-                return true;
-
-            //TODO put database remove method
-            //NeedsSave = !(IsUpdated
-            return true;
+            return Remove = NeedsSave = IsUpdated = true;
         }
 
         #endregion
@@ -757,6 +747,25 @@ namespace SCCPP1.User
         /// <returns>true if the operation was successful, false otherwise.</returns>
         public bool PersistAll()
         {
+            Console.WriteLine("**********************Persisting all data for user..");
+            bool success1 = Persist(),
+                success2 = PersistSkills(),
+                success3 = PersistCertifications(),
+                success4 = PersistEducationHistory(),
+                success5 = PersistWorkHistory(),
+                success6 = PersistProfiles();
+            bool success = success1 && success2 && success3 && success4 && success5 && success6;
+            Console.WriteLine("**********************All data persisted? " + success);
+            if (!success)
+            {
+                Console.WriteLine("**********************Account data persisted? " + success1);
+                Console.WriteLine("**********************Skill data persisted? " + success2);
+                Console.WriteLine("**********************Certs data persisted? " + success3);
+                Console.WriteLine("**********************Edu data persisted? " + success4);
+                Console.WriteLine("**********************Work data persisted? " + success5);
+                Console.WriteLine("**********************Profile data persisted? " + success6);
+            }
+            /*
             if (SavedSkills.Count > 0)
             {
                 DbColleagueSkillsRecord rd;
@@ -773,8 +782,8 @@ namespace SCCPP1.User
                 Console.WriteLine(
                     new DbQueryString()
                     .SelectAll(SavedSkills[1].ToDbRecord().Table.PrimaryKey));
-            }
-            return Persist() && PersistSkills() && PersistCertifications() && PersistEducationHistory() && PersistWorkHistory() && PersistProfiles();
+            }//*/
+            return success;
         }
 
 
@@ -784,32 +793,24 @@ namespace SCCPP1.User
         /// <returns>true if the operation was successful, false otherwise.</returns>
         public bool Persist()
         {
-            bool success = true;
-
-            //save, update, or delete account
-            if (Remove)
-                Delete();
-            else
-                Save();
-
-            return success;
+            return Save();
         }
 
 
         public bool PersistSkills()
         {
             bool success = true;
-            
+
             //persist all saved skill data
             foreach (SkillData d in SavedSkills.Values.ToList().Concat(UnsavedSkills))
             {
-                bool skills = true;
                 //delete if remove, else save
-                if (d.Remove)
-                    d.Delete();
-                else
-                    d.Save();
-
+                if (d.RecordID < 1 && d.Remove)
+                    UnsavedSkills.Remove(d);
+                else if (!d.Save())
+                {
+                    success = false;
+                }
             }
 
             //load the new skill data
@@ -837,12 +838,12 @@ namespace SCCPP1.User
             foreach (EducationData d in SavedEducationHistory.Values.Concat(UnsavedEducationHistory))
             {
                 //delete if remove, else save
-                if (d.Remove)
-                    d.Delete();
-                else
-                    d.Save();
-
-
+                if (d.RecordID < 1 && d.Remove)
+                    UnsavedEducationHistory.Remove(d);
+                else if (!d.Save())
+                {
+                    success = false;
+                }
             }
 
             //load the new education history data
@@ -869,13 +870,12 @@ namespace SCCPP1.User
             //persist all saved education history data
             foreach (CertificationData d in SavedCertifications.Values.Concat(UnsavedCertifications))
             {
-                //delete if remove, else save
-                if (d.Remove)
-                    d.Delete();
-                else
-                    d.Save();
-
-
+                if (d.RecordID < 1 && d.Remove)
+                    UnsavedCertifications.Remove(d);
+                else if (!d.Save())
+                {
+                    success = false;
+                }
             }
 
             //load the new education history data
@@ -902,12 +902,13 @@ namespace SCCPP1.User
             //persist all saved work history data
             foreach (WorkData d in SavedWorkHistory.Values.Concat(UnsavedWorkHistory))
             {
-                //delete if remove, else save
-                if (d.Remove)
-                    d.Delete();
-                else
-                    d.Save();
 
+                if (d.RecordID < 1 && d.Remove)
+                    UnsavedWorkHistory.Remove(d);
+                else if (!d.Save())
+                {
+                    success = false;
+                }
 
             }
 
@@ -932,15 +933,26 @@ namespace SCCPP1.User
         {
             bool success = true;
 
+            //bool saved = false;
             //persist all saved profile data
             foreach (ProfileData d in SavedProfiles.Values.Concat(UnsavedProfiles))
             {
-                //delete if remove, else save
-                if (d.Remove)
-                    d.Delete();
-                else
-                    d.Save();
+                //saved = false;
+                //Console.WriteLine($"BeforePersist Profile {d.RecordID} (Remove={d.Remove}, IsRemoved={d.IsRemoved}, Saved={saved})");
 
+                //remove from unsaved if it was flagged for removal
+                if (d.RecordID < 1 && d.Remove)
+                    UnsavedProfiles.Remove(d);
+                else if (!d.Save())
+                {
+                    success = false;
+                }
+
+                //Console.WriteLine($"AftertPersist Profile {d.RecordID} (Remove={d.Remove} IsRemoved={d.IsRemoved}, Saved={saved})");
+                //if (d.IsRemoved)
+                //{
+                //    Console.WriteLine($"-------------Profile {d.RecordID} deleted.");
+                //}
             }
 
             //load the new profile data
@@ -951,6 +963,30 @@ namespace SCCPP1.User
                 success = false;
 
             SavedProfiles = new ReadOnlyDictionary<int, ProfileData>(savedProfiles);
+
+            int ValidateContentIDs<T>(ProfileData d, HashSet<int> idSet, ReadOnlyDictionary<int, T> savedRecords)
+            {
+                int removedIDs = 0;
+                foreach (int id in idSet)
+                    if (!savedRecords.ContainsKey(id))
+                        if (idSet.Remove(id))
+                            removedIDs++;
+                return removedIDs;
+            }
+
+            int totalRemovedIDs = 0;
+            //need to validate saved profile data ids, since they may have changed
+            //some ids may have been removed, so we need to remove them from the saved profiles
+            foreach (ProfileData d in SavedProfiles.Values)
+            {
+                totalRemovedIDs += ValidateContentIDs(d, d.SelectedSkillIDs, SavedSkills);
+                totalRemovedIDs += ValidateContentIDs(d, d.SelectedEducationIDs, SavedEducationHistory);
+                totalRemovedIDs += ValidateContentIDs(d, d.SelectedCertificationIDs, SavedCertifications);
+                totalRemovedIDs += ValidateContentIDs(d, d.SelectedWorkIDs, SavedWorkHistory);
+            }
+
+            Console.WriteLine($"Removed a total of {totalRemovedIDs} IDs from profiles.");
+
             Console.WriteLine("-------------Profiles Saved " + UnsavedProfiles.Count + ", Profiles Loaded " + SavedProfiles.Count);
             UnsavedProfiles.Clear();
 

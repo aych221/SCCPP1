@@ -225,7 +225,13 @@ namespace SCCPP1.User.Data
 
         public override bool Save()
         {
-            return NeedsSave = !(IsUpdated = DatabaseConnector.SaveProfile(this));
+            if (!NeedsSave)
+                return true;
+            //Console.WriteLine($"BeforeSave called on ProfileData (Remove={Remove}, Saved={IsUpdated})");
+            IsUpdated = DatabaseConnector.SaveProfile(this);
+            NeedsSave = false;
+            //Console.WriteLine($"AfterSave called on ProfileData (Remove={Remove}, Saved={IsUpdated})");
+            return IsUpdated && !NeedsSave;
         }
 
 
@@ -235,12 +241,10 @@ namespace SCCPP1.User.Data
         /// <returns>true if record was removed from database, false otherwise.</returns>
         public override bool Delete()
         {
-            if (!Remove)
-                return true;
-
-            //TODO put database remove method
-            //NeedsSave = !(IsUpdated
-            return true;
+            //Console.WriteLine($"BeforeDelete called on ProfileData (Remove={Remove}, Saved={IsRemoved})");
+            Remove = NeedsSave = IsUpdated = true;
+            //Console.WriteLine($"AfterDelete called on ProfileData (Remove={Remove}, Saved={IsRemoved})");
+            return Remove;
         }
     }
 }

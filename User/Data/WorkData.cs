@@ -99,7 +99,7 @@
             /*if (!this.NeedsSave)
                 return true;*/
 
-            return NeedsSave = !(IsUpdated = DatabaseConnector.SaveWorkHistory(this));
+            return !(NeedsSave = !(IsUpdated = DatabaseConnector.SaveWorkHistory(this)));
         }
 
 
@@ -109,12 +109,7 @@
         /// <returns>true if record was removed from database, false otherwise.</returns>
         public override bool Delete()
         {
-            if (!Remove)
-                return true;
-
-            //TODO put database remove method
-            //NeedsSave = !(IsUpdated
-            return true;
+            return Remove = NeedsSave = IsUpdated = true;
         }
 
     }

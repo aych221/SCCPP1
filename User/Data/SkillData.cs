@@ -85,7 +85,8 @@ namespace SCCPP1.User.Data
             /*if (!NeedsSave)
                 return true;*/
 
-            return NeedsSave = !(IsUpdated = DatabaseConnector.SaveColleagueSkill(this));
+            NeedsSave = !(IsUpdated = DatabaseConnector.SaveColleagueSkill(this));
+            return IsUpdated && !NeedsSave;
         }
 
 
@@ -95,12 +96,7 @@ namespace SCCPP1.User.Data
         /// <returns>true if record was removed from database, false otherwise.</returns>
         public override bool Delete()
         {
-            if (!Remove)
-                return true;
-
-            //TODO put database remove method
-            //NeedsSave = !(IsUpdated
-            return true;
+            return Remove = NeedsSave = IsUpdated = true;
         }
 
 

@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using SCCPP1.Database;
 using SCCPP1.Database.Entity;
 using SCCPP1.Database.Sqlite;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace SCCPP1
 {
@@ -34,9 +35,9 @@ namespace SCCPP1
 
         public static void CreateDatabase(bool loadCaches = false)
         {
-            
+
             TableModels = new TableModels();
-            Dictionary<string, DbTable> Tables =  TableModels.Tables;
+            Dictionary<string, DbTable> Tables = TableModels.Tables;
 
             StringBuilder sql = new StringBuilder();
 
@@ -50,59 +51,59 @@ namespace SCCPP1
             //add foreign key to colleagues table
             sql.AppendLine(QueryGenerator.AlterTableAddForeignKeys(Tables["colleagues"], new Field("main_profile_id", typeof(int), false, false, Tables["profiles"].PrimaryKey)));
 
-/*            DbRecord[] states = new DbRecord[]
-            {
-                new DbRecord(new DbStateData("Alabama", "AL")),
-                new DbRecord(new DbStateData("Alaska", "AK")),
-                new DbRecord(new DbStateData("Arizona", "AZ")),
-                new DbRecord(new DbStateData("Arkansas", "AR")),
-                new DbRecord(new DbStateData("California", "CA")),
-                new DbRecord(new DbStateData("Colorado", "CO")),
-                new DbRecord(new DbStateData("Connecticut", "CT")),
-                new DbRecord(new DbStateData("Delaware", "DE")),
-                new DbRecord(new DbStateData("Florida", "FL")),
-                new DbRecord(new DbStateData("Georgia", "GA")),
-                new DbRecord(new DbStateData("Hawaii", "HI")),
-                new DbRecord(new DbStateData("Idaho", "ID")),
-                new DbRecord(new DbStateData("Illinois", "IL")),
-                new DbRecord(new DbStateData("Indiana", "IN")),
-                new DbRecord(new DbStateData("Iowa", "IA")),
-                new DbRecord(new DbStateData("Kansas", "KS")),
-                new DbRecord(new DbStateData("Kentucky", "KY")),
-                new DbRecord(new DbStateData("Louisiana", "LA")),
-                new DbRecord(new DbStateData("Maine", "ME")),
-                new DbRecord(new DbStateData("Maryland", "MD")),
-                new DbRecord(new DbStateData("Massachusetts", "MA")),
-                new DbRecord(new DbStateData("Michigan", "MI")),
-                new DbRecord(new DbStateData("Minnesota", "MN")),
-                new DbRecord(new DbStateData("Mississippi", "MS")),
-                new DbRecord(new DbStateData("Missouri", "MO")),
-                new DbRecord(new DbStateData("Montana", "MT")),
-                new DbRecord(new DbStateData("Nebraska", "NE")),
-                new DbRecord(new DbStateData("Nevada", "NV")),
-                new DbRecord(new DbStateData("New Hampshire", "NH")),
-                new DbRecord(new DbStateData("New Jersey", "NJ")),
-                new DbRecord(new DbStateData("New Mexico", "NM")),
-                new DbRecord(new DbStateData("New York", "NY")),
-                new DbRecord(new DbStateData("North Carolina", "NC")),
-                new DbRecord(new DbStateData("North Dakota", "ND")),
-                new DbRecord(new DbStateData("Ohio", "OH")),
-                new DbRecord(new DbStateData("Oklahoma", "OK")),
-                new DbRecord(new DbStateData("Oregon", "OR")),
-                new DbRecord(new DbStateData("Pennsylvania", "PA")),
-                new DbRecord(new DbStateData("Rhode Island", "RI")),
-                new DbRecord(new DbStateData("South Carolina", "SC")),
-                new DbRecord(new DbStateData("South Dakota", "SD")),
-                new DbRecord(new DbStateData("Tennessee", "TN")),
-                new DbRecord(new DbStateData("Texas", "TX")),
-                new DbRecord(new DbStateData("Utah", "UT")),
-                new DbRecord(new DbStateData("Vermont", "VT")),
-                new DbRecord(new DbStateData("Virginia", "VA")),
-                new DbRecord(new DbStateData("Washington", "WA")),
-                new DbRecord(new DbStateData("West Virginia", "WV")),
-                new DbRecord(new DbStateData("Wisconsin", "WI")),
-                new DbRecord(new DbStateData("Wyoming", "WY"))
-            };*/
+            /*            DbRecord[] states = new DbRecord[]
+                        {
+                            new DbRecord(new DbStateData("Alabama", "AL")),
+                            new DbRecord(new DbStateData("Alaska", "AK")),
+                            new DbRecord(new DbStateData("Arizona", "AZ")),
+                            new DbRecord(new DbStateData("Arkansas", "AR")),
+                            new DbRecord(new DbStateData("California", "CA")),
+                            new DbRecord(new DbStateData("Colorado", "CO")),
+                            new DbRecord(new DbStateData("Connecticut", "CT")),
+                            new DbRecord(new DbStateData("Delaware", "DE")),
+                            new DbRecord(new DbStateData("Florida", "FL")),
+                            new DbRecord(new DbStateData("Georgia", "GA")),
+                            new DbRecord(new DbStateData("Hawaii", "HI")),
+                            new DbRecord(new DbStateData("Idaho", "ID")),
+                            new DbRecord(new DbStateData("Illinois", "IL")),
+                            new DbRecord(new DbStateData("Indiana", "IN")),
+                            new DbRecord(new DbStateData("Iowa", "IA")),
+                            new DbRecord(new DbStateData("Kansas", "KS")),
+                            new DbRecord(new DbStateData("Kentucky", "KY")),
+                            new DbRecord(new DbStateData("Louisiana", "LA")),
+                            new DbRecord(new DbStateData("Maine", "ME")),
+                            new DbRecord(new DbStateData("Maryland", "MD")),
+                            new DbRecord(new DbStateData("Massachusetts", "MA")),
+                            new DbRecord(new DbStateData("Michigan", "MI")),
+                            new DbRecord(new DbStateData("Minnesota", "MN")),
+                            new DbRecord(new DbStateData("Mississippi", "MS")),
+                            new DbRecord(new DbStateData("Missouri", "MO")),
+                            new DbRecord(new DbStateData("Montana", "MT")),
+                            new DbRecord(new DbStateData("Nebraska", "NE")),
+                            new DbRecord(new DbStateData("Nevada", "NV")),
+                            new DbRecord(new DbStateData("New Hampshire", "NH")),
+                            new DbRecord(new DbStateData("New Jersey", "NJ")),
+                            new DbRecord(new DbStateData("New Mexico", "NM")),
+                            new DbRecord(new DbStateData("New York", "NY")),
+                            new DbRecord(new DbStateData("North Carolina", "NC")),
+                            new DbRecord(new DbStateData("North Dakota", "ND")),
+                            new DbRecord(new DbStateData("Ohio", "OH")),
+                            new DbRecord(new DbStateData("Oklahoma", "OK")),
+                            new DbRecord(new DbStateData("Oregon", "OR")),
+                            new DbRecord(new DbStateData("Pennsylvania", "PA")),
+                            new DbRecord(new DbStateData("Rhode Island", "RI")),
+                            new DbRecord(new DbStateData("South Carolina", "SC")),
+                            new DbRecord(new DbStateData("South Dakota", "SD")),
+                            new DbRecord(new DbStateData("Tennessee", "TN")),
+                            new DbRecord(new DbStateData("Texas", "TX")),
+                            new DbRecord(new DbStateData("Utah", "UT")),
+                            new DbRecord(new DbStateData("Vermont", "VT")),
+                            new DbRecord(new DbStateData("Virginia", "VA")),
+                            new DbRecord(new DbStateData("Washington", "WA")),
+                            new DbRecord(new DbStateData("West Virginia", "WV")),
+                            new DbRecord(new DbStateData("Wisconsin", "WI")),
+                            new DbRecord(new DbStateData("Wyoming", "WY"))
+                        };*/
 
             Account t = new Account("testuser");
             t.UpdateData("Testing", "Some", "User", "test@user.edu", 1231231234, "Nothing interesting");
@@ -113,7 +114,7 @@ namespace SCCPP1
             Console.WriteLine(QueryGenerator.UpdateAll(Tables["colleagues"]));
             Console.WriteLine();
             Console.WriteLine(QueryGenerator.UpdateRequiredOnly(Tables["colleagues"]));
-            
+
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
@@ -123,7 +124,7 @@ namespace SCCPP1
                     cmd.ExecuteNonQuery();
 
                     //QueryGenerator.InsertOrIgnore(cmd, TableModels.States, states);
-                    
+
                     if (loadCaches)
                         LoadCaches();
                     else
@@ -133,7 +134,7 @@ namespace SCCPP1
 
                 }
             }
-            
+
         }
 
 
@@ -331,7 +332,7 @@ namespace SCCPP1
             string[] arr = new string[ids.Length];
             string s;
 
-            for (int i = 0; i < arr.Length; i ++)
+            for (int i = 0; i < arr.Length; i++)
 
                 //value was found
                 if (table.TryGetValue(ids[i], out s))
@@ -414,7 +415,7 @@ namespace SCCPP1
                 string sql = @"INSERT INTO colleagues (user_hash, role, name, email, phone, address, intro_narrative, main_profile_id) VALUES (@user_hash, @role, @name, @email, @phone, @address, @intro_narrative, @main_profile_id) RETURNING id;";
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
-                    
+
                     cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(userID));
 
                     cmd.Parameters.AddWithValue("@role", role);
@@ -502,7 +503,7 @@ namespace SCCPP1
                 return SaveUser(account.RecordID, account.GetUsername(), account.Role, account.Name, account.EmailAddress, account.PhoneNumber, account.StreetAddress, account.IntroNarrative, account.MainProfileID);
             account.RecordID = SaveUser(account.GetUsername(), account.Role, account.Name, account.EmailAddress, account.PhoneNumber, account.StreetAddress, account.IntroNarrative, account.MainProfileID);
             account.IsReturning = true;
-            return  account.RecordID >= 0;
+            return account.RecordID >= 0;
         }
 
 
@@ -747,7 +748,7 @@ namespace SCCPP1
             }
         }
 
-        
+
         /// <summary>
         /// Inserts skill names into the skills table. This will insert all unique skill names.
         /// </summary>
@@ -760,7 +761,7 @@ namespace SCCPP1
 
 
             StringBuilder sb = new StringBuilder("INSERT OR IGNORE INTO skills(name) VALUES (@skillName0)");
-            
+
             for (int i = 1; i < skillNames.Length; i++)
             {
                 sb.Append(',');
@@ -1109,6 +1110,14 @@ namespace SCCPP1
          */
         public static bool SaveColleagueSkill(SkillData sd)
         {
+
+            if (sd.Remove)
+            {
+                sd.IsRemoved = DeleteRecord("colleague_skills", sd.RecordID);
+                Console.WriteLine("Removed Skill " + sd.SkillName + "? " + sd.IsRemoved);
+                return sd.IsRemoved;
+            }
+
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
@@ -1189,7 +1198,7 @@ namespace SCCPP1
                         {
 
                             sd = new SkillData(account, GetInt32(r, 0));
-                            sd.SkillID  = GetInt32(r, 2);
+                            sd.SkillID = GetInt32(r, 2);
                             sd.Rating = GetInt32(r, 3);
 
                             list.Add(sd);
@@ -1217,7 +1226,7 @@ namespace SCCPP1
                 return null;
             }
 
-                using (SqliteConnection conn = new SqliteConnection(connStr))
+            using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
                 string sql = @"SELECT * FROM colleague_skills WHERE (colleague_id=@id);";
@@ -1268,7 +1277,7 @@ namespace SCCPP1
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-               
+
                 string sql = @"SELECT cs.id, cs.colleague_id, sc.name AS skill_category, cs.skill_category_id, s.name AS skill, cs.skill_id, cs.rating
                                             FROM colleague_skills cs
                                             JOIN skills s ON cs.skill_id = s.id
@@ -1410,7 +1419,7 @@ namespace SCCPP1
                 conn.Open();
                 string sql = @"UPDATE education_history SET 
                                 colleague_id=@colleague_id, education_type_id=@education_type_id, institution_id=@institution_id, municipality_id=municipality_id, state_id=@state_id, start_date=@start_date, end_date=@end_date, description=@description WHERE id = @id;";
-                
+
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@id", id);
@@ -1435,8 +1444,13 @@ namespace SCCPP1
         public static bool SaveEducationHistory(EducationData ed)
         {
 
+            if (ed.Remove)
+            {
+                return ed.IsRemoved = DeleteRecord("education_history", ed.RecordID);
+            }
+
             ed.EducationTypeID = SaveEducationType(ed.EducationType);
-            ed.InstitutionID =  SaveInstitution(ed.Institution);
+            ed.InstitutionID = SaveInstitution(ed.Institution);
 
             //Thread.Sleep(1);
             if (ExistsEducationHistory(ed.RecordID))
@@ -1444,7 +1458,7 @@ namespace SCCPP1
             return (ed.RecordID = InsertEducationHistory(ed)) >= 0;
             //return SaveEducationHistory(ed.RecordID, ed.Owner.RecordID, ed.EducationType, ed.Institution, ed.Location.MunicipalityID, ed.Location.StateID, ed.StartDate, ed.EndDate, ed.Description);
         }
-        
+
 
         #region Education Type
         public static int GetEducationTypeID(string educationType)
@@ -1637,7 +1651,7 @@ namespace SCCPP1
             }
         }
 
-        [Obsolete ("Use the LoadColleagueEducationHistory1 method instead.")]
+        [Obsolete("Use the LoadColleagueEducationHistory1 method instead.")]
         /// <summary>
         /// Loads the education history of a colleague into the Account class. This method populates the Account.EducationHistory list.
         /// </summary>
@@ -1664,7 +1678,7 @@ namespace SCCPP1
             {
                 conn.Open();
                 sql = @"SELECT id, colleague_id, education_type_id, institution_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleague_id);";
-                
+
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
@@ -1864,6 +1878,7 @@ namespace SCCPP1
                         }
 
                         account.EducationHistory = list;
+                        return true;
                     }
                 }
             }
@@ -2032,6 +2047,13 @@ namespace SCCPP1
 
         public static bool SaveWorkHistory(WorkData wd)
         {
+
+            if (wd.Remove)
+            {
+                return wd.IsRemoved = DeleteRecord("work_history", wd.RecordID);
+            }
+
+
             wd.EmployerID = SaveEmployer(wd.Employer);
             wd.JobTitleID = SaveJobTitle(wd.JobTitle);
 
@@ -2491,13 +2513,13 @@ namespace SCCPP1
 
                         using (SqliteCommand cmd = new SqliteCommand(sql, conn, transaction))
                         {
-
+                            /*
                             Console.WriteLine("[Profile=" + pd.Title + "] {");
                             Console.WriteLine("Skills: " + ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
                             Console.WriteLine("Education: " + ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
                             Console.WriteLine("Certs: " + ValueCleaner(string.Join(",", pd.SelectedCertificationIDs)));
                             Console.WriteLine("Work: " + ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
-                            Console.WriteLine("}");
+                            Console.WriteLine("}");//*/
 
                             cmd.Parameters.AddWithValue("@id", ValueCleaner(pd.RecordID));
                             cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(pd.Owner.RecordID));
@@ -2532,8 +2554,9 @@ namespace SCCPP1
         }
 
 
-        public static int UpdateProfile(ProfileData pd)
+        public static bool UpdateProfile(ProfileData pd)
         {
+            bool success = false;
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
@@ -2549,13 +2572,13 @@ namespace SCCPP1
 
                         using (SqliteCommand cmd = new SqliteCommand(sql, conn, transaction))
                         {
-
+                            /*
                             Console.WriteLine("[Profile=" + pd.Title + "] {");
                             Console.WriteLine("Skills: " + ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
                             Console.WriteLine("Education: " + ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
                             Console.WriteLine("Certs: " + ValueCleaner(string.Join(",", pd.SelectedCertificationIDs)));
                             Console.WriteLine("Work: " + ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
-                            Console.WriteLine("}");
+                            Console.WriteLine("}");//*/
 
                             cmd.Parameters.AddWithValue("@id", ValueCleaner(pd.RecordID));
                             cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(pd.Owner.RecordID));
@@ -2566,18 +2589,13 @@ namespace SCCPP1
                             cmd.Parameters.AddWithValue("@work_history_ids", ValueCleaner(string.Join(",", pd.SelectedWorkIDs)));
                             cmd.Parameters.AddWithValue("@ordering", ValueCleaner(pd.Ordering));
 
-                            object? id = cmd.ExecuteScalar();
-
-                            if (id == null)
-                                return -1;
-
-                            pd.RecordID = profileID = Convert.ToInt32(id);
+                            success = cmd.ExecuteNonQuery() >= 0;
 
                         }
 
                         transaction.Commit();
 
-                        return profileID;
+                        return success;
                     }
                     catch (Exception ex)
                     {
@@ -2745,8 +2763,21 @@ namespace SCCPP1
 
         public static bool SaveProfile(ProfileData pd)
         {
+            if (pd.Remove)
+            {
+                /*if (pd.RecordID < 1)
+                {
+                    pd.IsRemoved = true;
+                    Console.WriteLine("#####Removed unsaved profile: " + pd.RecordID + " " + pd.IsRemoved);
+                    return pd.IsRemoved;
+                }//*/
+
+                pd.IsRemoved = DeleteRecord("profiles", pd.RecordID);
+                return pd.IsRemoved;
+            }
+
             if (pd.RecordID > 0)
-                return UpdateProfile(pd) >= 0;
+                return UpdateProfile(pd);
 
             return (pd.RecordID = InsertProfile(pd)) >= 0;
         }
@@ -2802,7 +2833,7 @@ namespace SCCPP1
             }
         }
 
-        public static int UpdateCertification(CertificationData cd)
+        public static bool UpdateCertification(CertificationData cd)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
@@ -2821,7 +2852,7 @@ namespace SCCPP1
                     cmd.Parameters.AddWithValue("@start_date", ValueCleaner(cd.StartDate));
                     cmd.Parameters.AddWithValue("@end_date", ValueCleaner(cd.EndDate));
                     cmd.Parameters.AddWithValue("@description", ValueCleaner(cd.Description));
-                    return cmd.ExecuteNonQuery();//rows affected
+                    return cmd.ExecuteNonQuery() >= 0;//rows affected
                 }
             }
         }
@@ -2829,12 +2860,18 @@ namespace SCCPP1
         public static bool SaveCertification(CertificationData cd)
         {
 
+            if (cd.Remove)
+            {
+                //delete cert
+                return cd.IsRemoved = DeleteRecord("colleague_certs", cd.RecordID);
+            }
+
             cd.CertificateTypeID = SaveCertificationType(cd.CertificationType);
             cd.InstitutionID = SaveInstitution(cd.Institution);
 
             //Thread.Sleep(1);
             if (cd.RecordID > 0)
-                return UpdateCertification(cd) >= 0;
+                return UpdateCertification(cd);
             return (cd.RecordID = InsertCertification(cd)) >= 0;
             //return SaveEducationHistory(ed.RecordID, ed.Owner.RecordID, ed.EducationType, ed.Institution, ed.Location.MunicipalityID, ed.Location.StateID, ed.StartDate, ed.EndDate, ed.Description);
         }
@@ -2996,21 +3033,77 @@ namespace SCCPP1
 
             account.AddCertification("Online", "CompTIA S+", null, null);
 
+            string s;
+            for (int i = 0; i < 10; i ++)
+            {
+                s = $"{i}{i}{i}";
+                account.AddEducation(
+                    $"TestInstitution{s}",
+                    $"TestDegreeType{s}",
+                    $"TestDegreeField{s}",
+                    null,
+                    Utilities.ToDateOnly($"May {i + 1} 200{i}"),
+                    Utilities.ToDateOnly($"August {i + 1} 200{i}")
+                    );
+                account.AddWork(
+                    $"TestEmployer{s}",
+                    $"TestJobTitle{s}",
+                    $"TestJobDescription{s}",
+                    null,
+                    Utilities.ToDateOnly($"Jan {i+1} 200{i}"),
+                    Utilities.ToDateOnly($"April {i + 1} 200{i}")
+                    );
+                account.AddCertification(
+                    $"TestInstitution{s}",
+                    $"TestCertType{s}",
+                    Utilities.ToDateOnly($"Oct {i + 1} 200{i}"),
+                    Utilities.ToDateOnly($"Sept {i + 1} 200{i}")
+                    );
+                account.AddSkills($"TestCategory{s}", $"TestSkill{s}");
+            }
 
+            //must persit all before making profiles
             account.PersistAll();
 
+
+
+
             //create mock profile
-            ProfileData p = account.CreateProfile("Mister Sir");
+            ProfileData p = account.CreateProfile("Mister Sir"), lastP;
             p.AddWork(1);
             p.AddWork(2);
             p.AddEducation(2);
             p.AddEducation(1);
             p.AddSkill(3);
-
+            lastP = p;
             account.CreateProfile("Main");
 
-            account.PersistProfiles();
+            Random r = new Random();
+            for (int i = 0; i < 10; i ++)
+            {
+                s = $"{i}{i}{i}";
+                p = account.CreateProfile($"TestProfile{s}");
+                p.AddWork(r.Next(1, 10));
+                p.AddWork(r.Next(1, 10));
+                p.AddEducation(r.Next(1, 10));
+                p.AddEducation(r.Next(1, 10));
+                p.AddSkill(r.Next(1, 10));
+            }
+            account.PersistAll();
 
+
+
+            Console.WriteLine("Test: Attempting to remove profileID: " + lastP.RecordID);
+            account.RemoveProfiles(lastP.RecordID);
+            account.PersistAll();
+
+
+            Console.WriteLine("Test: Attempting to some test data.");
+            account.RemoveSkills(5, 6, 7);
+            account.RemoveCertifications(5, 6, 7);
+            account.RemoveEducations(5, 6, 7);
+            account.RemoveWorks(5, 6, 7);
+            account.PersistAll();
 
             Console.WriteLine("Saved!");
         }
@@ -3092,9 +3185,82 @@ namespace SCCPP1
             return ids;
         }
 
+        //Does not work correctly for some reason? May be 
+        private static bool DeleteRecord(SqliteCommand cmd, string tableName, int id)
+        {
+
+            //save incoming command type
+            CommandType originalType = cmd.CommandType;
+            string originalSql = cmd.CommandText;
+            cmd.CommandType = CommandType.Text;
+            cmd.CommandText = $"DELETE FROM {tableName} WHERE id={id};";
+
+            //how many rows were deleted? 0 is find since the where condition may have been invalid.
+            bool success = cmd.ExecuteNonQuery() >= 0;
+
+            //reset command type
+            cmd.CommandType = originalType;
+            cmd.CommandText = originalSql;
 
 
-        private static object ValueCleaner(int val)
+            return success;
+        }
+
+        private static bool DeleteRecords(SqliteCommand cmd, string tableName, params int[] ids)
+        {
+
+            //save incoming command type
+            CommandType originalType = cmd.CommandType;
+            string originalSql = cmd.CommandText;
+            cmd.CommandType = CommandType.Text;
+            cmd.CommandText = $"DELETE FROM {tableName} WHERE id IN ({string.Join(',', ids)});";
+
+
+            bool success = cmd.ExecuteNonQuery() >= 0;
+
+            //reset command type
+            cmd.CommandType = originalType;
+            cmd.CommandText = originalSql;
+
+
+            return success;
+        }
+
+        private static bool DeleteRecord(string tableName, int id)
+        {
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+                string sql = $"DELETE FROM {tableName} WHERE id={id};";
+
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    return cmd.ExecuteNonQuery() >= 0;
+                }
+            }
+        }
+
+        private static bool DeleteRecords(string tableName, params int[] ids)
+        {
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+                string sql = $"DELETE FROM {tableName} WHERE id IN ({string.Join(',', ids)});";
+
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+
+                    return cmd.ExecuteNonQuery() >= 0;
+                }
+            }
+        }
+
+
+    private static object ValueCleaner(int val)
         {
             if (val == 0 || val == -1)
                 return DBNull.Value;
@@ -3156,6 +3322,7 @@ namespace SCCPP1
             return Utilities.ToDateOnly(r.GetDateTime(ordinal));
         }
         #endregion
+
 
 
 
@@ -3226,7 +3393,7 @@ namespace SCCPP1
           start_date DATE,
           end_date DATE,
           description TEXT,
-          FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
+          FOREIGN KEY (colleague_id) REFERENCES colleagues(id) ON DELETE CASCADE,
           FOREIGN KEY (education_type_id) REFERENCES education_types(id),
           FOREIGN KEY (institution_id) REFERENCES institutions(id),
           FOREIGN KEY (municipality_id) REFERENCES municipalities(id),
@@ -3248,7 +3415,7 @@ namespace SCCPP1
           start_date DATE,
           end_date DATE,
           description TEXT,
-          FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
+          FOREIGN KEY (colleague_id) REFERENCES colleagues(id) ON DELETE CASCADE,
           FOREIGN KEY (cert_type_id) REFERENCES cert_types(id),
           FOREIGN KEY (institution_id) REFERENCES institutions(id),
           FOREIGN KEY (municipality_id) REFERENCES municipalities(id),
@@ -3276,7 +3443,7 @@ namespace SCCPP1
           start_date DATE,
           end_date DATE,
           description TEXT,
-          FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
+          FOREIGN KEY (colleague_id) REFERENCES colleagues(id) ON DELETE CASCADE,
           FOREIGN KEY (employer_id) REFERENCES employers(id),
           FOREIGN KEY (municipality_id) REFERENCES municipalities(id),
           FOREIGN KEY (state_id) REFERENCES states(id),
@@ -3299,7 +3466,7 @@ namespace SCCPP1
           skill_id INTEGER NOT NULL,
           skill_category_id INTEGER,
           rating INTEGER,
-          FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
+          FOREIGN KEY (colleague_id) REFERENCES colleagues(id) ON DELETE CASCADE,
           FOREIGN KEY (skill_id) REFERENCES skills(id),
           FOREIGN KEY (skill_category_id) REFERENCES skill_categories(id)
         );
@@ -3313,10 +3480,10 @@ namespace SCCPP1
           colleague_certs_ids TEXT,     --list of colleague_certs ids in specified order
           work_history_ids TEXT,        --list of work history ids in specified order
           ordering TEXT,                --The ordering of how the different sections will be (education, work, skills, etc)
-          FOREIGN KEY (colleague_id) REFERENCES colleagues(id)
+          FOREIGN KEY (colleague_id) REFERENCES colleagues(id) ON DELETE CASCADE
         );
 
-        ALTER TABLE colleagues ADD COLUMN main_profile_id INTEGER REFERENCES profiles(id);
+        ALTER TABLE colleagues ADD COLUMN main_profile_id INTEGER REFERENCES profiles(id) ON DELETE CASCADE;
         
         --Populate states table, since this likely will not change.
         INSERT INTO states (name, abbreviation)
