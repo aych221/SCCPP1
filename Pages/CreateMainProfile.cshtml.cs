@@ -107,7 +107,6 @@ namespace SCCPP1.Pages
 
                 // Save the "Experience" of the user
                 string hiddenexp = Request.Form["Work.Experience"];
-                Console.WriteLine(hiddenexp);
                 if (hiddenexp != null)
                 {
                     var experience = Request.Form["Work.Experience"].ToString().Split(';');
@@ -130,7 +129,6 @@ namespace SCCPP1.Pages
 
                 // Save the "Education" of the user
                 string hiddenedu = Request.Form["Education.Value"];
-                Console.WriteLine(hiddenedu);
                 if (hiddenedu != null)
                 {
                     var education = Request.Form["Education.Value"].ToString().Split(';');
@@ -153,7 +151,6 @@ namespace SCCPP1.Pages
 
                 // Save the "Certification" of the user
                 string hiddencert = Request.Form["Certification.Value"];
-                Console.WriteLine(hiddencert);
                 if (hiddencert != null)
                 {
                     var certification = Request.Form["Certification.Value"].ToString().Split(';');
