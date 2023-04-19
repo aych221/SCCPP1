@@ -10,6 +10,10 @@ namespace SCCPP1.Database
         private readonly SqliteConnection _connection;
         private readonly CancellationTokenSource _cancellationTokenSource;
 
+        private readonly PriorityQueue<DbRequest, int> _requestQueue;
+
+
+
         private bool _isBusy;
 
         public bool IsBusy
@@ -24,6 +28,7 @@ namespace SCCPP1.Database
             _semaphore = new SemaphoreSlim(1);
             _connection = DbRequestManager.RequestConnection(this);
             _cancellationTokenSource = new CancellationTokenSource();
+            _requestQueue = new PriorityQueue<DbRequest, int>();
         }
 
 

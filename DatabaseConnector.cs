@@ -722,7 +722,7 @@ namespace SCCPP1
                     {
 
                         //account was found.
-                        if (r.Read())
+                        if (!r.Read())
                             return null;
 
                         //load new instance with basic colleague information
