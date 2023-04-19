@@ -7,21 +7,21 @@ namespace SCCPP1.Database
     public class DbCommandHelper
     {
 
-        protected DatabaseCommand _dbCmd;
+        //protected DatabaseCommand _dbCmd;
         protected StringBuilder _params;
 
 
 
-        public DbCommandHelper(DatabaseCommand dbCmd)
+        public DbCommandHelper()//DatabaseCommand dbCmd)
         {
 
-            _dbCmd = dbCmd;
+            //_dbCmd = dbCmd;
             _params = new StringBuilder();
         }// TODO:
 
 
         //returns a list of ids
-        public List<int> InsertOrIgnore(string tableName, List<object> values)
+ /*       public List<int> InsertOrIgnore(string tableName, List<object> values)
         {
             //clear
             _params.Clear();
@@ -52,7 +52,7 @@ namespace SCCPP1.Database
 
 
             return ids;
-        }
+        }*/
 
         public DatabaseResponse Insert(string tableName, List<object> values)
         {

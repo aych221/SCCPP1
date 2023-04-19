@@ -178,25 +178,37 @@
 
             <label for="ProgLang">Programming Languages:</label>
             <div class="tags-input">
-                <input type="text" asp-for="Skill!.ProgLang" placeholder="What languages do you know?... (Press enter to save)" />
-                <ul class="tags-list"></ul>
-                <ul class="hidden-tags-list" id="prog-lang-tags-list"></ul>
+                <input type="text" class="tags-input-field" data-list-selector="#prog-lang-list" placeholder="What languages do you know?... (Press enter to save)" onkeydown="onKeyDown(event)" />
+                <input type="text" asp-for="Skill!.ProgLang" style="display:none;" />
+                @Html.HiddenFor(m => m.Skill.ProgLang, new { id = "prog-lang-input" })
+                <ul class="tags-list" id="prog-lang-list"></ul>
             </div>
             <br />
 
             <label for="OS">Operating Systems:</label>
             <div class="tags-input">
-                <input type="text" asp-for="Skill!.OS" placeholder="What operating systems do you know?... (Press enter to save)" />
-                <ul class="tags-list"></ul>
-                <ul class="hidden-tags-list" id="os-tags-list"></ul>
+                <input type="text" class="tags-input-field" data-list-selector="#op-sys-list" placeholder="What operating systems do you know?... (Press enter to save)" onkeydown="onKeyDown(event)" />
+                <input type="text" asp-for="Skill!.OS" style="display:none;" />
+                @Html.HiddenFor(m => m.Skill.OS, new { id = "op-sys-input" })
+                <ul class="tags-list" id="op-sys-list"></ul>
             </div>
             <br />
 
             <label for="SoftAndFrame">Software & Frameworks:</label>
             <div class="tags-input">
-                <input type="text" asp-for="Skill!.SoftAndFrame" placeholder="What softwares and frameworks do you know?... (Press enter to save)">
-                <ul class="tags-list"></ul>
-                <ul class="hidden-tags-list" id="soft-frame-tags-list"></ul>
+                <input type="text" class="tags-input-field" data-list-selector="#soft-frame-list" placeholder="What languages do you know?... (Press enter to save)" onkeydown="onKeyDown(event)" />
+                <input type="text" asp-for="Skill!.SoftAndFrame" style="display:none;" />
+                @Html.HiddenFor(m => m.Skill.SoftAndFrame, new { id = "soft-frame-input" })
+                <ul class="tags-list" id="soft-frame-list"></ul>
+            </div>
+            <br />
+
+            <label for="Other">Other:</label>
+            <div class="tags-input">
+                <input type="text" class="tags-input-field" data-list-selector="#other-list" placeholder="What languages do you know?... (Press enter to save)" onkeydown="onKeyDown(event)" />
+                <input type="text" asp-for="Skill!.Other" style="display:none;" />
+                @Html.HiddenFor(m => m.Skill.Other, new { id = "other-input" })
+                <ul class="tags-list" id="other-list"></ul>
             </div>
             <br />
 
@@ -224,9 +236,11 @@
                 </ul>
                 <br />
                 <button type="button" onclick="removeLastExperience()">Remove Last Experience</button>
-                <ul id="hidden-experience-ul" style="display:none">
-            </div>
 
+                <!-- Hidden input to store experience data -->
+                @Html.HiddenFor(m => m.Work.Experience, new { id = "hidden-experience-list" })
+
+            </div>
             <br />
             <br />
 
@@ -256,7 +270,9 @@
                 </ul>
                 <br />
                 <button type="button" onclick="removeLastEducation()">Remove Last Education</button>
-                <ul id="hidden-education-ul" style="display:none">
+                <!-- Hidden input to store experience data -->
+                @Html.HiddenFor(m => m.Education.Value, new { id = "hidden-education-list" })
+
             </div>
 
             <br />
@@ -285,7 +301,7 @@
                 </ul>
                 <br />
                 <button type="button" onclick="removeLastCertification()">Remove Last Certification</button>
-                <ul id="hidden-certification-ul" style="display:none">
+                @Html.HiddenFor(m => m.Certification.Value, new { id = "hidden-certification-list" })
             </div>
 
             <br />
@@ -298,190 +314,201 @@
 </body>
 
 <!-- Input tag script-->
+
 <script>
-    // Get all the input fields
-        const inputFields = document.querySelectorAll('.tags-input input');
 
-        // Goes through each input field and attach event listener
-        inputFields.forEach(inputField => {
-            inputField.addEventListener('keyup', function (event) {
-                if (event.key === 'Enter' && event.target.value) {
+    // Function triggered when a key is pressed down
+    function onKeyDown(event) {
 
-                    // Create a new tag element
-                    const tag = document.createElement('li');
-                    tag.classList.add('tag');
+        // Check if the Enter key was pressed
+        if (event.keyCode === 13) {
+            event.preventDefault(); // Prevent form submission
 
-                    // Create a span element for the tag label
-                    const label = document.createElement('span');
-                    label.innerText = event.target.value;
-                    tag.appendChild(label);
+            // Gets the input element and the list element from data attributes
+            const input = event.target;
+            const listSelector = input.getAttribute("data-list-selector");
+            const list = document.querySelector(listSelector);
 
-                    // Create a close icon element to remove tags
-                    const closeIcon = document.createElement('i');
-                    closeIcon.classList.add('material-icons');
-                    closeIcon.innerText = 'X';
-                    closeIcon.addEventListener('click', () => {
-                        tag.parentNode.removeChild(tag);
+            // Creates a new tag element and add it to the list
+            const tag = document.createElement("li");
+            tag.classList.add("tag");
+            tag.textContent = input.value;
 
-                        // Remove the corresponding hidden tag element
-                        const hiddenTag = hiddenTagsList.querySelector(`li:not(.tag)[data-value="${event.target.value}"]`);
-                        if (hiddenTag) {
-                            hiddenTag.parentNode.removeChild(hiddenTag);
-                        }
-                    });
-                    tag.appendChild(closeIcon);
-
-                    // Add the tag element to the visible list
-                    const tagsList = event.target.nextElementSibling;
-                    tagsList.appendChild(tag);
-
-                    // Add the tag element to the hidden list
-                    const hiddenTagsList = document.querySelector(`#${event.target.id}-tags-list`);
-                    const hiddenTag = document.createElement('li');
-                    hiddenTag.dataset.value = event.target.value;
-                    hiddenTag.innerText = event.target.value;
-                    hiddenTagsList.appendChild(hiddenTag);
-
-                    // Clear input field
-                    event.target.value = '';
-                }
+            // Creates a button to remove the tag and add it to the tag element
+            const xButton = document.createElement("button");
+            xButton.classList.add("tag-close-btn");
+            xButton.innerHTML = "&times;";
+            xButton.addEventListener("click", function () {
+                const tagToRemove = this.parentNode;
+                tagToRemove.parentNode.removeChild(tagToRemove);
+                updateHiddenInput(list); // Update hidden input after removing the tag
             });
-        });</script>
+            tag.appendChild(xButton);
+
+            list.appendChild(tag); // Add the tag to the list
+            input.value = ""; // Clear the input field
+            updateHiddenInput(list); // Update hidden input after adding the tag
+        }
+    }
+
+    // Update the hidden input with the current tags in the list
+    function updateHiddenInput(list) {
+
+        // Convert the list of tags to a comma-separated string
+        const csv = Array.from(list.children).map(tag => tag.textContent.replace(/\u00D7/g, "").trim()).join(",");
+
+        // Set the value of the hidden input to the comma-separated string
+        const hiddenInput = document.getElementById("@Html.IdFor(m => m.Skill.ProgLang)");
+        hiddenInput.value = csv;
+    }
+</script>
 
 <!-- Configurable list script for experience -->
-
 <script>
     function addExperience() {
-            var ul = document.querySelector("#experience-ul"); // The visible experience list element
-            var hiddenUl = document.querySelector("#hidden-experience-ul"); // The hidden experience list element
-            var employerInput = document.getElementById("Work_Employer"); // Input field for employer name
-            var jobTitleInput = document.getElementById("Work_JobTitle"); // Input field for job title
-            var startDateInput = document.getElementById("Work_StartDate"); // Input field for start date
-            var endDateInput = document.getElementById("Work_EndDate"); // Input field for end date
-            var presentCheckbox = document.querySelector("#present-checkbox"); // Present employer checkbox
+        var ul = document.querySelector("#experience-ul"); // The list element
+        var employerInput = document.getElementById("Work_Employer"); // Input field for employer name
+        var jobTitleInput = document.getElementById("Work_JobTitle"); // Input field for job title
+        var startDateInput = document.getElementById("Work_StartDate"); // Input field for start date
+        var endDateInput = document.getElementById("Work_EndDate"); // Input field for end date
+        var presentCheckbox = document.querySelector("#present-checkbox"); // Present employer checkbox
+        var hiddenInput = document.querySelector("#hidden-experience-list"); // Hidden input field for experience list
 
-            // Creates new list item to hold experience details
-            var li = document.createElement("li");
+        // Creates new list item to hold experience details
+        var li = document.createElement("li");
 
-            // Creates paragraph element for employer name and adds it to list
-            var company = document.createElement("p");
-            company.appendChild(document.createTextNode("WorkEmployer: " + employerInput.value));
-            li.appendChild(company);
+        // Creates paragraph element for employer name and adds it to list
+        var company = document.createElement("p");
+        company.appendChild(document.createTextNode("WorkEmployer: " + employerInput.value));
+        li.appendChild(company);
 
-            // Creates paragraph element for job title and adds it to list
-            var jobTitle = document.createElement("p");
-            jobTitle.appendChild(document.createTextNode("Job Title: " + jobTitleInput.value));
-            li.appendChild(jobTitle);
+        // Creates paragraph element for job title and adds it to list
+        var jobTitle = document.createElement("p");
+        jobTitle.appendChild(document.createTextNode("Job Title: " + jobTitleInput.value));
+        li.appendChild(jobTitle);
 
-            // Creates paragraph element for start date and adds it to list
-            var startDate = document.createElement("p");
-            startDate.appendChild(document.createTextNode("Start Date: " + startDateInput.value));
-            li.appendChild(startDate);
+        // Creates paragraph element for start date and adds it to list
+        var startDate = document.createElement("p");
+        startDate.appendChild(document.createTextNode("Start Date: " + startDateInput.value));
+        li.appendChild(startDate);
 
-            // Creates paragraph element for end date and adds it to list
-            var endDate = document.createElement("p");
-            if (presentCheckbox.checked) {
-                endDate.appendChild(document.createTextNode("End Date: Currently Employed"));
-            } else {
-                endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
-            }
-            li.appendChild(endDate);
-
-            //Adds new list item to both experience lists
-            ul.appendChild(li);
-            hiddenUl.appendChild(li.cloneNode(true));
-
-            // Clears input fields and checkbox
-            employerInput.value = "";
-            jobTitleInput.value = "";
-            startDateInput.value = "";
-            endDateInput.value = "";
-            presentCheckbox.checked = false;
+        // Creates paragraph element for end date and adds it to list
+        var endDate = document.createElement("p");
+        if (presentCheckbox.checked) {
+            endDate.appendChild(document.createTextNode("End Date: Present Employer"));
+        } else {
+            endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
         }
+        li.appendChild(endDate);
 
-        function removeLastExperience() {
-            var ul = document.querySelector("#experience-ul");
-            var hiddenUl = document.querySelector("#hidden-experience-ul");
-            var li = document.querySelector("#experience-ul li:last-child");
-            ul.removeChild(li);
-            hiddenUl.removeChild(hiddenUl.querySelector('li:last-child'));
-        }</script>
+        // Adds new list item to experience list
+        ul.appendChild(li);
 
-<!-- Configurable list script for education -->
+        // Adds new experience to hidden input field
+        var experience = employerInput.value + "|" + jobTitleInput.value + "|" + startDateInput.value + "|" + endDateInput.value + "|" + presentCheckbox.checked;
+        hiddenInput.value += experience + ";";
+
+        // Clears input fields and checkbox
+        employerInput.value = "";
+        jobTitleInput.value = "";
+        startDateInput.value = "";
+        endDateInput.value = "";
+        presentCheckbox.checked = false;
+    }
+
+    function removeLastExperience() {
+        var ul = document.querySelector("#experience-ul");
+        var li = document.querySelector("#experience-ul li:last-child");
+        var hiddenInput = document.querySelector("#hidden-experience-list"); // Hidden input field for experience list
+        var experiences = hiddenInput.value.split(";"); // Splits experiences by semicolon
+        var lastExperience = experiences.pop(); // Removes last experience
+        hiddenInput.value = experiences.join("|") + "|" // Updates hidden input field
+        ul.removeChild(li);
+    }
+
+</script>
+
+<!-- Configurable list script for education-->
 <script>
     function addEducation() {
-            var ul = document.querySelector("#education-ul"); // The visible education list element
-            var hiddenUl = document.querySelector("#hidden-education-ul"); // The hidden education list element
-            var institutionInput = document.getElementById("Education_Institution"); // Input field for institution name
-            var degreeInput = document.getElementById("Education_Degree"); // Input field for degree
-            var fieldInput = document.getElementById("Education_Field"); // Input field for field
-            var startDateInput = document.getElementById("Education_StartDate"); // Input field for start date
-            var endDateInput = document.getElementById("Education_EndDate"); // Input field for end date
-            var currentlyCheckbox = document.querySelector("#currently-checkbox"); // Currently enrolled checkbox
+        var ul = document.querySelector("#education-ul"); // The list element
+        var institutionInput = document.getElementById("Education_Institution"); // Input field for institution name
+        var degreeInput = document.getElementById("Education_Degree"); // Input field for degree
+        var fieldInput = document.getElementById("Education_Field"); // Input field for field
+        var startDateInput = document.getElementById("Education_StartDate"); // Input field for start date
+        var endDateInput = document.getElementById("Education_EndDate"); // Input field for end date
+        var currentlyCheckbox = document.querySelector("#currently-checkbox"); // Currently enrolled checkbox
+        var hiddenInput = document.querySelector("#hidden-education-list"); // Hidden input field for education list
 
-            // Creates new list item to hold education details
-            var li = document.createElement("li");
+        // Creates new list item to hold education details
+        var li = document.createElement("li");
 
-            // Creates paragraph element for institution and adds it to list
-            var institution = document.createElement("p");
-            institution.appendChild(document.createTextNode("Institution: " + institutionInput.value));
-            li.appendChild(institution);
+        // Creates paragraph element for institution and adds it to list
+        var institution = document.createElement("p");
+        institution.appendChild(document.createTextNode("Institution: " + institutionInput.value));
+        li.appendChild(institution);
 
-            // Creates paragraph element for degree and adds it to list
-            var degree = document.createElement("p");
-            degree.appendChild(document.createTextNode("Degree: " + degreeInput.value));
-            li.appendChild(degree);
+        // Creates paragraph element for degree and adds it to list
+        var degree = document.createElement("p");
+        degree.appendChild(document.createTextNode("Degree: " + degreeInput.value));
+        li.appendChild(degree);
 
-            // Creates paragraph element for field and adds it to list
-            var field = document.createElement("p");
-            field.appendChild(document.createTextNode("Field: " + fieldInput.value));
-            li.appendChild(field);
+        // Creates paragraph element for field and adds it to list
+        var field = document.createElement("p");
+        field.appendChild(document.createTextNode("Field: " + fieldInput.value));
+        li.appendChild(field);
 
-            // Creates paragraph element for start date and adds it to list
-            var startDate = document.createElement("p");
-            startDate.appendChild(document.createTextNode("Start Date: " + startDateInput.value));
-            li.appendChild(startDate);
+        // Creates paragraph element for start date and adds it to list
+        var startDate = document.createElement("p");
+        startDate.appendChild(document.createTextNode("Start Date: " + startDateInput.value));
+        li.appendChild(startDate);
 
-            // Creates paragraph element for end date and adds it to list
-            var endDate = document.createElement("p");
-            if (currentlyCheckbox.checked) {
-                endDate.appendChild(document.createTextNode("End Date: Currently Enrolled"));
-            } else {
-                endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
-            }
-            li.appendChild(endDate);
-
-            // Adds new list item to both education lists
-            ul.appendChild(li);
-            hiddenUl.appendChild(li.cloneNode(true));
-
-            // Clears input fields and checkbox
-            institutionInput.value = "";
-            degreeInput.value = "";
-            fieldInput.value = "";
-            startDateInput.value = "";
-            endDateInput.value = "";
-            currentlyCheckbox.checked = false;
+        // Creates paragraph element for end date and adds it to list
+        var endDate = document.createElement("p");
+        if (currentlyCheckbox.checked) {
+            endDate.appendChild(document.createTextNode("End Date: Currently Enrolled"));
+        } else {
+            endDate.appendChild(document.createTextNode("End Date: " + endDateInput.value));
         }
+        li.appendChild(endDate);
 
-        function removeLastEducation() {
-            var ul = document.querySelector("#education-ul");
-            var hiddenUl = document.querySelector("#hidden-education-ul");
-            var li = document.querySelector("#education-ul li:last-child");
-            ul.removeChild(li);
-            hiddenUl.removeChild(hiddenUl.querySelector('li:last-child'));
-        }</script>
+        // Adds new list item to education list
+        ul.appendChild(li);
+
+        // Adds new education to hidden input field
+        var education = institutionInput.value + "|" + degreeInput.value + "|" + fieldInput.value + "|" + startDateInput.value + "|" + endDateInput.value + "|" + currentlyCheckbox.checked;
+        hiddenInput.value += education + ";";
+
+        // Clears input fields and checkbox
+        institutionInput.value = "";
+        degreeInput.value = "";
+        fieldInput.value = "";
+        startDateInput.value = "";
+        endDateInput.value = "";
+        currentlyCheckbox.checked = false;
+    }
+
+    function removeLastEducation() {
+        var ul = document.querySelector("#education-ul");
+        var li = document.querySelector("#education-ul li:last-child");
+        var hiddenInput = document.querySelector("#hidden-education-list"); // Hidden input field for education list
+        var educations = hiddenInput.value.split(";"); // Splits educations by semicolon
+        var lastEducation = educations.pop(); // Removes last education
+        hiddenInput.value = educations.join("|") + "|" // Updates hidden input field
+        ul.removeChild(li);
+    }
+</script>
 
 <!-- Configurable list script for certification-->
 <script>
     function addCertification() {
         var ul = document.querySelector("#certification-ul"); // The visible certification list element
-        var hiddenUl = document.querySelector("#hidden-certification-ul"); // The hidden certification list element
         var institutionInput = document.getElementById("Certification_Institution"); // Input field for institution name
         var certificateInput = document.getElementById("Certification_Certificate"); // Input field for certificate
         var startDateInput = document.getElementById("Certification_StartDate"); // Input field for start date
         var endDateInput = document.getElementById("Certification_EndDate"); // Input field for end date
         var currentCheckbox = document.querySelector("#current-checkbox"); // Present employer checkbox
+        var hiddenInput = document.querySelector("#hidden-certification-list"); // Hidden input field for certification list
 
         // Creates new list item to hold certification details
         var li = document.createElement("li");
@@ -510,9 +537,12 @@
         }
         li.appendChild(endDate);
 
-        //Adds new list item to both certification lists
+        //Adds new list item to certification list
         ul.appendChild(li);
-        hiddenUl.appendChild(li.cloneNode(true));
+
+        // Adds new certification to hidden input field
+        var certification = institutionInput.value + "|" + certificateInput.value + "|" + startDateInput.value + "|" + endDateInput.value + "|" + currentCheckbox.checked;
+        hiddenInput.value += certification + ";";
 
         // Clears input fields and checkbox
         institutionInput.value = "";
@@ -524,11 +554,14 @@
 
     function removeLastCertification() {
         var ul = document.querySelector("#certification-ul");
-        var hiddenUl = document.querySelector("#hidden-certification-ul");
+        var hiddenInput = document.querySelector("#hidden-certification-list"); // Hidden input field for certification list
+        var certifications = hiddenInput.value.split(";"); // Splits certifications by semicolon
+        var lastCertification = certifications.pop(); // Removes last certification
+        hiddenInput.value = certifications.join("|") + "|" // Updates hidden input field
         var li = document.querySelector("#certification-ul li:last-child");
         ul.removeChild(li);
-        hiddenUl.removeChild(hiddenUl.querySelector('li:last-child'));
     }
+
 </script>
 
 <!--Stops page from being submitted upon pressing enter-->
@@ -538,5 +571,5 @@
         if (e.key === "Enter") {
             e.preventDefault();
         }
-    });
-</script>
+    });</script>
+

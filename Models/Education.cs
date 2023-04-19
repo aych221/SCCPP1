@@ -9,6 +9,8 @@ namespace SCCPP1.Models
     {
         public int ID { get; set; }
 
+        public string Value { get; set; }
+
         public string? Institution { get; set; }
 
         public string? Degree { get; set; }

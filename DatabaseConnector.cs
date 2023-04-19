@@ -11,6 +11,7 @@ using SCCPP1.Database;
 using SCCPP1.Database.Entity;
 using SCCPP1.Database.Sqlite;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Net;
 
 namespace SCCPP1
 {
@@ -371,7 +372,8 @@ namespace SCCPP1
         /// </summary>
         /// <param name="sessionData">The current session object</param>
         /// <returns>true if the account exists, false if the account does not exist</returns>
-        [Obsolete]
+
+        [Obsolete("Use GetAccount() instead.")]
         public static bool LoadUserData(SessionData sessionData)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -439,9 +441,78 @@ namespace SCCPP1
 
 
 
-        public static int InsertUser(Account account)
+        public static bool InsertAccount(Account account)
         {
-            return InsertUser(account.GetUsername(), account.Role, account.Name, account.EmailAddress, account.PhoneNumber, account.StreetAddress, account.IntroNarrative, account.MainProfileID);
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"INSERT INTO colleagues (user_hash, role, name, email, phone, address, intro_narrative, main_profile_id)
+                                VALUES (@user_hash, @role, @name, @email, @phone, @address, @intro_narrative, @main_profile_id)
+                                RETURNING id;";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+
+                    //since this is hashed, we won't need to clean the value
+                    cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(account.GetUsername()));
+
+                    cmd.Parameters.AddWithValue("@role", account.Role);
+                    cmd.Parameters.AddWithValue("@name", ValueCleaner(account.Name));
+                    cmd.Parameters.AddWithValue("@email", ValueCleaner(account.EmailAddress));
+                    cmd.Parameters.AddWithValue("@phone", ValueCleaner(account.PhoneNumber));
+                    cmd.Parameters.AddWithValue("@address", ValueCleaner(account.StreetAddress));
+                    cmd.Parameters.AddWithValue("@intro_narrative", ValueCleaner(account.IntroNarrative));
+                    cmd.Parameters.AddWithValue("@main_profile_id", ValueCleaner(account.MainProfileID));
+
+                    object? accountID = cmd.ExecuteScalar();
+
+                    if (accountID == null)
+                        return false;
+
+
+                    return (account.RecordID = Convert.ToInt32(accountID)) > 0;
+
+                }
+            }
+        }
+
+
+        public static int UpdateUser(Account account)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"UPDATE colleagues
+                                SET user_hash=@user_hash, role=@role, name=@name, email=@email, phone=@phone, address=@address, intro_narrative=@intro_narrative, main_profile_id=@main_profile_id
+                                WHERE id = @id;";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+
+                    cmd.Parameters.AddWithValue("@id", account.RecordID);
+                    AddParameterValues(account, cmd.Parameters);
+
+                    return cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates all the <see cref="SqliteCommand.Parameters"></see> in the command with the values from the account object.
+        /// This does not update the ID.
+        /// </summary>
+        /// <param name="account">The account to pull values from.</param>
+        /// <param name="parameters">The collection of parameters from the command.</param>
+        private static void AddParameterValues(Account account, SqliteParameterCollection parameters)
+        {
+            //since this is hashed, we won't need to clean the value
+            parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(account.GetUsername()));
+            
+            parameters.AddWithValue("@role", account.Role);
+            parameters.AddWithValue("@name", ValueCleaner(account.Name));
+            parameters.AddWithValue("@email", ValueCleaner(account.EmailAddress));
+            parameters.AddWithValue("@phone", ValueCleaner(account.PhoneNumber));
+            parameters.AddWithValue("@address", ValueCleaner(account.StreetAddress));
+            parameters.AddWithValue("@intro_narrative", ValueCleaner(account.IntroNarrative));
+            parameters.AddWithValue("@main_profile_id", ValueCleaner(account.MainProfileID));
         }
 
         public static int UpdateUser(int id, string userID, int role, string name, string email, long phone, string address, string introNarrative, int mainProfileID)
@@ -468,11 +539,6 @@ namespace SCCPP1
                     return cmd.ExecuteNonQuery();
                 }
             }
-        }
-
-        public static int UpdateUser(Account account)
-        {
-            return UpdateUser(account.RecordID, account.GetUsername(), account.Role, account.Name, account.EmailAddress, account.PhoneNumber, account.StreetAddress, account.IntroNarrative, account.MainProfileID);
         }
 
 
@@ -579,6 +645,108 @@ namespace SCCPP1
 
 
 
+        /// <summary>
+        /// Loads a new Account object into the SessionData provided.
+        /// If the account does not exist, it will create a new account, but will not save it to the database.
+        /// </summary>
+        /// <param name="data">The current SessionData object</param>
+        /// <returns>A new <see cref="Account"/> instance.</returns>
+        public static Account GetAccount(SessionData data)
+        {
+            Account account;
+
+            if ((account = LoadAccount(data)) == null)
+                account = new Account(data, false); //may want to use Create user, but not sure if we want to save account to db if they don't save on CreateMainProfile
+
+            return account;
+        }
+
+
+        /**
+         * 
+
+        CREATE TABLE colleagues (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_hash TEXT NOT NULL,
+          role INTEGER NOT NULL, --0=admin 1=normal
+          name TEXT NOT NULL,
+          email TEXT,
+          phone INTEGER,
+          address TEXT,
+          intro_narrative TEXT
+        );
+
+         * 
+         * 
+         * 
+         */
+        public static int CreateUser(SessionData data)
+        {
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"INSERT INTO colleagues (user_hash, role, name, email, phone, address, intro_narrative, main_profile_id) VALUES (@user_hash, @role, @name, @email, @phone, @address, @intro_narrative, @main_profile_id) RETURNING id;";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    Account account = new Account(data, false);
+
+                    cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(account.GetUsername()));
+
+                    cmd.Parameters.AddWithValue("@role", account.Role);
+                    cmd.Parameters.AddWithValue("@name", ValueCleaner(account.Name));
+                    cmd.Parameters.AddWithValue("@email", ValueCleaner(account.EmailAddress));
+
+                    object? accountID = cmd.ExecuteScalar();
+
+                    if (accountID == null)
+                        return -1;
+
+                    return account.RecordID = Convert.ToInt32(accountID);//return record ID
+
+                }
+            }
+        }
+
+
+        public static Account LoadAccount(SessionData data)
+        {
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+                string sql = @"SELECT id, role, name, email, phone, address, intro_narrative, main_profile_id FROM colleagues WHERE (user_hash=@user_hash);";
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@user_hash", data.Username);
+                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleRow))
+                    {
+
+                        //account was found.
+                        if (r.Read())
+                            return null;
+
+                        //load new instance with basic colleague information
+                        Account account = new Account(data, true);
+
+                        account.RecordID = GetInt32(r, 0);
+                        account.Role = GetInt32(r, 1);
+                        account.Name = GetString(r, 2);
+                        account.EmailAddress = GetString(r, 3);
+                        account.PhoneNumber = GetInt64(r, 4);
+                        account.StreetAddress = GetString(r, 5);
+                        account.IntroNarrative = GetString(r, 6);
+                        account.MainProfileID = GetInt32(r, 7);
+
+                        return account;
+
+                    }
+                }
+            }
+        }
+
+
+
+        [Obsolete ("Use GetAccount() instead.")]
         public static Account? GetUser(string userID)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -653,6 +821,7 @@ namespace SCCPP1
             }
         }
 
+        [Obsolete("Use GetAccount() instead.")]
         public static bool GetUser(Account acc)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))

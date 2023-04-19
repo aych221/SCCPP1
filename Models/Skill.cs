@@ -13,5 +13,7 @@ namespace SCCPP1.Models
         public string? OS { get; set; }
 
         public string? SoftAndFrame { get; set; }
+
+        public string? Other { get; set; }
     }
 }

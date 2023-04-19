@@ -295,6 +295,11 @@ namespace SCCPP1.User
             SavedProfiles = new ReadOnlyDictionary<int, ProfileData>(new Dictionary<int, ProfileData>());
         }
 
+
+        /// <summary>
+        /// This constructor should only be used for testing purposes. This is not valid for a real account.
+        /// </summary>
+        /// <param name="username"></param>
         public Account(string username)
         {
             this.Data = null;
@@ -516,6 +521,7 @@ namespace SCCPP1.User
         /// <returns>The SessionData.Username</returns>
         public string GetUsername()
         {
+            //Data will only be null if the account is not logged in. (mainly for testing)
             if (Data != null)
                 return Data.Username;
             return Name;
@@ -624,88 +630,6 @@ namespace SCCPP1.User
 
         #endregion
 
-
-
-
-        #region Load methods
-
-        [Obsolete("Use PersistAll() instead.")]
-        public void LoadAll()
-        {
-            Load();
-
-            Dictionary<int, SkillData> savedSkills;
-            Dictionary<int, EducationData> savedEducationHistory;
-            Dictionary<int, WorkData> savedWorkHistory;
-            Dictionary<int, ProfileData> savedProfiles;
-
-            LoadSkills(out savedSkills);
-            LoadEducationHistory(out savedEducationHistory);
-            LoadWorkHistory(out savedWorkHistory);
-            LoadProfiles(out savedProfiles);
-
-            SavedSkills = new ReadOnlyDictionary<int, SkillData>(savedSkills);
-            SavedEducationHistory = new ReadOnlyDictionary<int, EducationData>(savedEducationHistory);
-            SavedWorkHistory = new ReadOnlyDictionary<int, WorkData>(savedWorkHistory);
-            SavedProfiles = new ReadOnlyDictionary<int, ProfileData>(savedProfiles);
-        }
-
-
-        [Obsolete("Use Persist() instead.")]
-        public bool Load()
-        {
-            return DatabaseConnector.GetUser(this);
-        }
-
-        [Obsolete("Use PersistSkills() instead.")]
-        public bool LoadSkills()
-        {
-            return DatabaseConnector.LoadColleagueSkills1(this);
-        }
-
-        [Obsolete("Use PersistSkills() and the SavedSkills property instead.")]
-        public bool LoadSkills(out Dictionary<int, SkillData> skills)
-        {
-            return DatabaseConnector.LoadColleagueSkills1(this, out skills);
-        }
-
-        [Obsolete("Use PersistEducationHistory() instead.")]
-        public bool LoadEducationHistory()
-        {
-            return DatabaseConnector.LoadColleagueEducationHistory1(this);
-        }
-
-        [Obsolete("Use PersistEducationHistory() and the SavedEducationHistory property instead.")]
-        public bool LoadEducationHistory(out Dictionary<int, EducationData> educationHistory)
-        {
-            return DatabaseConnector.LoadColleagueEducationHistory1(this, out educationHistory);
-        }
-
-
-        [Obsolete("Use PersistWorkHistory() instead.")]
-        public bool LoadWorkHistory()
-        {
-            return DatabaseConnector.LoadColleagueWorkHistory1(this);
-        }
-
-        [Obsolete("Use PersistWorkHistory() and the SavedWorkHistory property instead.")]
-        public bool LoadWorkHistory(out Dictionary<int, WorkData> workHistory)
-        {
-            return DatabaseConnector.LoadColleagueWorkHistory1(this, out workHistory);
-        }
-
-        [Obsolete("Use PersistProfiles() instead.")]
-        public bool LoadProfiles()
-        {
-            return DatabaseConnector.LoadColleageProfiles(this);
-        }
-
-        [Obsolete("Use PersistProfiles() and the SavedProfiles property instead.")]
-        public bool LoadProfiles(out Dictionary<int, ProfileData> profiles)
-        {
-            return DatabaseConnector.LoadColleageProfiles(this, out profiles);
-        }
-        #endregion
 
 
 

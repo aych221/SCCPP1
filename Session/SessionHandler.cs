@@ -72,6 +72,8 @@ namespace SCCPP1.Session
                 pm.RedirectToPage("/Index");
         }
 
+
+
         public string Login(PageModel pm)
         {
             string page;
@@ -91,7 +93,6 @@ namespace SCCPP1.Session
             {
                 DatabaseConnector.Thomas(acc = new Account(Data, false));
                 page = "/UserHome";
-                Console.WriteLine("[IsReturning = True]");
                 //new TableModels();
                 //DatabaseConnector.TestQueryMaker();
                 //Console.WriteLine(DatabaseConnector.LoadColleagueEducationHistory1(acc));
@@ -100,7 +101,16 @@ namespace SCCPP1.Session
                 //Console.WriteLine(DatabaseConnector.LoadColleagueWorkHistory(acc));
 
             }
-            else//*/ 
+            else if ((acc = DatabaseConnector.GetAccount(Data)).IsReturning)
+            {
+                page = "/UserHome";
+            }
+            else
+            {
+                page = "/CreateMainProfile";
+            }
+            Console.WriteLine($"[IsReturning = {acc.IsReturning}]");
+            /*
             if (DatabaseConnector.ExistsUser(Data.Username) < 1)
             {
                 acc = new Account(Data, false);
@@ -116,13 +126,16 @@ namespace SCCPP1.Session
                 acc = DatabaseConnector.GetUser(Data.Username);
                 page = "/UserHome";
                 Console.WriteLine("[IsReturning = True]");
-            }
+            }*/
 
             //save account to session.
             Data.Owner = acc;
 
             return page;
         }
+
+
+        [Obsolete ("USe Login(PageModel) instead.")]
         public string Login(string username)
         {
             /*
