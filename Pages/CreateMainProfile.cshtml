@@ -178,7 +178,7 @@
 
             <label for="ProgLang">Programming Languages:</label>
             <div class="tags-input">
-                <input type="text" class="tags-input-field" data-list-selector="#prog-lang-list" placeholder="What languages do you know?... (Press enter to save)" onkeydown="onKeyDown(event)" />
+                <input type="text" class="tags-input-field" data-list-selector="#prog-lang-list" placeholder="What languages do you know?... (Press enter to save)" onkeydown="onKeyPL(event)" />
                 <input type="text" asp-for="Skill!.ProgLang" style="display:none;" />
                 @Html.HiddenFor(m => m.Skill.ProgLang, new { id = "prog-lang-input" })
                 <ul class="tags-list" id="prog-lang-list"></ul>
@@ -187,7 +187,7 @@
 
             <label for="OS">Operating Systems:</label>
             <div class="tags-input">
-                <input type="text" class="tags-input-field" data-list-selector="#op-sys-list" placeholder="What operating systems do you know?... (Press enter to save)" onkeydown="onKeyDown(event)" />
+                <input type="text" class="tags-input-field" data-list-selector="#op-sys-list" placeholder="What operating systems do you know?... (Press enter to save)" onkeydown="onKeyOS(event)" />
                 <input type="text" asp-for="Skill!.OS" style="display:none;" />
                 @Html.HiddenFor(m => m.Skill.OS, new { id = "op-sys-input" })
                 <ul class="tags-list" id="op-sys-list"></ul>
@@ -196,7 +196,7 @@
 
             <label for="SoftAndFrame">Software & Frameworks:</label>
             <div class="tags-input">
-                <input type="text" class="tags-input-field" data-list-selector="#soft-frame-list" placeholder="What languages do you know?... (Press enter to save)" onkeydown="onKeyDown(event)" />
+                <input type="text" class="tags-input-field" data-list-selector="#soft-frame-list" placeholder="What languages do you know?... (Press enter to save)" onkeydown="onKeySNF(event)" />
                 <input type="text" asp-for="Skill!.SoftAndFrame" style="display:none;" />
                 @Html.HiddenFor(m => m.Skill.SoftAndFrame, new { id = "soft-frame-input" })
                 <ul class="tags-list" id="soft-frame-list"></ul>
@@ -205,7 +205,7 @@
 
             <label for="Other">Other:</label>
             <div class="tags-input">
-                <input type="text" class="tags-input-field" data-list-selector="#other-list" placeholder="What languages do you know?... (Press enter to save)" onkeydown="onKeyDown(event)" />
+                <input type="text" class="tags-input-field" data-list-selector="#other-list" placeholder="What languages do you know?... (Press enter to save)" onkeydown="onKeyO(event)" />
                 <input type="text" asp-for="Skill!.Other" style="display:none;" />
                 @Html.HiddenFor(m => m.Skill.Other, new { id = "other-input" })
                 <ul class="tags-list" id="other-list"></ul>
@@ -318,7 +318,51 @@
 <script>
 
     // Function triggered when a key is pressed down
-    function onKeyDown(event) {
+    function onKeyPL(event) {
+        // Check if the Enter key was pressed
+        if (event.keyCode === 13) {
+            event.preventDefault(); // Prevent form submission
+
+            // Gets the input element and the list element from data attributes
+            const input = event.target;
+            const listSelector = input.getAttribute("data-list-selector");
+            const list = document.querySelector(listSelector);
+
+            // Creates a new tag element and add it to the list
+            const tag = document.createElement("li");
+            tag.classList.add("tag");
+            tag.textContent = input.value;
+
+            // Creates a button to remove the tag and add it to the tag element
+            const xButton = document.createElement("button");
+            xButton.classList.add("tag-close-btn");
+            xButton.innerHTML = "&times;";
+            xButton.addEventListener("click", function () {
+                const tagToRemove = this.parentNode;
+                tagToRemove.parentNode.removeChild(tagToRemove);
+                updateHiddenInput(list); // Update hidden input after removing the tag
+            });
+            tag.appendChild(xButton);
+
+            list.appendChild(tag); // Add the tag to the list
+            input.value = ""; // Clear the input field
+            updatePL(list); // Update hidden input after adding the tag
+        }
+    }
+
+    // Update the hidden input with the current tags in the list
+    function updatePL(list) {
+
+        // Convert the list of tags to a comma-separated string
+        const csv = Array.from(list.children).map(tag => tag.textContent.replace(/\u00D7/g, "").trim()).join(",");
+
+        // Set the value of the hidden input to the comma-separated string
+        const hiddenInput = document.getElementById("@Html.IdFor(m => m.Skill.ProgLang)");
+        hiddenInput.value = csv;
+    }
+
+    // Function triggered when a key is pressed down
+    function onKeyOS(event) {
 
         // Check if the Enter key was pressed
         if (event.keyCode === 13) {
@@ -347,21 +391,112 @@
 
             list.appendChild(tag); // Add the tag to the list
             input.value = ""; // Clear the input field
-            updateHiddenInput(list); // Update hidden input after adding the tag
+            updateOS(list); // Update hidden input after adding the tag
         }
     }
 
     // Update the hidden input with the current tags in the list
-    function updateHiddenInput(list) {
+    function updateOS(list) {
 
         // Convert the list of tags to a comma-separated string
         const csv = Array.from(list.children).map(tag => tag.textContent.replace(/\u00D7/g, "").trim()).join(",");
 
         // Set the value of the hidden input to the comma-separated string
-        const hiddenInput = document.getElementById("@Html.IdFor(m => m.Skill.ProgLang)");
+        const hiddenInput = document.getElementById("@Html.IdFor(m => m.Skill.OS)");
+        hiddenInput.value = csv;
+    }
+
+    // Function triggered when a key is pressed down
+    function onKeySNF(event) {
+
+        // Check if the Enter key was pressed
+        if (event.keyCode === 13) {
+            event.preventDefault(); // Prevent form submission
+
+            // Gets the input element and the list element from data attributes
+            const input = event.target;
+            const listSelector = input.getAttribute("data-list-selector");
+            const list = document.querySelector(listSelector);
+
+            // Creates a new tag element and add it to the list
+            const tag = document.createElement("li");
+            tag.classList.add("tag");
+            tag.textContent = input.value;
+
+            // Creates a button to remove the tag and add it to the tag element
+            const xButton = document.createElement("button");
+            xButton.classList.add("tag-close-btn");
+            xButton.innerHTML = "&times;";
+            xButton.addEventListener("click", function () {
+                const tagToRemove = this.parentNode;
+                tagToRemove.parentNode.removeChild(tagToRemove);
+                updateHiddenInput(list); // Update hidden input after removing the tag
+            });
+            tag.appendChild(xButton);
+
+            list.appendChild(tag); // Add the tag to the list
+            input.value = ""; // Clear the input field
+            updateSNF(list); // Update hidden input after adding the tag
+        }
+    }
+
+    // Update the hidden input with the current tags in the list
+    function updateSNF(list) {
+
+        // Convert the list of tags to a comma-separated string
+        const csv = Array.from(list.children).map(tag => tag.textContent.replace(/\u00D7/g, "").trim()).join(",");
+
+        // Set the value of the hidden input to the comma-separated string
+        const hiddenInput = document.getElementById("@Html.IdFor(m => m.Skill.SoftAndFrame)");
+        hiddenInput.value = csv;
+    }
+
+    // Function triggered when a key is pressed down
+    function onKeyO(event) {
+
+        // Check if the Enter key was pressed
+        if (event.keyCode === 13) {
+            event.preventDefault(); // Prevent form submission
+
+            // Gets the input element and the list element from data attributes
+            const input = event.target;
+            const listSelector = input.getAttribute("data-list-selector");
+            const list = document.querySelector(listSelector);
+
+            // Creates a new tag element and add it to the list
+            const tag = document.createElement("li");
+            tag.classList.add("tag");
+            tag.textContent = input.value;
+
+            // Creates a button to remove the tag and add it to the tag element
+            const xButton = document.createElement("button");
+            xButton.classList.add("tag-close-btn");
+            xButton.innerHTML = "&times;";
+            xButton.addEventListener("click", function () {
+                const tagToRemove = this.parentNode;
+                tagToRemove.parentNode.removeChild(tagToRemove);
+                updateHiddenInput(list); // Update hidden input after removing the tag
+            });
+            tag.appendChild(xButton);
+
+            list.appendChild(tag); // Add the tag to the list
+            input.value = ""; // Clear the input field
+            updateO(list); // Update hidden input after adding the tag
+        }
+    }
+
+    // Update the hidden input with the current tags in the list
+    function updateO(list) {
+
+        // Convert the list of tags to a comma-separated string
+        const csv = Array.from(list.children).map(tag => tag.textContent.replace(/\u00D7/g, "").trim()).join(",");
+
+        // Set the value of the hidden input to the comma-separated string
+        const hiddenInput = document.getElementById("@Html.IdFor(m => m.Skill.Other)");
         hiddenInput.value = csv;
     }
 </script>
+
 
 <!-- Configurable list script for experience -->
 <script>

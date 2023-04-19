@@ -36,9 +36,10 @@ namespace SCCPP1.Pages
         {
             Console.WriteLine("EditMainProfile.OnGet() Called");
             // invalid model state or the account is new
+            /*
             if (!ModelState.IsValid || !Account.IsReturning)
                 return Page();
-
+            */
             if (Colleague == null)
                 Colleague = new Colleague();
 
@@ -51,6 +52,7 @@ namespace SCCPP1.Pages
             Colleague.PhoneNumber = Account.PhoneNumber;
             Colleague.IntroNarrative = Account.IntroNarrative;
             Colleague.EmailAddress = Account.EmailAddress;
+
 
             //Education.ID = Account.EducationHistory[0].RecordID;
 
