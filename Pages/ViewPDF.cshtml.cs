@@ -187,11 +187,11 @@ namespace SCCPP1.Pages
                 if (v.IsSelected)
                 {
                     Console.WriteLine($"Skill {v.RecordID} is selected");
-                    work += $"<div style = \"display:block\" id = \"work_{v.RecordID}\"> {Account.GetWorkData(v.RecordID).Employer} <br> {Account.GetWorkData(v.RecordID).JobTitle} <br> {Account.GetWorkData(v.RecordID).Description} <br> {Account.GetWorkData(v.RecordID).StartDate} to {Account.GetWorkData(v.RecordID).EndDate} <br> {Account.GetWorkData(v.RecordID).Description}  </div> <br> ";
+                    work += $"<div style = \"display:block\" id = \"work_{v.RecordID}\"> <b>{Account.GetWorkData(v.RecordID).Employer}</b> <br> {Account.GetWorkData(v.RecordID).JobTitle} <br> {Account.GetWorkData(v.RecordID).Description} <br> {Account.GetWorkData(v.RecordID).StartDate} to {Account.GetWorkData(v.RecordID).EndDate} <br> {Account.GetWorkData(v.RecordID).Description}  </div> <br> ";
                 }
                 else
                 {
-                    work += $"<div style = \"display:none\" id = \"work_{v.RecordID}\"> {Account.GetWorkData(v.RecordID).Employer} <br> {Account.GetWorkData(v.RecordID).JobTitle} <br> {Account.GetWorkData(v.RecordID).Description} <br> {Account.GetWorkData(v.RecordID).StartDate} to {Account.GetWorkData(v.RecordID).EndDate} <br> {Account.GetWorkData(v.RecordID).Description} </div> <br> ";
+                    work += $"<div style = \"display:none\" id = \"work_{v.RecordID}\"> <b>{Account.GetWorkData(v.RecordID).Employer}</b> <br> {Account.GetWorkData(v.RecordID).JobTitle} <br> {Account.GetWorkData(v.RecordID).Description} <br> {Account.GetWorkData(v.RecordID).StartDate} to {Account.GetWorkData(v.RecordID).EndDate} <br> {Account.GetWorkData(v.RecordID).Description} </div> <br> ";
                 }
             } 
             ViewData["workDisplay"] = work;

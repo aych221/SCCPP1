@@ -45,7 +45,6 @@
         padding: 10px;
         border: solid #002b49;
         margin: 10px;
-        left:0;
     }
 
     .right {
@@ -87,6 +86,8 @@
 
 <body>
     <div id="container">
+
+
     <div class="left" id="left">
         <form method="post">
            
@@ -122,7 +123,7 @@
                             </div>
                             }
 
-                    </div>
+                </div>
 
                     <br>
 
@@ -182,7 +183,9 @@
         </form>
         <button onclick="printPDF()">Create PDF</button>
     </div>
-    </div>
+
+
+    
 
 
 
@@ -197,11 +200,13 @@
             <div id="name" style="display:block">
                 <h1><b>@Model.Account.Name </b></h1>
             </div>
-            <div id="phone" style="display:block">
-                <h6> <i class="fa fa-phone"></i> @Model.Account.PhoneNumber</h6>
-            </div>
-            <div id="email" style="display:block">
-                <h6><i class="fa fa-envelope"> @Model.Account.EmailAddress </h6>
+            <div id="contact">
+                <div id="phone" style="display:block">
+                    <h6> <i class="fa fa-phone"></i> @Model.Account.PhoneNumber</h6>
+                </div>
+                <div id="email" style="display:block">
+                    <h6><i class="fa fa-envelope"></i> @Model.Account.EmailAddress </h6>
+                </div>
             </div>
             <div id="intro" style="display:block">
                 <h5><i class="fa fa-user"></i><b> About </b></h5>
@@ -249,7 +254,7 @@
     </div>
 
    
-
+    </div>
 
 </body>
 
