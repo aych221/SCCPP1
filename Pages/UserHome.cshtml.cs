@@ -71,7 +71,7 @@ namespace SCCPP1.Pages
             newSubP = "";
             
             
-            return RedirectToPage("CreateSubProfile");
+            return RedirectToPage("viewPDF");
         }
 
 

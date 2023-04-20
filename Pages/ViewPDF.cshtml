@@ -8,8 +8,23 @@
 
 
 <style>
+
     body {
         font-family: sans-serif;
+    }
+
+    .navbar {
+        margin-bottom: 10px !important;
+        top: 0;
+    }
+
+    .footer {
+        margin-top: 10px !important;
+        bottom: 0;
+    }
+
+    #container {
+        display: flex;
     }
 
     #red {
@@ -24,27 +39,32 @@
         margin: 10px
     }
 
+    .left {
+        width: 20vw;
+        height: auto;
+        padding: 10px;
+        border: solid #002b49;
+        margin: 10px;
+        left:0;
+    }
+
+    .right {
+        width: 80vw;
+        height: auto;
+        padding: 10px;
+        margin: 10px;
+    }
+
     .accordion {
-        background-color: #eee;
-        color: #444;
+        background-color: #0062f3;
+        color: #f2f2f2;
         cursor: pointer;
-        padding: 18px;
-        width: 20%;
+        padding: 10px;
         border: none;
         text-align: left;
         outline: none;
-        font-size: 15px;
         transition: 0.4s;
-    }
-
-
-    .panel {
-        padding: 0 18px;
-        background-color: white;
-    }
-
-    .active, .accordion:hover {
-        background-color: #fff;
+        width: 15vw;
     }
 
     input[type=submit] {
@@ -62,245 +82,313 @@
             border: 1px solid #0062F3;
         }
 
-    .sidenav {
-        height: 90%;
-        width: 200px;
-        position: relative;
-        z-index: 5;
-        left: 0;
-        background-color: white overflow-x: hidden;
-        padding-top: 150px;
-        position: fixed;
-    }
-
 </style>
 
-<!-- We need to figure out how to -->
+
 <body>
+    <div id="container">
+    <div class="left" id="left">
+        <form method="post">
+           
+            <button class="accordion">About</button>
+            <div class="panel">
+                <input type="checkbox" id="nameC" name="nameC" onchange="hideName()" checked>
+                <label for="about"> Colleague Name</label><br>
 
-    <form method="post">
-        <input type="submit" name="submit" value="Submit" />
+                <input type="checkbox" id="phoneC" name="phoneC" onchange="hidePhone()" checked>
+                <label for="about"> Colleague Phone</label><br>
+                <input type="checkbox" id="emailC" name="emailC" onchange="hideEmail()" checked>
+                <label for="about"> Colleague Email</label><br>
 
-    <button class="accordion">About</button>
-    <div class="panel">
-        <input type="checkbox" id="aboutme" name="about">
-        <label for="about"> Employee description</label><br>
-    </div>
-    <br>
-
-    <button class="accordion">Skills</button>
-    <div class="panel">
-
-        @for (int i = 0; i < Model.Skills.Count; i++)
-        {
-            <div>
-                <input type="checkbox" asp-for="@Model.Skills[i].IsSelected" />
-                <input type="hidden" asp-for="@Model.Skills[i].RecordID" />
-                <b>@Model.Account.GetSkillData(@Model.Skills[i].RecordID).SkillName</b>
+                <input type="checkbox" id="introC" name="introC" onchange="hideIntro()" checked>
+                <label for="about"> Intro Narrative </label><br>
             </div>
-        }
+            <br>
+
+
+
+
+                <input type="checkbox" onchange="hideEdu()" checked />
+                <button class="accordion">Education</button>
+                <div class="panel" style="display:block">
+                    
+
+                            @for (int i = 0; i < Model.EducationHistory.Count; i++)
+                            {
+                            <div>
+                                <input type="checkbox" asp-for="@Model.EducationHistory[i].IsSelected" onchange="edu(@Model.EducationHistory[i].RecordID)" />
+                                <input type="hidden" asp-for="@Model.EducationHistory[i].RecordID" />
+                                 <b>@Model.Account.GetEducationData(@Model.EducationHistory[i].RecordID).Institution</b>
+                            </div>
+                            }
+
+                    </div>
+
+                    <br>
+
+                    <input type="checkbox" onchange="hideWork()" checked />
+                    <button class="accordion">Work History</button>
+                    <div class="panel">
+
+                            @for (int i = 0; i < Model.WorkHistory.Count; i++)
+                            {
+                            <div>
+                                <input type="checkbox" asp-for="@Model.WorkHistory[i].IsSelected" onchange="work(@Model.WorkHistory[i].RecordID)" />
+                                <input type="hidden" asp-for="@Model.WorkHistory[i].RecordID" />
+                                <b>@Model.Account.GetWorkData(@Model.WorkHistory[i].RecordID).Employer</b>
+                            </div>
+                            }
+
+                    </div>
+
+                    <br>
+                     <input type="checkbox" onchange="hideSkills()" checked />
+                    <button class="accordion">Skills</button>
+                    <div class="panel">
+
+                            @for (int i = 0; i < Model.Skills.Count; i++)
+                            {
+                            <div>
+                                <input type="checkbox" asp-for="@Model.Skills[i].IsSelected" onchange="skill(@Model.Skills[i].RecordID)" />
+                                <input type="hidden" asp-for="@Model.Skills[i].RecordID" />
+                                <b>@Model.Account.GetSkillData(@Model.Skills[i].RecordID).SkillName</b>
+                            </div>
+                            }
+                       
+                    </div>
+                      <br>
+                    <input type="checkbox" onchange="hideCerts()" checked />
+                    <button class="accordion">Certification</button>
+                    <div class="panel">
+
+                            @for (int i = 0; i < Model.Certifications.Count; i++)
+                            {
+                            <div>
+                                <input type="checkbox" asp-for="@Model.Certifications[i].IsSelected" onchange="cert(@Model.Certifications[i].RecordID)" />
+                                <input type="hidden" asp-for="@Model.Certifications[i].RecordID" />
+                                <b>@Model.Account.GetCertificationData(@Model.Certifications[i].RecordID).CertificationType</b>
+                                <b>@Model.Account.GetCertificationData(@Model.Certifications[i].RecordID).Description</b>
+                            </div>
+
+
+                            }
+
+                    </div>
+
+                    
+
+
+                <input type="submit" name="submit" value="Submit" />
+        </form>
+        <button onclick="printPDF()">Create PDF</button>
+    </div>
+    </div>
+
+
+
+
+
+
+
+    <div id="right" class="right" >
+        
+
+        <div id="about">
+            <div id="name" style="display:block">
+                <h1><b>@Model.Account.Name </b></h1>
+            </div>
+            <div id="phone" style="display:block">
+                <h6> <i class="fa fa-phone"></i> @Model.Account.PhoneNumber</h6>
+            </div>
+            <div id="email" style="display:block">
+                <h6><i class="fa fa-envelope"> @Model.Account.EmailAddress </h6>
+            </div>
+            <div id="intro" style="display:block">
+                <h5><i class="fa fa-user"></i><b> About </b></h5>
+                <p id="red"> @Model.Account.IntroNarrative </p>
+            </div>
+        </div>
+
         <br>
 
-        <button class="accordion">Programming Languages</button>
-        <div class="panel">
-            <input type="checkbox" id="plang" name="plang">
-            <label for="clang"> C#</label>
-            <br>
-
-            <input type="checkbox" id="plang" name="plang">
-            <label for="clang"> HTML </label>
-            <br>
-
-            <input type="checkbox" id="plang" name="plang">
-            <label for="clang"> CSS </label>
-            <br>
-
-            <input type="checkbox" id="plang" name="plang">
-            <label for="clang"> JavaScript </label>
-            <br>
-
-            <input type="checkbox" id="plang" name="plang">
-            <label for="clang"> Python </label>
+        <div class="edu" id="edu" style="display:block">
+            <h5><i class="fa fa-graduation-cap"></i><b> Education </b></h5>
+            <div id="blue">
+                @Html.Raw(ViewData["eduDisplay"])
+            </div>
         </div>
         <br>
-
-        <button class="accordion">Operating Systems</button>
-        <div class="panel">
-            <input type="checkbox" id="opsys" name="opsys">
-            <label for="opsys"> Windows </label>
-            <br>
-
-            <input type="checkbox" id="opsys" name="opsys">
-            <label for="opsys"> MacOS </label>
-            <br>
-
-            <input type="checkbox" id="opsys" name="opsys">
-            <label for="opsys"> Android </label>
-            <br>
-
-            <input type="checkbox" id="opsys" name="opsys">
-            <label for="opsys"> Linux </label>
-            <br>
-
-            <input type="checkbox" id="opsys" name="opsys">
-            <label for="opsys"> Ubuntu </label>
+        <div class="work" id="work" style="display:block">
+            <h5><i class="fa fa-briefcase"></i><b> Work Experience </b></h5>
+            <div id="red">
+                @Html.Raw(ViewData["workDisplay"])
+            </div>
         </div>
         <br>
-
-        <button class="accordion">Software & Frameworks</button>
-        <div class="panel">
-            <input type="checkbox" id="sandf" name="sandf">
-            <label for="sandf"> ASP.net </label>
-            <br>
-
-            <input type="checkbox" id="sandf" name="sandf">
-            <label for="sandf"> React Native </label>
-            <br>
-
-            <input type="checkbox" id="sandf" name="sandf">
-            <label for="sandf"> AngularJS </label>
-            <br>
-
-            <input type="checkbox" id="sandf" name="sandf">
-            <label for="sandf"> Unity </label>
-            <br>
-
-            <input type="checkbox" id="sandf" name="sandf">
-            <label for="sandf"> Ruby </label>
+        <div class="skills" id="skills" style="display:block">
+            <h5><i class="fa fa-lightbulb-o"></i><b> Skills </b></h5>
+            <div id="blue">
+                <b>Programming Languages:</b>
+                @Html.Raw(ViewData["proglangDisplay"])
+                <b>Operating Systems:</b>
+                @Html.Raw(ViewData["osDisplay"])
+                <b>Software & Frameworks:</b>
+                @Html.Raw(ViewData["sfDisplay"])
+                <b>Other Skills:</b>
+                @Html.Raw(ViewData["otherDisplay"])
+            </div>
         </div>
-    </div>
-    <br>
 
-    <button class="accordion">Education & Certification</button>
-    <div class="panel">
-        <button class="accordion">Degrees</button>
-        <div class="panel">
-
-            @for (int i = 0; i < Model.EducationHistory.Count; i++)
-            {
-                <div>
-                    <input type="checkbox" asp-for="@Model.EducationHistory[i].IsSelected" />
-                    <input type="hidden" asp-for="@Model.EducationHistory[i].RecordID" />
-                    <b>@Model.Account.GetEducationData(@Model.EducationHistory[i].RecordID).EducationType</b>
-                    <b>@Model.Account.GetEducationData(@Model.EducationHistory[i].RecordID).Institution</b>
-                </div>
-            }
-
-        </div>
         <br>
-        <button class="accordion">Certification</button>
-        <div class="panel">
-
-            @for (int i = 0; i < Model.Certifications.Count; i++)
-            {
-                <div>
-                    <input type="checkbox" asp-for="@Model.Certifications[i].IsSelected" />
-                    <input type="hidden" asp-for="@Model.Certifications[i].RecordID" />
-                    <b>@Model.Account.GetCertificationData(@Model.Certifications[i].RecordID).CertificationType</b>
-                    <b>@Model.Account.GetCertificationData(@Model.Certifications[i].RecordID).Description</b>
-                </div>
-            }
-
+        <div class="certs" id="certs" style="display:block">
+            <h5><i class="fa fa-certificate"></i><b> Certifications </b></h5>
+            <div id="red">
+                @Html.Raw(ViewData["certDisplay"])
+             </div>
         </div>
-
     </div>
 
-    </form>
+   
 
-
-    <h1><b>Wang Ho Chiu</b></h1>
-    <h6>
-        | <i class="fa fa-phone"></i> (987) 654-3210 | <i class="fa fa-envelope"></i> wchiu@augusta.edu |
-    </h6>
-    <br />
-
-    <div id="about">
-        <h5><i class="fa fa-user"></i><b> About </b></h5>
-        <p id="red">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-            Ante in nibh mauris cursus mattis. Auctor neque vitae tempus quam pellentesque. Suspendisse faucibus interdum posuere lorem ipsum dolor. 
-            Ipsum consequat nisl vel pretium lectus quam id leo. 
-            Quis lectus nulla at volutpat diam ut venenatis. 
-            Ut aliquam purus sit amet luctus. 
-            Odio ut enim blandit volutpat maecenas volutpat blandit aliquam. 
-            Fermentum odio eu feugiat pretium. 
-            At volutpat diam ut venenatis tellus in metus vulputate eu. 
-            Sed sed risus pretium quam vulputate dignissim. 
-            Imperdiet proin fermentum leo vel orci porta non pulvinar. 
-            Malesuada proin libero nunc consequat interdum.
-        </p>
-    </div>
-    <br />
-
-    <div class="skill">
-        <h5><i class="fa fa-lightbulb-o"></i><b> Skills </b></h5>
-        <p id="blue">
-            <b>Programming Langauges:</b> JavaScript, Python, C#, Unity, Rust
-            <br />
-            <b>Operating System:</b> Windows, iOS, Android
-            <br />
-            <b>Software & Framework:</b> ASP.NET, jQuery
-        </p>
-    </div>
-    <br />
-
-    <div class="experience">
-        <h5><i class="fa fa-briefcase"></i><b> Experience </b></h5>
-        <p id="red">
-            <b>Job Title</b>
-            <br />
-            Employer | Start Date - End Date
-            <br />
-            Experience Description - Currently does not exist for user.
-            <br /> <br />
-
-            <b>The Kern Family Foundation</b>
-            <br />
-            Kern Kernbert | 2012 - 2021
-            <br />
-            Led a four-week product discovery effort yo establish alignmnet on the problem statement.
-            Conducted qualitative and quantitative user research to elicit requirements and identify highest business value features.
-            Facilitated sessions with key stakeholders to align on priority.
-            Conducted ongoing discovery to influence the product strategy, roadmap, and backlog.
-            <br />
-        </p>
-    </div>
-    <br />
-
-    <div class="education">
-        <h5><i class="fa fa-graduation-cap"></i><b> Education </b></h5>
-        <p id="blue">
-            <b>Education Title</b>
-            <br />
-            University/College | Start Date - End Date
-            <br /> <br />
-
-            <b>Bachelor of Computer Science</b>
-            <br />
-            Augusta University | 2019 - 2023
-            <br /> <br />
-
-            <b>Master of None</b>
-            <br />
-            Talentless University | Birth - Present
-            <br />
-        </p>
-    </div>
-    <br />
-
-    <div class="certificate">
-        <h5><i class="fa fa-certificate"></i><b> Certificate </b></h5>
-        <p id="red">
-            <b>Certificate Title</b>
-            <br />
-            Institution | Start Date - End Date
-            <br /> <br />
-
-            <b>Cyber Defender Certificate</b>
-            <br />
-            Augusta University | 2016 - 2021
-            <br />
-        </p>
-    </div>
 
 </body>
+
+<script>
+    function edu(i) {
+        var a = document.getElementById("edu_" + i);
+
+        if (a.style.display != "block") {
+            a.style.display = "block";
+        }
+        else {
+            a.style.display = "none";
+        }
+    }
+    function skill(i) {
+        var a = document.getElementById("skills_" + i);
+
+        if (a.style.display != "block") {
+            a.style.display = "block";
+        }
+        else {
+            a.style.display = "none";
+        }
+    }
+    function cert(i) {
+        var a = document.getElementById("certs_" + i);
+
+        if (a.style.display != "block") {
+            a.style.display = "block";
+        }
+        else {
+            a.style.display = "none";
+        }
+    }
+    function work(i) {
+        var a = document.getElementById("work_" + i);
+
+        if (a.style.display != "block") {
+            a.style.display = "block";
+        }
+        else {
+            a.style.display = "none";
+        }
+    }
+
+
+
+    function hideEdu() {
+        var a = document.getElementById("edu");
+        if (a.style.display != "block") {
+            a.style.display = "block";
+        }
+        else {
+            a.style.display = "none";
+        }
+    }
+
+    function hideCerts() {
+        var a = document.getElementById("certs");
+        if (a.style.display != "block") {
+            a.style.display = "block";
+        }
+        else {
+            a.style.display = "none";
+        }
+    }
+    function hideWork() {
+        var a = document.getElementById("work");
+        if (a.style.display != "block") {
+            a.style.display = "block";
+        }
+        else {
+            a.style.display = "none";
+        }
+    }
+    function hideSkills() {
+        var a = document.getElementById("skills");
+        if (a.style.display != "block") {
+            a.style.display = "block";
+        }
+        else {
+            a.style.display = "none";
+        }
+
+    }
+    function hideName() {
+        var a = document.getElementById("name");
+        if (a.style.display != "block") {
+            a.style.display = "block";
+        }
+        else {
+            a.style.display = "none";
+        }
+    }
+    function hidePhone() {
+        var a = document.getElementById("phone");
+        if (a.style.display != "block") {
+            a.style.display = "block";
+        }
+        else {
+            a.style.display = "none";
+        }
+    }
+    function hideEmail() {
+        var a = document.getElementById("email");
+        if (a.style.display != "block") {
+            a.style.display = "block";
+        }
+        else {
+            a.style.display = "none";
+        }
+    }
+    function hideIntro() {
+        var a = document.getElementById("intro");
+        if (a.style.display != "block") {
+            a.style.display = "block";
+        }
+        else {
+            a.style.display = "none";
+        }
+    }
+
+
+    function printPDF() {
+        var x = document.getElementById("topbar");
+        var y = document.getElementById("left");
+        var z = document.getElementById("footer");
+        //var w = document.getElementById("pgHeader");
+        //var a = document.getElementById("printarea");
+        //a.style.marginLeft = 0;
+        y.style.display = "none";
+        x.style.display = "none";
+        //w.style.display = "none";
+        z.style.display = "none";
+        window.print();
+        y.style.display = "block";
+        x.style.display = "block";
+        //w.style.display = "block";
+        z.style.display = "block";
+        //a.style.marginLeft = 200;
+    }
+</script>
