@@ -110,7 +110,7 @@ namespace SCCPP1
             t.UpdateData("Testing", "Some", "User", "test@user.edu", 1231231234, "Nothing interesting");
             //Console.WriteLine(QueryGenerator.InsertOrIgnore(Tables["colleagues"], new DbRecord(new DbColleagueData(t))));
             Console.WriteLine();
-            Console.WriteLine(new DbQueryString().SelectAll(Tables["work_histories"].Columns[1]));
+            Console.WriteLine(new DbQueryBuilder().SelectAll(Tables["work_histories"].Columns[1]));
             Console.WriteLine();
             Console.WriteLine(QueryGenerator.UpdateAll(Tables["colleagues"]));
             Console.WriteLine();

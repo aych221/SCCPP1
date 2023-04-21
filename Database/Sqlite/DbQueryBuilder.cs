@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SCCPP1.Database.Sqlite
 {
-    public class DbQueryString
+    public class DbQueryBuilder
     {
 
         //TODO add change table method and add configuration for query building
@@ -58,16 +58,16 @@ namespace SCCPP1.Database.Sqlite
 
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DbQueryString"/> class with the specified buffer size.
+        /// Initializes a new instance of the <see cref="DbQueryBuilder"/> class with the specified buffer size.
         /// </summary>
-        /// <param name="bufferSize">The buffer size to be used for the <see cref="StringBuilder"/> backing the <see cref="DbQueryString"/> object. Default is 128 bytes.</param>
-        public DbQueryString(int bufferSize = 128)
+        /// <param name="bufferSize">The buffer size to be used for the <see cref="StringBuilder"/> backing the <see cref="DbQueryBuilder"/> object. Default is 128 bytes.</param>
+        public DbQueryBuilder(int bufferSize = 128)
         {
             
             m_query = new StringBuilder(bufferSize);
         }
 
-        public DbQueryString(string query)
+        public DbQueryBuilder(string query)
         {
             m_query = new StringBuilder(query);
         }
@@ -76,28 +76,28 @@ namespace SCCPP1.Database.Sqlite
         #region core methods
 
 
-        public DbQueryString Append(char c)
+        public DbQueryBuilder Append(char c)
         {
             m_query.Append(c);
             return this;
         }
 
 
-        public DbQueryString Append(string query)
+        public DbQueryBuilder Append(string query)
         {
             m_query.Append(query);
             return this;
         }
 
 
-        public DbQueryString AppendLine(string query)
+        public DbQueryBuilder AppendLine(string query)
         {
             m_query.AppendLine(query);
             return this;
         }
 
 
-        public DbQueryString AppendLine()
+        public DbQueryBuilder AppendLine()
         {
             m_query.AppendLine();
             return this;
@@ -105,14 +105,14 @@ namespace SCCPP1.Database.Sqlite
 
 
 
-        public DbQueryString Remove(int startIndex, int length)
+        public DbQueryBuilder Remove(int startIndex, int length)
         {
             m_query.Remove(startIndex, length);
             return this;
         }
 
 
-        public DbQueryString Replace(char oldChar, char newChar, int startIndex, int count)
+        public DbQueryBuilder Replace(char oldChar, char newChar, int startIndex, int count)
         {
             m_query.Replace(oldChar, newChar, startIndex, count);
             return this;
@@ -120,21 +120,21 @@ namespace SCCPP1.Database.Sqlite
 
 
 
-        public DbQueryString Replace(string oldValue, string? newValue, int startIndex, int count)
+        public DbQueryBuilder Replace(string oldValue, string? newValue, int startIndex, int count)
         {
             m_query.Replace(oldValue, newValue, startIndex, count);
             return this;
         }
 
 
-        public DbQueryString Replace(char oldChar, char newChar)
+        public DbQueryBuilder Replace(char oldChar, char newChar)
         {
             return Replace(oldChar, newChar, 0, m_query.Length);
         }
 
 
 
-        public DbQueryString Clear()
+        public DbQueryBuilder Clear()
         {
             m_query.Clear();
             return this;
@@ -152,7 +152,7 @@ namespace SCCPP1.Database.Sqlite
         /// </summary>
         /// <param name="table">The table to select from.</param>
         /// <returns>A string in the format of "SELECT * FROM [table_name];".</returns>
-        public DbQueryString SelectAll(DbTable table)
+        public DbQueryBuilder SelectAll(DbTable table)
         {
 
             return Append("SELECT * FROM ").Append(table.QuotedName).Append(';');
@@ -163,7 +163,7 @@ namespace SCCPP1.Database.Sqlite
         /// </summary>
         /// <param name="whereKey">The DbColumn used as the WHERE key in the SELECT statement.</param>
         /// <returns>A string containing the generated SELECT statement, in the format of "SELECT ... FROM [table] ... JOIN or LEFT JOIN ... WHERE [whereKey] = @whereKey;".</returns>
-        public DbQueryString SelectAll(DbColumn whereKey)
+        public DbQueryBuilder SelectAll(DbColumn whereKey)
         {
             return Select(whereKey, true, false);
         }
@@ -173,7 +173,7 @@ namespace SCCPP1.Database.Sqlite
         /// </summary>
         /// <param name="whereKey">The key that is used in the where statement.</param>
         /// <returns>a string in the format of "SELECT ... FROM [whereKeyTable] ... JOIN or LEFT JOIN ... WHERE [whereKey] = @whereKey;"</returns>
-        public DbQueryString SelectRequired(DbColumn whereKey)
+        public DbQueryBuilder SelectRequired(DbColumn whereKey)
         {
             return Select(whereKey, true, true);
         }
@@ -184,7 +184,7 @@ namespace SCCPP1.Database.Sqlite
         /// <param name="whereKey">The key that is used in the where statement.</param>
         /// <param name="joinForeignKeys">True to include foreign key columns in the SELECT statement, false otherwise.</param>
         /// <returns>a string in the format of "SELECT ... FROM [whereKeyTable] ... JOIN or LEFT JOIN ... WHERE [whereKey] = @whereKey;".</returns>
-        public DbQueryString Select(DbColumn whereKey, bool joinForeignKeys)
+        public DbQueryBuilder Select(DbColumn whereKey, bool joinForeignKeys)
         {
             return Select(whereKey, joinForeignKeys, false);
         }
@@ -196,7 +196,7 @@ namespace SCCPP1.Database.Sqlite
         /// <param name="joinForeignKeys">True to include foreign key columns in the SELECT statement, false otherwise.</param>
         /// <param name="requiredOnly">True to join only required foreign keys, false to join all foreign keys.</param>
         /// <returns>a string in the format of "SELECT ... FROM [whereKeyTable] ... JOIN or LEFT JOIN ... WHERE [whereKey] = @whereKey;".</returns>
-        public DbQueryString Select(DbColumn whereKey, bool joinForeignKeys, bool requiredOnly)
+        public DbQueryBuilder Select(DbColumn whereKey, bool joinForeignKeys, bool requiredOnly)
         {
 
             _currentColumn = whereKey;
@@ -227,7 +227,7 @@ namespace SCCPP1.Database.Sqlite
         /// <param name="joinForeignKeys">True to include foreign key columns in the SELECT statement, false otherwise.</param>
         /// <param name="requiredOnly">True to join only required foreign keys, false to join all foreign keys.</param>
         /// <returns>a QueryString object in the format of "SELECT ... FROM [whereKeyTable] ... JOIN or LEFT JOIN ... WHERE [whereKey] = @whereKey;".</returns>
-        public DbQueryString Select(bool joinForeignKeys, bool requiredOnly)
+        public DbQueryBuilder Select(bool joinForeignKeys, bool requiredOnly)
         {
             return Select(_currentColumn, joinForeignKeys, requiredOnly);
         }
@@ -260,29 +260,29 @@ namespace SCCPP1.Database.Sqlite
                 }*/
 
 
-        public DbQueryString Insert(DbRecordData records)
+        public DbQueryBuilder Insert(DbRecordData records)
         {
             return Insert(false, records);
         }
 
-        public DbQueryString InsertOrIgnore(DbRecordData records)
+        public DbQueryBuilder InsertOrIgnore(DbRecordData records)
         {
             return Insert(true, records);
         }
 
 
-        public DbQueryString Insert(DbRecordCollection records)
+        public DbQueryBuilder Insert(DbRecordCollection records)
         {
             return Insert(false, records);
         }
 
-        public DbQueryString InsertOrIgnore(DbRecordCollection records)
+        public DbQueryBuilder InsertOrIgnore(DbRecordCollection records)
         {
             return Insert(true, records);
         }
 
 
-        private DbQueryString Insert(bool addOrIgnore, DbRecordCollection collection)
+        private DbQueryBuilder Insert(bool addOrIgnore, DbRecordCollection collection)
         {
             _currentTable = collection.Table;
             Append("INSERT");
@@ -324,7 +324,7 @@ namespace SCCPP1.Database.Sqlite
         }
 
 
-        private DbQueryString Insert(bool addOrIgnore, DbRecordData record)
+        private DbQueryBuilder Insert(bool addOrIgnore, DbRecordData record)
         {
             _currentTable = record.Table;
             Append("INSERT");
@@ -357,7 +357,7 @@ namespace SCCPP1.Database.Sqlite
         /// </summary>
         /// <param name="table">The table to update.</param>
         /// <returns>A string in the format of "UPDATE [table] SET [col1]=@col1, [col2]=@col2, ... WHERE [primaryKey]=@primaryKey;".</returns>
-        public DbQueryString UpdateRequiredOnly(DbTable table)
+        public DbQueryBuilder UpdateRequiredOnly(DbTable table)
         {
             return Update(table, false);
         }
@@ -367,7 +367,7 @@ namespace SCCPP1.Database.Sqlite
         /// </summary>
         /// <param name="table">The table to update.</param>
         /// <returns>A string in the format of "UPDATE [table] SET [col1]=@col1, [col2]=@col2, ... WHERE [primaryKey]=@primaryKey;".</returns>
-        public DbQueryString UpdateAll(DbTable table)
+        public DbQueryBuilder UpdateAll(DbTable table)
         {
             return Update(table, true);
         }
@@ -379,7 +379,7 @@ namespace SCCPP1.Database.Sqlite
         /// <param name="table">The table to update.</param>
         /// <param name="updateNonRequiredValues">If true, update non-required columns as well.</param>
         /// <returns>A string in the format of "UPDATE [table] SET [col1]=@col1, [col2]=@col2, ... WHERE [primaryKey]=@primaryKey;".</returns>
-        public DbQueryString Update(DbTable table, bool updateNonRequiredValues)
+        public DbQueryBuilder Update(DbTable table, bool updateNonRequiredValues)
         {
             Append("UPDATE ").Append(table.QuotedName).Append(" SET");
 
@@ -396,12 +396,12 @@ namespace SCCPP1.Database.Sqlite
 
 
         #region Delete statements
-        public DbQueryString DeleteIDs(DbTable table, int[] ids)
+        public DbQueryBuilder DeleteIDs(DbTable table, int[] ids)
         {
             return Append("DELETE FROM ").Append(table.QuotedName).Append(' ').Append(WhereIDIsInClause(table.PrimaryKey, ids)).Append(';');
         }
 
-        public DbQueryString Delete(DbTable table)
+        public DbQueryBuilder Delete(DbTable table)
         {
             return Append("DELETE FROM ").Append(table.QuotedName).Append(' ').Append(WhereEqualsClause(table.PrimaryKey)).Append(';');
         }
@@ -414,7 +414,7 @@ namespace SCCPP1.Database.Sqlite
         /// </summary>
         /// <param name="column"></param>
         /// <returns>"RETURNING [columnName];</returns>
-        public DbQueryString Return(DbColumn column)
+        public DbQueryBuilder Return(DbColumn column)
         {
             return Append(ReturingClause(column)).Append(';');
         }
@@ -677,4 +677,5 @@ namespace SCCPP1.Database.Sqlite
         }
 
     }
+
 }

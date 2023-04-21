@@ -11,7 +11,28 @@ namespace SCCPP1.Session
 
         //This is the session ID, not necessarily the Colleages ID
         public int ID { get; set; }
-        public string Username { get; set; }
+
+
+        private string _username;
+
+
+        ///<summary>
+        /// This property is used in <see cref="Account.Equals(object)"/>.
+        /// It is important that it always returns a unique value in the scope of runtime.
+        /// If the value entered is null, the property will assign the value returned from
+        /// <see cref="Utilities.ToSHA256Hash(string)"/> where the string is set to $"SessionDataHashCode={<see cref="object.GetHashCode()"/>}".
+        ///</summary>
+        public string Username
+        { 
+            get { return _username; }
+            set
+            {
+                if (value == null)
+                    _username = Utilities.ToSHA256Hash($"AccountHashCode={GetHashCode()}");
+                else
+                    _username = value;
+            }
+        }
 
         [Obsolete("Use IsAuthenticated instead.")]
         public bool SignedOn { get; set; }

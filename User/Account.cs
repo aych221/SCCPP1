@@ -6,6 +6,7 @@ using SCCPP1.Session;
 using SCCPP1.User.Data;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Runtime.Intrinsics.X86;
 
 namespace SCCPP1.User
 {
@@ -517,6 +518,10 @@ namespace SCCPP1.User
 
         /// <summary>
         /// Gets the username of the account.
+        /// This method is used in <see cref="Account.Equals(object)"/>.
+        /// It is important that it always returns a unique value in the scope of runtime.
+        /// If the value entered is null, the property will assign the value returned from
+        /// <see cref="Utilities.ToSHA256Hash(string)"/> where the string is set to $"AccountHashCode={<see cref="object.GetHashCode()"/>}".
         /// </summary>
         /// <returns>The SessionData.Username</returns>
         public string GetUsername()
@@ -524,7 +529,10 @@ namespace SCCPP1.User
             //Data will only be null if the account is not logged in. (mainly for testing)
             if (Data != null)
                 return Data.Username;
-            return Name;
+            else if (Name != null)
+                return Name;
+            else
+                return Utilities.ToSHA256Hash($"AccountHashCode={GetHashCode()}");
         }
 
 
@@ -923,6 +931,16 @@ namespace SCCPP1.User
         public DbAccountRecord ToDbRecord()
         {
             return new DbAccountRecord(this);
+        }
+
+
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || obj is not Account)
+                return false;
+
+            return GetUsername().Equals(((Account) obj).GetUsername());
         }
     }
 }

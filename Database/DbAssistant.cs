@@ -12,14 +12,14 @@ namespace SCCPP1.Database
 
         public string LastSql { get; private set; }
 
-        public DbQueryString Sql;
+        public DbQueryBuilder Sql;
 
 
 
         public DbAssistant(DbRecordCollection records)
         {
             Records = records;
-            Sql = new DbQueryString();
+            Sql = new DbQueryBuilder();
         }
 
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using SCCPP1.Database.Policies;
+using SCCPP1.Database.Sqlite;
 using System;
 using System.Collections.ObjectModel;
 
@@ -192,33 +193,22 @@ namespace SCCPP1.Database.Entity
 
     public struct QueryStatements
     {
-        public string InsertAll { get; private set; }
-        public string InsertRequiredOnly { get; private set; }
-        public string InsertOrIgnoreAll { get; private set; }
-        public string InsertOrIgnoreRequiredOnly { get; private set; }
-        public string SelectAll { get; private set; }
-        public string SelectRequiredOnly { get; private set; }
-        public string UpdateAll { get; private set; }
-        public string UpdateRequiredOnly { get; private set; }
-        public string DeleteAll { get; private set; }
-        public string DeleteFrom { get; private set; }
+        private string InsertAll { get; set; }
+        private string InsertRequiredOnly { get; set; }
+        private string InsertOrIgnoreAll { get; set; }
+        private string InsertOrIgnoreRequiredOnly { get; set; }
+        private string SelectAll { get; set; }
+        private string SelectRequiredOnly { get; set; }
+        private string UpdateAll { get; set; }
+        private string UpdateRequiredOnly { get; set; }
+        private string DeleteAll { get; set; }
+        private string DeleteFrom { get; set; }
 
 
-        public QueryStatements(string insertAll, string insertRequiredOnly, string insertOrIgnoreAll, string insertOrIgnoreRequiredOnly,
-                       string selectAll, string selectRequiredOnly, string updateAll, string updateRequiredOnly,
-                       string deleteAll, string deleteFrom)
-        {
-            InsertAll = insertAll;
-            InsertRequiredOnly = insertRequiredOnly;
-            InsertOrIgnoreAll = insertOrIgnoreAll;
-            InsertOrIgnoreRequiredOnly = insertOrIgnoreRequiredOnly;
-            SelectAll = selectAll;
-            SelectRequiredOnly = selectRequiredOnly;
-            UpdateAll = updateAll;
-            UpdateRequiredOnly = updateRequiredOnly;
-            DeleteAll = deleteAll;
-            DeleteFrom = deleteFrom;
-        }
+      //  public QueryStatements(DbTable t)
+       // {
+        //    DbQueryBuilder qb = new DbQueryBuilder();
+        //}
 
     }
 

@@ -44,7 +44,8 @@ namespace SCCPP1.Pages
 
         public IActionResult OnGet()
         {
-
+            if (p is null)
+                Account.ChooseProfile(Account.CreateProfile("ViewPDF Profile"));
             p = Account.ChosenProfile();
 
             List<CheckBoxViewModel> LoadModel<T>(ReadOnlyDictionary<int, T> dict) where T : RecordData
