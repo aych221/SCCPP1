@@ -40,13 +40,16 @@ namespace SCCPP1.Pages
         [BindProperty]
         public List<CheckBoxViewModel> WorkHistory { get; set; }
 
+
+
         private ProfileData p;
 
         public IActionResult OnGet()
         {
+            p = Account.ChosenProfile();
             if (p is null)
                 Account.ChooseProfile(Account.CreateProfile("ViewPDF Profile"));
-            p = Account.ChosenProfile();
+            ViewData["profileName"] = p.Title;
 
             List<CheckBoxViewModel> LoadModel<T>(ReadOnlyDictionary<int, T> dict) where T : RecordData
             {
@@ -94,20 +97,20 @@ namespace SCCPP1.Pages
                 {
                     if (Account.GetSkillData(v.RecordID).SkillCategoryName == "Programming Languages")
                     {
-                        progLangs += $"<div style = \"display:block\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName} </div> <br> ";
+                        progLangs += $"<li><div style = \"display:block\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName + " "} </div></li> ";
                     }
                     else if (Account.GetSkillData(v.RecordID).SkillCategoryName == "OS") 
                     {
-                        opSys += $"<div style = \"display:block\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName} </div> <br> ";
+                        opSys += $"<li><div style = \"display:block\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName + " "}</div> </li> ";
                     }
                     else if (Account.GetSkillData(v.RecordID).SkillCategoryName == "Software and Framework")
                     {
-                        sF += $"<div style = \"display:block\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName} </div> <br> ";
+                        sF += $"<li><div style = \"display:block\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName + " "} </div> </li> ";
 
                     }
                     else
                     {
-                        other += $"<div style = \"display:block\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName} </div> <br> ";
+                        other += $"<li><div style = \"display:block\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName + " "} </div> </li> ";
 
                     }
                 }
@@ -115,20 +118,20 @@ namespace SCCPP1.Pages
                 {
                     if (Account.GetSkillData(v.RecordID).SkillCategoryName == "Programming Languages")
                     {
-                        progLangs += $"<div style = \"display:none\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName} </div> <br> ";
+                        progLangs += $"<li><div style = \"display:none\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName + " "} </div> </li> ";
                     }
                     else if (Account.GetSkillData(v.RecordID).SkillCategoryName == "OS")
                     {
-                        opSys += $"<div style = \"display:none\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName} </div> <br> ";
+                        opSys += $"<li><div style = \"display:none\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName + " "} </div> </li> ";
                     }
                     else if (Account.GetSkillData(v.RecordID).SkillCategoryName == "Software and Framework")
                     {
-                        sF += $"<div style = \"display:none\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName} </div> <br> ";
+                        sF += $"<li><div style = \"display:none\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName + " "}</div> </li> ";
 
                     }
                     else
                     {
-                        other += $"<div style = \"display:none\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName} </div> <br> ";
+                        other += $"<li><div style = \"display:none\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName + " "}</div> </li> ";
 
                     }
                 }
@@ -146,13 +149,14 @@ namespace SCCPP1.Pages
                 if (v.IsSelected)
                 {
                     Console.WriteLine($"EDU {v.RecordID} is selected");
-                    edu += $"<div style = \"display:block\" id =\"edu_{v.RecordID}\">" + Account.GetEducationData(v.RecordID).Institution + "<br>" + Account.GetEducationData(v.RecordID).EducationType + "<br>" + Account.GetEducationData(v.RecordID).Description + "<br>" + "From: " + Account.GetEducationData(v.RecordID).StartDate + "to " + Account.GetEducationData(v.RecordID).EndDate + "</div><br>";
+                    edu += $"<div style = \"display:block\" id =\"edu_{v.RecordID}\"><b>" + Account.GetEducationData(v.RecordID).Institution + "</b><br><i>" + Account.GetEducationData(v.RecordID).EducationType + " in " + Account.GetEducationData(v.RecordID).Description + "</i><br>" + "From: " + Account.GetEducationData(v.RecordID).StartDate + "to " + Account.GetEducationData(v.RecordID).EndDate + "</div><br>";
                 }
                 else
                 {
-                    edu += $"<div style = \"display:none\" id =\"edu_{v.RecordID}\">" + Account.GetEducationData(v.RecordID).Institution + "<br>" + Account.GetEducationData(v.RecordID).EducationType + "<br>" + Account.GetEducationData(v.RecordID).Description + "<br>" + "From: " + Account.GetEducationData(v.RecordID).StartDate + "to " + Account.GetEducationData(v.RecordID).EndDate + "</div><br>";
-
+                    edu += $"<div style = \"display:none\" id =\"edu_{v.RecordID}\"><b>" + Account.GetEducationData(v.RecordID).Institution + "</b><br><i>" + Account.GetEducationData(v.RecordID).EducationType + " in " + Account.GetEducationData(v.RecordID).Description + " </i><br>" + "From: " + Account.GetEducationData(v.RecordID).StartDate + "to " + Account.GetEducationData(v.RecordID).EndDate + "</div><br>";
                 }
+
+            
             }
             //if (edu != "")
             //{
@@ -167,11 +171,11 @@ namespace SCCPP1.Pages
                 if (v.IsSelected)
                 {
                     Console.WriteLine($"Skill {v.RecordID} is selected");
-                    certs += $"<div style = \"display:block\" id = \"certs_{v.RecordID}\"> {Account.GetCertificationData(v.RecordID).CertificationType} </div> <br> ";
+                    certs += $"<div style = \"display:block\" id = \"certs_{v.RecordID}\"> {Account.GetCertificationData(v.RecordID).Institution} {Account.GetCertificationData(v.RecordID).CertificationType} </div> <br> ";
                 }
                 else
                 {
-                    certs += $"<div style = \"display:none\" id = \"certs_{v.RecordID}\"> {Account.GetCertificationData(v.RecordID).CertificationType} </div> <br> ";
+                    certs += $"<div style = \"display:none\" id = \"certs_{v.RecordID}\"> {Account.GetCertificationData(v.RecordID).Institution} {Account.GetCertificationData(v.RecordID).CertificationType} </div> <br> ";
                 }
             }
             //if (certs != "")

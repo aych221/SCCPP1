@@ -59,40 +59,90 @@
         color: #f2f2f2;
         cursor: pointer;
         padding: 10px;
-        border: none;
-        text-align: left;
+        text-align: center;
         outline: none;
-        transition: 0.4s;
+        transition: 0.3s;
         width: 15vw;
+        text-overflow: ellipsis;
     }
 
-    input[type=submit] {
-        background-color: white;
-        color: #0062F3;
-        padding: 12px 20px;
-        border: 1px solid #0062F3;
+        .accordion:hover {
+        border: 5px solid black;
         border-radius: 4px;
-        cursor: pointer;
+        box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19)
     }
 
-        input[type=submit]:hover {
-            background-color: #0062F3;
-            color: white;
-            border: 1px solid #0062F3;
+
+         .skillList li{
+            display:inline-block;
+        list-style-type: none;
+        }
+        .aboutList li{
+            display:inline-block;
+        list-style-type: none;
+        }
+        #about {
+            text-align: center;
         }
 
+        .centering {
+            display: grid;
+            padding:20px;
+            margin: auto;
+        }
+
+        .bs {
+            margin-top: 10px;
+            margin-buttom: 10px;
+            background-color: lightgrey;
+            border: 2px solid #0062F3;
+            border-radius: 4px;
+        }
+        .bs:hover {
+            background-color: #0062F3;
+            color: white;
+            border: 5px solid black;
+            box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+            transition: 0.3s;
+        }
+
+        .miniButton {
+
+            float:left;
+            width:25%;
+        background-color: #0062f3;
+        color: #f2f2f2;
+        cursor: pointer;
+        text-align: center;
+        outline: none;
+        transition: 0.3s;
+        border: 1px solid black;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        }
+
+        .miniButton:hover {
+            border: 5px solid black;
+            border-radius: 4px;
+            box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19)
+        }
 </style>
 
 
 <body>
     <div id="container">
 
+@*
+    Below is the the generated checkboxes that determine what data should be shown on the PDF*@
 
     <div class="left" id="left">
         <form method="post">
-           
-            <button class="accordion">About</button>
-            <div class="panel">
+
+
+                <h3 style="text-align:center">@Html.Raw(ViewData["profileName"])</h3>
+
+             <button type ="button" onclick = "hideAbout()" id = "aboutButton" class="accordion">About</button>
+                <div id="aboutPanel" class="panel">
                 <input type="checkbox" id="nameC" name="nameC" onchange="hideName()" checked>
                 <label for="about"> Colleague Name</label><br>
 
@@ -109,16 +159,16 @@
 
 
 
-                <input type="checkbox" onchange="hideEdu()" checked />
-                <button class="accordion">Education</button>
-                <div class="panel" style="display:block">
-                    
+                @*Oddly, type=button is needed to prevent posting.*@
+                <button type = "button" id = "eduButton" class="accordion" onclick="hideEdu()">Education</button>
+
+                <div id="eduPanel" style="display:block">
+      @*              These sections are responsible for actually determining whether or not the checkbox was saved as selected in the profile, and displays them as such if they are, unchecked if not.*@
 
                             @for (int i = 0; i < Model.EducationHistory.Count; i++)
                             {
                             <div>
                                 <input type="checkbox" asp-for="@Model.EducationHistory[i].IsSelected" onchange="edu(@Model.EducationHistory[i].RecordID)" />
-                                <input type="hidden" asp-for="@Model.EducationHistory[i].RecordID" />
                                  <b>@Model.Account.GetEducationData(@Model.EducationHistory[i].RecordID).Institution</b>
                             </div>
                             }
@@ -127,15 +177,14 @@
 
                     <br>
 
-                    <input type="checkbox" onchange="hideWork()" checked />
-                    <button class="accordion">Work History</button>
-                    <div class="panel">
+                <button type="button" id="workButton" class="accordion" onclick="hideWork()">Work History</button>
+
+                    <div id="workPanel" class="panel">
 
                             @for (int i = 0; i < Model.WorkHistory.Count; i++)
                             {
                             <div>
                                 <input type="checkbox" asp-for="@Model.WorkHistory[i].IsSelected" onchange="work(@Model.WorkHistory[i].RecordID)" />
-                                <input type="hidden" asp-for="@Model.WorkHistory[i].RecordID" />
                                 <b>@Model.Account.GetWorkData(@Model.WorkHistory[i].RecordID).Employer</b>
                             </div>
                             }
@@ -143,30 +192,35 @@
                     </div>
 
                     <br>
-                     <input type="checkbox" onchange="hideSkills()" checked />
-                    <button class="accordion">Skills</button>
-                    <div class="panel">
 
+                <button type="button" id="skillsButton" class="accordion" onclick="hideSkills()">Skills</button>
+                <div id="skillsPanel" class="panel">
+
+                    
+                        <button type="button" id = "plButton" onclick="removePL()" class="miniButton">Languages</button>
+                        <button type="button" id = "osButton" onclick="removeOS()" class="miniButton">OpSys</button>
+                        <button type="button" id = "sfButton" onclick="removeSF()" class="miniButton">Software</button>
+                        <button type="button" id = "otherButton" onclick="removeOther()" class="miniButton">Others</button>
+                    <br>
                             @for (int i = 0; i < Model.Skills.Count; i++)
                             {
                             <div>
                                 <input type="checkbox" asp-for="@Model.Skills[i].IsSelected" onchange="skill(@Model.Skills[i].RecordID)" />
-                                <input type="hidden" asp-for="@Model.Skills[i].RecordID" />
                                 <b>@Model.Account.GetSkillData(@Model.Skills[i].RecordID).SkillName</b>
                             </div>
                             }
                        
                     </div>
+
                       <br>
-                    <input type="checkbox" onchange="hideCerts()" checked />
-                    <button class="accordion">Certification</button>
-                    <div class="panel">
+
+                <button type="button" id="certButton" onclick="hideCerts()" class=" accordion">Certification</button>
+                <div id="certPanel" class="panel">
 
                             @for (int i = 0; i < Model.Certifications.Count; i++)
                             {
                             <div>
                                 <input type="checkbox" asp-for="@Model.Certifications[i].IsSelected" onchange="cert(@Model.Certifications[i].RecordID)" />
-                                <input type="hidden" asp-for="@Model.Certifications[i].RecordID" />
                                 <b>@Model.Account.GetCertificationData(@Model.Certifications[i].RecordID).CertificationType</b>
                                 <b>@Model.Account.GetCertificationData(@Model.Certifications[i].RecordID).Description</b>
                             </div>
@@ -177,11 +231,11 @@
                     </div>
 
                     
-
-
-                <input type="submit" name="submit" value="Submit" />
+                <div class="centering">
+                <button class = "bs" type="submit" name="submit" value="Submit">Save and Exit</button>
+                <button class = "bs" type="button"  onclick="printPDF()">Create PDF</button>
+                </div>
         </form>
-        <button onclick="printPDF()">Create PDF</button>
     </div>
 
 
@@ -189,28 +243,30 @@
 
 
 
-
-
+@*
+    Below is the section of the site that actually displays the PDF information*@
 
 
     <div id="right" class="right" >
         
 
-        <div id="about">
+        <div id="about" style="display:block">
             <div id="name" style="display:block">
                 <h1><b>@Model.Account.Name </b></h1>
             </div>
             <div id="contact">
-                <div id="phone" style="display:block">
-                    <h6> <i class="fa fa-phone"></i> @Model.Account.PhoneNumber</h6>
-                </div>
-                <div id="email" style="display:block">
-                    <h6><i class="fa fa-envelope"></i> @Model.Account.EmailAddress </h6>
-                </div>
+                <ul class="aboutList">
+                <li><div id="phone" style="display:block">
+                | <i class="fa fa-phone"></i>   @Model.Account.PhoneNumber |
+                </div></li>
+                <li><div id="email" style="display:block">
+                 | <i class="fa fa-envelope"></i>   @Model.Account.EmailAddress |
+                </div></li>
+                    </ul>
             </div>
-            <div id="intro" style="display:block">
+            <div id="intro" style="display:block; text-align: left" >
                 <h5><i class="fa fa-user"></i><b> About </b></h5>
-                <p id="red"> @Model.Account.IntroNarrative </p>
+                <p id="red"> @Html.Raw(Model.Account.IntroNarrative) </p>
             </div>
         </div>
 
@@ -233,14 +289,34 @@
         <div class="skills" id="skills" style="display:block">
             <h5><i class="fa fa-lightbulb-o"></i><b> Skills </b></h5>
             <div id="blue">
-                <b>Programming Languages:</b>
-                @Html.Raw(ViewData["proglangDisplay"])
-                <b>Operating Systems:</b>
-                @Html.Raw(ViewData["osDisplay"])
-                <b>Software & Frameworks:</b>
-                @Html.Raw(ViewData["sfDisplay"])
-                <b>Other Skills:</b>
-                @Html.Raw(ViewData["otherDisplay"])
+
+                <div id="plRemove" style="display:block">
+                    <ul class="skillList">
+                            <b>Programming Languages:</b>
+                            @Html.Raw(ViewData["proglangDisplay"])
+                            </ul>
+                 </div>
+
+                    <div id="osRemove" style="display:block">
+                     <ul class="skillList">
+                           <b>Operating Systems:</b>
+                            @Html.Raw(ViewData["osDisplay"])
+                     </ul>             
+                 </div>
+
+                    <div id="sfRemove" style="display:block">
+                        <ul class="skillList">
+                            <b>Software & Frameworks:</b>
+                            @Html.Raw(ViewData["sfDisplay"])
+                     </ul>
+                 </div>
+
+                    <div id="oRemove" style="display:block">
+                     <ul class="skillList">
+                           <b>Other Skills:</b>
+                            @Html.Raw(ViewData["otherDisplay"])
+                     </ul>
+                 </div>
             </div>
         </div>
 
@@ -259,6 +335,8 @@
 </body>
 
 <script>
+    //these functions take in the the RecordID, and use it to find and hide/unhide the corresponding user-input data
+
     function edu(i) {
         var a = document.getElementById("edu_" + i);
 
@@ -302,41 +380,160 @@
 
 
 
+
+    /*The below sections all accomplish the task of hiding/showing whole sections in the PDF and modifying the control's look */
+
     function hideEdu() {
         var a = document.getElementById("edu");
+        var b = document.getElementById("eduPanel");
+        var c = document.getElementById("eduButton");
         if (a.style.display != "block") {
             a.style.display = "block";
+            b.style.display = "block";
+            c.innerHTML = "Education";
+            c.style.backgroundColor = "#0062f3";
         }
         else {
             a.style.display = "none";
+            b.style.display = "none";
+            c.innerHTML = "Education - Off";
+            c.style.backgroundColor = "red";
         }
+        
     }
 
     function hideCerts() {
         var a = document.getElementById("certs");
+        var b = document.getElementById("certPanel");
+        var c = document.getElementById("certButton");
         if (a.style.display != "block") {
             a.style.display = "block";
+            b.style.display = "block";
+            c.innerHTML = "Certifications";
+            c.style.backgroundColor = "#0062f3";
         }
         else {
             a.style.display = "none";
+            b.style.display = "none";
+            c.innerHTML = "Certifications - Off";
+            c.style.backgroundColor = "red";
         }
     }
     function hideWork() {
         var a = document.getElementById("work");
+        var b = document.getElementById("workPanel");
+        var c = document.getElementById("workButton");
         if (a.style.display != "block") {
             a.style.display = "block";
+            b.style.display = "block";
+            c.innerHTML = "Work History";
+            c.style.backgroundColor = "#0062f3";
         }
         else {
             a.style.display = "none";
+            b.style.display = "none";
+            c.innerHTML = "Work History - Off";
+            c.style.backgroundColor = "red";
         }
     }
     function hideSkills() {
         var a = document.getElementById("skills");
+         var b = document.getElementById("skillsPanel");
+        var c = document.getElementById("skillsButton");
         if (a.style.display != "block") {
             a.style.display = "block";
+            b.style.display = "block";
+            c.innerHTML = "Skills";
+            c.style.backgroundColor = "#0062f3";
         }
         else {
             a.style.display = "none";
+            b.style.display = "none";
+            c.innerHTML = "Skills - Off";
+            c.style.backgroundColor = "red";
+        }
+
+    }
+
+    function removePL () {
+        var a = document.getElementById("plRemove");
+        var b = document.getElementById("plButton");
+        
+        if(a.style.display != "block") {
+            a.style.display = "block";
+            b.innerHTML = "Languages";
+            b.style.backgroundColor = "#0062f3";
+        }
+        else{
+            a.style.display = "none";
+            b.innerHTML = "Lang-Off";
+            b.style.backgroundColor = "red";
+        }
+
+    }
+    function removeOS () {
+        var a = document.getElementById("osRemove");
+        var b = document.getElementById("osButton");
+        
+        if(a.style.display != "block") {
+            a.style.display = "block";
+            b.innerHTML = "OpSys";
+            b.style.backgroundColor = "#0062f3";
+        }
+        else{
+            a.style.display = "none";
+            b.innerHTML = "OpSys-Off";
+            b.style.backgroundColor = "red";
+        }
+
+    }
+    function removeSF () {
+        var a = document.getElementById("sfRemove");
+        var b = document.getElementById("sfButton");
+        
+        if(a.style.display != "block") {
+            a.style.display = "block";
+            b.innerHTML = "Software";
+            b.style.backgroundColor = "#0062f3";
+        }
+        else{
+            a.style.display = "none";
+            b.innerHTML = "SW-Off";
+            b.style.backgroundColor = "red";
+        }
+
+    }
+    function removeOther() {
+        var a = document.getElementById("oRemove");
+        var b = document.getElementById("otherButton");
+
+        if (a.style.display != "block") {
+            a.style.display = "block";
+            b.innerHTML = "Others";
+            b.style.backgroundColor = "#0062f3";
+        }
+        else {
+            a.style.display = "none";
+            b.innerHTML = "Others-Off";
+            b.style.backgroundColor = "red";
+        }
+
+    }
+    function hideAbout() {
+        var a = document.getElementById("about");
+         var b = document.getElementById("aboutPanel");
+        var c = document.getElementById("aboutButton");
+        if (a.style.display != "block") {
+            a.style.display = "block";
+            b.style.display = "block";
+            c.innerHTML = "About";
+            c.style.backgroundColor = "#0062f3";
+        }
+        else {
+            a.style.display = "none";
+            b.style.display = "none";
+            c.innerHTML = "About - Off";
+            c.style.backgroundColor = "red";
         }
 
     }
@@ -378,22 +575,18 @@
     }
 
 
+
+    //strips away non-PDF elements
     function printPDF() {
         var x = document.getElementById("topbar");
         var y = document.getElementById("left");
         var z = document.getElementById("footer");
-        //var w = document.getElementById("pgHeader");
-        //var a = document.getElementById("printarea");
-        //a.style.marginLeft = 0;
         y.style.display = "none";
         x.style.display = "none";
-        //w.style.display = "none";
         z.style.display = "none";
         window.print();
         y.style.display = "block";
         x.style.display = "block";
-        //w.style.display = "block";
         z.style.display = "block";
-        //a.style.marginLeft = 200;
     }
 </script>
