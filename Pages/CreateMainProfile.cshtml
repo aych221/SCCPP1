@@ -81,18 +81,18 @@
 
     /* Submit button styling*/
     input[type=submit] {
-        background-color: white;
-        color: #0062F3;
+        background-color: #00868B;
+        color: white;
         padding: 12px 20px;
-        border: 1px solid #0062F3;
+        border: 1px solid #00868B;
         border-radius: 4px;
         cursor: pointer;
     }
 
         input[type=submit]:hover {
-            background-color: #0062F3;
+            background-color: #7E94CB;
             color: white;
-            border: 1px solid #0062F3;
+            border: 1px solid #7E94CB;
         }
 
     .profile {
@@ -140,12 +140,11 @@
         border: 1px solid black;
     }
 </style>
-
-<body>
-    <h1>Create Your Main Profile</h1>
+<body style="background-image: url(https://www.teamsparq.com/wp-content/themes/rural-sourcing/assets/images/backgrounds/pattern-gradient.jpg)">
+    <h1 style="color: white;">CREATE YOUR MAIN PROFILE</h1>
     <br />
     <div class="profile">
-        <form method="post" id="myForm">
+        <form method="post" id="myForm" style="background-image: url(https://www.teamsparq.com/wp-content/themes/rural-sourcing/assets/images/backgrounds/stars-light-left.svg)">
             <legend><b>About:</b></legend>
 
             <label for="FirstName">First Name:*</label>
@@ -311,6 +310,7 @@
             <input type="submit" value="Save as Draft">
         </form>
     </div>
+
 </body>
 
 <!-- Input tag script-->
@@ -559,9 +559,7 @@
         var lastExperience = experiences.pop(); // Removes last experience
         hiddenInput.value = experiences.join("|") + "|" // Updates hidden input field
         ul.removeChild(li);
-    }
-
-</script>
+    }</script>
 
 <!-- Configurable list script for education-->
 <script>
@@ -631,8 +629,7 @@
         var lastEducation = educations.pop(); // Removes last education
         hiddenInput.value = educations.join("|") + "|" // Updates hidden input field
         ul.removeChild(li);
-    }
-</script>
+    }</script>
 
 <!-- Configurable list script for certification-->
 <script>
@@ -695,9 +692,7 @@
         hiddenInput.value = certifications.join("|") + "|" // Updates hidden input field
         var li = document.querySelector("#certification-ul li:last-child");
         ul.removeChild(li);
-    }
-
-</script>
+    }</script>
 
 <!--Stops page from being submitted upon pressing enter-->
 <script>

@@ -4,91 +4,93 @@
     ViewData["Title"] = "User Home";
 }
 <style>
-    /**CSS Dropdown styling for links to other pages*/
-    .dropdown {
-        position: right;
+    /* Submit button styling*/
+    input[type=submit] {
+        background-color: #00868B;
+        color: white;
+        padding: 12px 20px;
+        border: 1px solid #00868B;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        input[type=submit]:hover {
+            background-color: #7E94CB;
+            color: white;
+            border: 1px solid #7E94CB;
+        }
+
+    /* Edit Main Profile button styling */
+    .edit-profile-btn {
+        background-color: #00868B;
+        color: white;
+        padding: 12px 20px;
+        border: 1px solid #00868B;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
         display: inline-block;
     }
 
-    .dropdown-content {
-        display: none;
-        position: inherit;
-        background-color: #f1f1f1;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        z-index: 1;
-    }
-
-        .dropdown-content a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
+        .edit-profile-btn:hover {
+            background-color: #7E94CB;
+            color: white;
+            border: 1px solid #7E94CB;
         }
 
-            .dropdown-content a:hover {
+    .profile {
+        border-radius: 5px;
+        background-color: white;
+        padding: 20px;
+    }
+
+    .transport {
+        padding: 45px;
+    }
+
+    .search-container {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+        .search-container input[type=text] {
+            padding: 10px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 3px;
+            width: 30%;
+            box-sizing: border-box;
+            background-color: #f1f1f1;
+        }
+
+            .search-container input[type=text]:focus {
                 background-color: #ddd;
+                outline: none;
             }
-
-    .dropdown:hover .dropdown-content {
-        display: block;
-    }
-
-    .dropdown:hover .dropbtn {
-        background-color: #3e8e41;
-    }
-    .transport{
-        
-        padding:45px;
-    }
 </style>
-
 <html>
 <head>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script> <!--Icon reference-->
     <!--Get your own code at fontawesome.com-->
 </head>
-<body>
-    <h1>@ViewData["Title"]</h1>
-
-    @*<br>
-    <h1>Main Profile</h1>
-    <br>
-
-    <div class=" dropdown">
-    <i style='font-size:120px' class='far'>&#xf15c;</i> <!--Unicode for page icon-->
-    <div class="dropdown-content">
-    <a href="EditMainProfile">Edit Main Profile</a>
-    <a href="ViewPDF">View as PDF</a>
-    </div>
-    </div>
-
-    <br>
-    <br>
-    <h1>Sub Profile</h1>
-    <br>
-    <div class=" dropdown">
-    <i style='font-size:120px' class='far'>&#xf15c;</i> <!--Unicode for page icon-->
-    <div class="dropdown-content">
-    <a href="EditSubProfile">Edit Sub Profile</a>
-    <a href="ViewPDF">View as PDF</a>
-    </div>
-    </div>
-    <br>
-    <br>
-    <a href="CreateSubProfile"> <button style='font-size:24px'> Create Sub-Profile </button></a>*@
-    
-
-
-
+<body style="background-image: url(https://www.teamsparq.com/wp-content/themes/rural-sourcing/assets/images/backgrounds/stars-light-left.svg)">
+    <h1 style="color: #7E94CB;">USER HOME</h1>
     @* this provides the link to edit the main page, followed by the placing of the profiles*@
     <a class="transport" href="EditMainProfile"><button>Edit Main Profile</button></a>
+    <br />
+    <br />
+    <div class="search-container">
+        <form method="get" action="">
+            <input type="text" placeholder="Search profiles" name="searchTerm" />
+            <input type="submit" value="Search" />
+        </form>
+    </div>
     <form method="post">
         @Html.Raw(ViewData["subProfiles"])
         <br>
-        <input type = "text" name="newSubP" placeholder="Enter a name to create a new Profile!" />
-        <input type = "submit" name="newProf" />
+        <input type="text" name="newSubP" placeholder="Enter a name to create a new Profile!" />
+        <input type="submit" name="newProf" />
     </form>
 </body>
 </html>
