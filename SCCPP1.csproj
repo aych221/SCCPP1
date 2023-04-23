@@ -27,7 +27,6 @@
     <None Remove="Pages\Photos_Icons\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Database\Requests\Operations\" />
     <Folder Include="Pages\Photos_Icons\" />
     <Folder Include="wwwroot\img\" />
   </ItemGroup>

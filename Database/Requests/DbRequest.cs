@@ -18,6 +18,8 @@ namespace SCCPP1.Database.Requests
         private Account _account;
         private DbRequestHandler _handler;
         private bool _isExecuting;
+        public bool Success { get; internal set; }
+        protected object? Result;
 
         protected internal DbRequest(Account account)
         {
@@ -44,11 +46,119 @@ namespace SCCPP1.Database.Requests
                 throw new System.Exception("This request is already being processed by another handler.");
 
             SetHandler(handler);
-            return RunCommand(handler.Command);
+            try
+            {
+                Success = RunCommand(handler.Command);
+            }
+            catch (SqliteException e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine($"Command: {e.BatchCommand}");
+                Console.WriteLine($"Data: {e.Data}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            finally
+            {
+                _isExecuting = false;
+            }
+
+            return Success;
         }
 
 
-        public abstract bool RunCommand(SqliteCommand cmd);
+        protected internal abstract bool RunCommand(SqliteCommand cmd);
+
+
+
+        #region Sql helper methods
+        public int ResultAsID()
+        {
+            if (Result != null)
+                return Convert.ToInt32(Result);
+            return -1;
+        }
+
+        protected void ResetCommand()
+        {
+            if (_handler != null)
+                _handler.ResetCommand();
+        }
+
+
+        protected static object ValueCleaner(object val)
+        {
+            if (val == null)
+                return DBNull.Value;
+
+            return val;
+        }
+
+
+        protected static object ValueCleaner(int val)
+        {
+            if (val == 0 || val == -1)
+                return DBNull.Value;
+
+            return val;
+        }
+
+        protected static object ValueCleaner(long val)
+        {
+            if (val == 0 || val == -1)
+                return DBNull.Value;
+
+            return val;
+        }
+
+        protected static object ValueCleaner(string val)
+        {
+            if (val == null)
+                return DBNull.Value;
+
+            //Test before using.
+
+            return val;//Utilities.HtmlStripper(val);
+        }
+
+        protected static object ValueCleaner(DateOnly? val)
+        {
+            if (val == null)
+                return DBNull.Value;
+
+            return val;
+        }
+
+        protected static long GetInt64(SqliteDataReader r, int ordinal)
+        {
+            if (r.IsDBNull(ordinal))
+                return -1;
+            return r.GetInt64(ordinal);
+        }
+
+        protected static int GetInt32(SqliteDataReader r, int ordinal)
+        {
+            if (r.IsDBNull(ordinal))
+                return -1;
+            return r.GetInt32(ordinal);
+        }
+
+        protected static string GetString(SqliteDataReader r, int ordinal)
+        {
+            if (r.IsDBNull(ordinal))
+                return null;
+            return r.GetString(ordinal);
+        }
+
+        protected static DateOnly GetDateOnly(SqliteDataReader r, int ordinal)
+        {
+            if (r.IsDBNull(ordinal))
+                return DateOnly.MinValue;
+            return Utilities.ToDateOnly(r.GetDateTime(ordinal));
+        }
+        #endregion
     }
 
 
@@ -63,7 +173,7 @@ namespace SCCPP1.Database.Requests
             _values = values;
         }
 
-        public override bool RunCommand(SqliteCommand cmd)
+        protected internal override bool RunCommand(SqliteCommand cmd)
         {
             cmd.CommandText = $"INSERT INTO {_tableName} ({string.Join(",", _values.Keys)}) VALUES ({string.Join(",", _values.Values.Select(v => $"@{v}"))})";
             foreach (var vals in _values)
@@ -88,7 +198,7 @@ namespace SCCPP1.Database.Requests
             _whereClause = whereClause;
         }
 
-        public override bool RunCommand(SqliteCommand cmd)
+        protected internal override bool RunCommand(SqliteCommand cmd)
         {
             var setValues = string.Join(",", _values.Select(kvp => $"{kvp.Key} = @{kvp.Key}"));
             cmd.CommandText = $"UPDATE {_tableName} SET {setValues} WHERE {_whereClause}";
@@ -114,7 +224,7 @@ namespace SCCPP1.Database.Requests
             _resultSelector = resultSelector;
         }
 
-        public override bool RunCommand(SqliteCommand cmd)
+        protected internal override bool RunCommand(SqliteCommand cmd)
         {
             cmd.CommandText = $"SELECT * FROM {_tableName} WHERE {_whereClause}";
 

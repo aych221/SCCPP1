@@ -23,7 +23,7 @@ namespace SCCPP1.User.Data
             set { SetField(ref _certificationType, value); }
         }
 
-        public int CertificateTypeID { get; set; }
+        public int CertificationTypeID { get; set; }
 
 
 
@@ -60,7 +60,7 @@ namespace SCCPP1.User.Data
         public CertificationData(Account owner, int recordID = -1) : base(owner, recordID)
         {
             InstitutionID = -1;
-            CertificateTypeID = -1;
+            CertificationTypeID = -1;
         }
 
 
@@ -69,7 +69,7 @@ namespace SCCPP1.User.Data
             this.Institution = institution;
             this.InstitutionID = institutionID;
             this.CertificationType = certificationType;
-            this.CertificateTypeID = certificationTypeID;
+            this.CertificationTypeID = certificationTypeID;
             this.Description = description;
             this.Location = location;
             this.StartDate = startDate;

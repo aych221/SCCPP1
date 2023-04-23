@@ -2981,7 +2981,7 @@ namespace SCCPP1
                 using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@colleague_id", cd.Owner.RecordID);
-                    cmd.Parameters.AddWithValue("@cert_type_id", cd.CertificateTypeID);
+                    cmd.Parameters.AddWithValue("@cert_type_id", cd.CertificationTypeID);
                     cmd.Parameters.AddWithValue("@institution_id", cd.InstitutionID);
                     cmd.Parameters.AddWithValue("@municipality_id", ValueCleaner(cd.Location.MunicipalityID));
                     cmd.Parameters.AddWithValue("@state_id", ValueCleaner(cd.Location.StateID));
@@ -3014,7 +3014,7 @@ namespace SCCPP1
                 {
                     cmd.Parameters.AddWithValue("@id", cd.RecordID);
                     cmd.Parameters.AddWithValue("@colleague_id", cd.Owner.RecordID);
-                    cmd.Parameters.AddWithValue("@cert_type_id", cd.CertificateTypeID);
+                    cmd.Parameters.AddWithValue("@cert_type_id", cd.CertificationTypeID);
                     cmd.Parameters.AddWithValue("@institution_id", cd.InstitutionID);
                     cmd.Parameters.AddWithValue("@municipality_id", ValueCleaner(cd.Location.MunicipalityID));
                     cmd.Parameters.AddWithValue("@state_id", ValueCleaner(cd.Location.StateID));
@@ -3035,7 +3035,7 @@ namespace SCCPP1
                 return cd.IsRemoved = DeleteRecord("colleague_certs", cd.RecordID);
             }
 
-            cd.CertificateTypeID = SaveCertificationType(cd.CertificationType);
+            cd.CertificationTypeID = SaveCertificationType(cd.CertificationType);
             cd.InstitutionID = SaveInstitution(cd.Institution);
 
             //Thread.Sleep(1);

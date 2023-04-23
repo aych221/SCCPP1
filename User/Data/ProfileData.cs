@@ -138,7 +138,7 @@ namespace SCCPP1.User.Data
         public void AddSkill(int skillRecordID)
         {
             if (Owner.SavedSkills.ContainsKey(skillRecordID))
-                SelectedSkillIDs.Add(skillRecordID);
+                AddToHashSet(SelectedSkillIDs, skillRecordID);
         }
 
 
@@ -149,7 +149,7 @@ namespace SCCPP1.User.Data
         public void AddEducation(int eduRecordID)
         {
             if (Owner.SavedEducationHistory.ContainsKey(eduRecordID))
-                SelectedEducationIDs.Add(eduRecordID);
+                AddToHashSet(SelectedEducationIDs, eduRecordID);
         }
 
 
@@ -160,7 +160,7 @@ namespace SCCPP1.User.Data
         public void AddCertification(int certRecordID)
         {
             if (Owner.SavedCertifications.ContainsKey(certRecordID))
-                SelectedCertificationIDs.Add(certRecordID);
+                AddToHashSet(SelectedCertificationIDs, certRecordID);
         }
 
 
@@ -171,10 +171,15 @@ namespace SCCPP1.User.Data
         public void AddWork(int workRecordID)
         {
             if (Owner.SavedWorkHistory.ContainsKey(workRecordID))
-                SelectedWorkIDs.Add(workRecordID);
+                AddToHashSet(SelectedWorkIDs, workRecordID);
             //    workHistory.TryAdd(workRecordID, Owner.GetWorkData(workRecordID));
         }
 
+        private void AddToHashSet(HashSet<int> hs, int id)
+        {
+            if (hs.Add(id))
+                NeedsSave = true;
+        }
         #endregion
 
 
@@ -188,7 +193,7 @@ namespace SCCPP1.User.Data
         /// <param name="skillRecordID">The SkillData.RecordID to be removed.</param>
         public void RemoveSkill(int skillRecordID)
         {
-            SelectedSkillIDs.Remove(skillRecordID);
+            RemoveFromHashSet(SelectedSkillIDs, skillRecordID);
         }
 
 
@@ -198,7 +203,7 @@ namespace SCCPP1.User.Data
         /// <param name="eduRecordID">The EducationData.RecordID to be removed.</param>
         public void RemoveEducation(int eduRecordID)
         {
-            SelectedEducationIDs.Remove(eduRecordID);
+            RemoveFromHashSet(SelectedEducationIDs, eduRecordID);
         }
 
 
@@ -208,7 +213,8 @@ namespace SCCPP1.User.Data
         /// <param name="certRecordID">The CertificationData.RecordID to be removed.</param>
         public void RemoveCertification(int certRecordID)
         {
-            SelectedCertificationIDs.Remove(certRecordID);
+            //SelectedCertificationIDs.Remove(certRecordID);
+            RemoveFromHashSet(SelectedCertificationIDs, certRecordID);
         }
 
 
@@ -218,9 +224,16 @@ namespace SCCPP1.User.Data
         /// <param name="workRecordID">The WorkData.RecordID to be removed.</param>
         public void RemoveWork(int workRecordID)
         {
-            SelectedWorkIDs.Remove(workRecordID);
+            //SelectedWorkIDs.Remove(workRecordID);
+            RemoveFromHashSet(SelectedWorkIDs, workRecordID);
         }
 
+
+        private void RemoveFromHashSet(HashSet<int> hs, int id)
+        {
+            if (hs.Remove(id))
+                NeedsSave = true;
+        }
         #endregion
 
         public override bool Save()

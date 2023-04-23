@@ -70,6 +70,7 @@ namespace SCCPP1.Database.Requests
 
                 DbRequestHandler handler;
 
+                //should we create the connection int the handler to ensure no multithreading issues?
                 _handlers.Add(handler = new DbRequestHandler(new SqliteConnection(_connectionString)));
                 Task.Run(handler.ProcessRequestsAsync);
 

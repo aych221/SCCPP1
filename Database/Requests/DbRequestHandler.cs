@@ -181,7 +181,7 @@ namespace SCCPP1.Database.Requests
         }
 
 
-        private void ResetCommand()
+        internal void ResetCommand()
         {
             //clear command text and params
             Command.CommandText = string.Empty;
