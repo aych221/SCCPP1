@@ -2676,8 +2676,8 @@ namespace SCCPP1
                     {
                         int profileID = -1;
 
-                        string sql = @"INSERT INTO profiles (colleague_id, title, colleague_skills_ids, education_history_ids, colleague_certs_ids, work_history_ids, ordering) 
-                                    VALUES (@colleague_id, @title, @colleague_skills_ids, @education_history_ids, @colleague_certs_ids, @work_history_ids, @ordering)
+                        string sql = @"INSERT INTO profiles (colleague_id, title, about_section, colleague_skills_ids, education_history_ids, colleague_certs_ids, work_history_ids, ordering) 
+                                    VALUES (@colleague_id, @title, @about_section, @colleague_skills_ids, @education_history_ids, @colleague_certs_ids, @work_history_ids, @ordering)
                                     RETURNING id;";
 
                         using (SqliteCommand cmd = new SqliteCommand(sql, conn, transaction))
@@ -2693,6 +2693,7 @@ namespace SCCPP1
                             cmd.Parameters.AddWithValue("@id", ValueCleaner(pd.RecordID));
                             cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(pd.Owner.RecordID));
                             cmd.Parameters.AddWithValue("@title", ValueCleaner(pd.Title));
+                            cmd.Parameters.AddWithValue("@about_section", ValueCleaner($"{pd.ShowName}|{pd.ShowEmailAddress}|{pd.ShowPhoneNumber}|{pd.ShowIntroNarrative}"));
                             cmd.Parameters.AddWithValue("@colleague_skills_ids", ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
                             cmd.Parameters.AddWithValue("@education_history_ids", ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
                             cmd.Parameters.AddWithValue("@colleague_certs_ids", ValueCleaner(string.Join(",", pd.SelectedCertificationIDs)));
@@ -2736,7 +2737,7 @@ namespace SCCPP1
                     {
                         int profileID = -1;
 
-                        string sql = @"UPDATE profiles SET colleague_id=@colleague_id, title=@title, colleague_skills_ids=@colleague_skills_ids, education_history_ids=@education_history_ids, colleague_certs_ids=@colleague_certs_ids, work_history_ids=@work_history_ids, ordering=@ordering 
+                        string sql = @"UPDATE profiles SET colleague_id=@colleague_id, title=@title, about_section=@about_section, colleague_skills_ids=@colleague_skills_ids, education_history_ids=@education_history_ids, colleague_certs_ids=@colleague_certs_ids, work_history_ids=@work_history_ids, ordering=@ordering 
                                     WHERE id=@id;";
 
                         using (SqliteCommand cmd = new SqliteCommand(sql, conn, transaction))
@@ -2752,6 +2753,7 @@ namespace SCCPP1
                             cmd.Parameters.AddWithValue("@id", ValueCleaner(pd.RecordID));
                             cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(pd.Owner.RecordID));
                             cmd.Parameters.AddWithValue("@title", ValueCleaner(pd.Title));
+                            cmd.Parameters.AddWithValue("@about_section", ValueCleaner($"{pd.ShowName}|{pd.ShowEmailAddress}|{pd.ShowPhoneNumber}|{pd.ShowIntroNarrative}"));
                             cmd.Parameters.AddWithValue("@colleague_skills_ids", ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
                             cmd.Parameters.AddWithValue("@education_history_ids", ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
                             cmd.Parameters.AddWithValue("@colleague_certs_ids", ValueCleaner(string.Join(",", pd.SelectedCertificationIDs)));
@@ -2788,7 +2790,7 @@ namespace SCCPP1
             {
                 conn.Open();
 
-                string sql = @"SELECT id, colleague_id, title, colleague_skills_ids, education_history_ids, colleague_certs_ids, work_history_ids, ordering
+                string sql = @"SELECT id, colleague_id, title, about_section, colleague_skills_ids, education_history_ids, colleague_certs_ids, work_history_ids, ordering
                                 FROM profiles
                                 WHERE colleague_id=@colleague_id;";
 
@@ -2817,10 +2819,10 @@ namespace SCCPP1
 
                         while (r.Read())
                         {
-                            skillIDs = GetString(r, 3);
-                            educationIDs = GetString(r, 4);
-                            certIDs = GetString(r, 5);
-                            workIDs = GetString(r, 6);
+                            skillIDs = GetString(r, 4);
+                            educationIDs = GetString(r, 5);
+                            certIDs = GetString(r, 6);
+                            workIDs = GetString(r, 7);
 
                             CreateHashSet(skillIDs, out skills);
                             CreateHashSet(educationIDs, out education);
@@ -2835,8 +2837,16 @@ namespace SCCPP1
                                 education, //populate education history ids
                                 certs, //populate certification ids
                                 work, //populate work history ids
-                                GetString(r, 6) //populate ordering
+                                GetString(r, 8) //populate ordering
                                 ));
+
+
+                            string[] aboutVals = GetString(r, 3).Split('|');
+
+                            pd.ShowName = aboutVals[0].Equals("true");
+                            pd.ShowEmailAddress = aboutVals[1].Equals("true");
+                            pd.ShowPhoneNumber = aboutVals[2].Equals("true");
+                            pd.ShowIntroNarrative = aboutVals[3].Equals("true");
 
                         }
 
@@ -2865,7 +2875,7 @@ namespace SCCPP1
             {
                 conn.Open();
 
-                string sql = @"SELECT id, colleague_id, title, colleague_skills_ids, education_history_ids, colleague_certs_ids, work_history_ids, ordering
+                string sql = @"SELECT id, colleague_id, title, about_section, colleague_skills_ids, education_history_ids, colleague_certs_ids, work_history_ids, ordering
                                 FROM profiles
                                 WHERE colleague_id=@colleague_id;";
 
@@ -2893,10 +2903,10 @@ namespace SCCPP1
 
                         while (r.Read())
                         {
-                            skillIDs = GetString(r, 3);
-                            educationIDs = GetString(r, 4);
-                            certIDs = GetString(r, 5);
-                            workIDs = GetString(r, 6);
+                            skillIDs = GetString(r, 4);
+                            educationIDs = GetString(r, 5);
+                            certIDs = GetString(r, 6);
+                            workIDs = GetString(r, 7);
 
                             CreateHashSet(skillIDs, out skills);
                             CreateHashSet(educationIDs, out education);
@@ -2912,8 +2922,16 @@ namespace SCCPP1
                                 education, //populate education history ids
                                 certs, //populate certification ids
                                 work, //populate work history ids
-                                GetString(r, 6) //populate ordering
+                                GetString(r, 8) //populate ordering
                                 ));
+
+
+                            string[] aboutVals = GetString(r, 3).Split('|');
+
+                            pd.ShowName = aboutVals[0].Equals("true");
+                            pd.ShowEmailAddress = aboutVals[1].Equals("true");
+                            pd.ShowPhoneNumber = aboutVals[2].Equals("true");
+                            pd.ShowIntroNarrative = aboutVals[3].Equals("true");
 
                             dict.TryAdd(pd.RecordID, pd);
                         }
@@ -3644,6 +3662,7 @@ namespace SCCPP1
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           colleague_id INTEGER NOT NULL,
           title TEXT NOT NULL,          --similar to the file name
+          about_section TEXT,           --about section of the profile
           colleague_skills_ids TEXT,    --list of colleague_skills ids in specified order
           education_history_ids TEXT,   --list of education history ids in specified order
           colleague_certs_ids TEXT,     --list of colleague_certs ids in specified order

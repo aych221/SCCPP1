@@ -626,12 +626,14 @@ namespace SCCPP1.User
             //might want to create these hashsets in LoadAll() method to reduce memory and computations
             ProfileData pd = new ProfileData(this, title);
 
-                //new HashSet<int>(SavedSkills.Keys),
-                //new HashSet<int>(SavedEducationHistory.Keys),
-                //new HashSet<int>(SavedCertifications.Keys),
-                //new HashSet<int>(SavedWorkHistory.Keys),
-                //""
-                //);
+            //new HashSet<int>(SavedSkills.Keys),
+            //new HashSet<int>(SavedEducationHistory.Keys),
+            //new HashSet<int>(SavedCertifications.Keys),
+            //new HashSet<int>(SavedWorkHistory.Keys),
+            //""
+            //);
+
+            pd.ShowName = pd.ShowEmailAddress = pd.ShowPhoneNumber = pd.ShowIntroNarrative = true;
             UnsavedProfiles.Add(pd);
             return pd;
         }

@@ -20,6 +20,44 @@ namespace SCCPP1.User.Data
 
 
         /// <summary>
+        /// Saved into and read from the database as a string array of true and false values.
+        /// Pattern: ShowName|ShowEmailAddress|ShowPhoneNumber|ShowIntroNarrative
+        /// </summary>
+        #region About section
+        private bool _showName;
+        public bool ShowName
+        {
+            get { return _showName; }
+            set { SetField(ref _showName, value); }
+        }
+
+
+        private bool _showPhoneNumber;
+        public bool ShowPhoneNumber
+        {
+            get { return _showPhoneNumber; }
+            set { SetField(ref _showPhoneNumber, value); }
+        }
+
+
+        private bool _showEmailAddress;
+        public bool ShowEmailAddress
+        {
+            get { return _showEmailAddress; }
+            set { SetField(ref _showEmailAddress, value); }
+        }
+
+
+        private bool _showIntroNarrative;
+        public bool ShowIntroNarrative
+        {
+            get { return _showIntroNarrative; }
+            set { SetField(ref _showIntroNarrative, value); }
+        }
+        #endregion
+
+
+        /// <summary>
         /// Used to hold RecordData.RecordIDs that are selected (by the user) to appear on this profile.
         /// </summary>
         private HashSet<int> _skillIDs, _educationIDs, _certificationIDs, _workIDs;
@@ -235,6 +273,7 @@ namespace SCCPP1.User.Data
                 NeedsSave = true;
         }
         #endregion
+
 
         public override bool Save()
         {
