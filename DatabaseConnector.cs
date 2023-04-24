@@ -3246,7 +3246,7 @@ namespace SCCPP1
                     Utilities.ToDateOnly($"Oct {i + 1} 200{i}"),
                     Utilities.ToDateOnly($"Sept {i + 1} 200{i}")
                     );
-                account.AddSkills($"TestCategory{s}", $"TestSkill{s}");
+                account.AddSkills($"Other", $"TestSkill{s}");
             }
 
             //must persit all before making profiles
@@ -3294,19 +3294,259 @@ namespace SCCPP1
 
             Console.WriteLine("Saved!");
         }
+
+
+        //created by ChatGPT (based on my Thomas method)
+        public static void Andrew(Account account)
+        {
+            // Replace this with a unique token for Andrew's account
+            // example: qw9FDk-bnuBk1KJXVreseNbsDmGnt62pNRpswwgGC7k
+            account.UpdateData(
+                "Roe, Andrew Chadwick",
+                "andrew.johnson@example.com",
+                1234567890,
+                @"Passionate software developer with experience in creating modern web applications and APIs. Proficient in various programming languages and frameworks. Seeking new opportunities to leverage skills and contribute to innovative projects."
+            );
+
+            account.AddEducation(
+                "Stanford University",
+                "Bachelor of Science",
+                "Computer Science",
+                null,
+                Utilities.ToDateOnly("September 1 2015"),
+                Utilities.ToDateOnly("June 15 2019")
+            );
+
+            account.AddEducation(
+                "Augusta University",
+                "Master of Science",
+                "Information Security Management",
+                null,
+                Utilities.ToDateOnly("September 1 2019"),
+                Utilities.ToDateOnly("June 15 2021")
+            );
+
+            account.AddEducation(
+                "Georgia Regents University",
+                "Bachelor of Business Administration",
+                "Management Information Systems",
+                null,
+                Utilities.ToDateOnly("September 1 2014"),
+                Utilities.ToDateOnly("June 15 2018")
+            );
+
+            account.AddEducation(
+                "Columbia University",
+                "Master of Science",
+                "Data Science",
+                null,
+                Utilities.ToDateOnly("September 1 2016"),
+                Utilities.ToDateOnly("June 15 2018")
+            );
+
+            account.AddEducation(
+                "University of Pennsylvania",
+                "Bachelor of Applied Science",
+                "Computer and Cognitive Science",
+                null,
+                Utilities.ToDateOnly("September 1 2013"),
+                Utilities.ToDateOnly("June 15 2017")
+            );
+
+            account.AddEducation(
+                "University of Michigan",
+                "Master of Science",
+                "Computer Science and Engineering",
+                null,
+                Utilities.ToDateOnly("September 1 2015"),
+                Utilities.ToDateOnly("June 15 2017")
+            );
+
+
+            account.AddWork(
+                "Innovative Tech Solutions",
+                "Software Engineer",
+                "Developed web applications using .NET Core and Angular. Collaborated with cross-functional teams to deliver high-quality software products.",
+                null,
+                Utilities.ToDateOnly("July 1 2019"),
+                Utilities.ToDateOnly("March 31 2023")
+            );
+
+            account.AddWork(
+                "Global Software Inc.",
+                "Senior Software Engineer",
+                "Designed and developed scalable microservices using Java, Spring Boot, and Kubernetes. Implemented CI/CD pipelines for efficient software deployment.",
+                null,
+                Utilities.ToDateOnly("April 1 2023"),
+                Utilities.ToDateOnly("April 1 2026")
+            );
+
+            account.AddWork(
+                "Cutting Edge Solutions",
+                "Full Stack Developer",
+                "Built responsive web applications using React, Redux, and Node.js. Worked closely with designers and product managers to meet user requirements.",
+                null,
+                Utilities.ToDateOnly("July 1 2016"),
+                Utilities.ToDateOnly("June 30 2019")
+            );
+
+            account.AddWork(
+                "AI Innovations",
+                "Machine Learning Engineer",
+                "Developed and deployed machine learning models for predictive analytics and recommendation systems. Utilized Python, TensorFlow, and Scikit-learn.",
+                null,
+                Utilities.ToDateOnly("January 1 2014"),
+                Utilities.ToDateOnly("June 30 2016")
+            );
+
+            account.AddWork(
+                "TechStart",
+                "Software Engineering Intern",
+                "Collaborated with a team to build a web application using Ruby on Rails and PostgreSQL. Implemented user authentication and API integrations.",
+                null,
+                Utilities.ToDateOnly("June 1 2013"),
+                Utilities.ToDateOnly("August 31 2013")
+            );
+
+
+            account.AddSkills("Programming Languages", "C#", "JavaScript", "HTML", "CSS", "Python", "Ruby", "PHP", "Swift", "TypeScript");
+            account.AddSkills("OS", "Windows", "Linux", "macOS", "Ubuntu", "Debian", "Fedora", "Red Hat Enterprise Linux", "FreeBSD", "Android");
+            account.AddSkills("Software and Framework", ".NET Core", "Angular", "Node.js", "Django", "Flask", "Ruby on Rails", "ASP.NET", "Spring Boot", "Laravel", "Express.js", "React", "Vue.js", "Ember.js", "Backbone.js", "Bootstrap", "Tailwind CSS");
+
+            account.AddSkills("Other", "Git", "Agile Methodologies", "Docker", "Kubernetes", "NoSQL Databases", "SQL", "RESTful APIs", "React", "Vue.js", "Cloud Computing", "AWS", "Azure", "GCP", "CI/CD", "Jenkins", "Terraform", "Ansible", "Data Structures", "Algorithms");
+
+            account.AddCertification("Microsoft", "Microsoft Certified Solutions Developer (MCSD)", null, null);
+            account.AddCertification("Amazon Web Services", "AWS Certified Developer - Associate", null, null);
+            account.AddCertification("Google Cloud", "Google Cloud Professional Developer", null, null);
+            account.AddCertification("Scrum.org", "Professional Scrum Master I (PSM I)", null, null);
+            account.AddCertification("Oracle", "Oracle Certified Professional, Java SE 8 Programmer", null, null);
+            account.AddCertification("Cisco", "Cisco Certified Network Associate (CCNA)", null, null);
+
+            // Save all changes
+            account.PersistAll();
+
+            // Create a profile for Andrew
+            ProfileData profile = account.CreateProfile("Main");
+            profile.AddWork(1);
+            profile.AddWork(2);
+            profile.AddWork(3);
+            profile.AddWork(4);
+            profile.AddEducation(1);
+            profile.AddEducation(3);
+            profile.AddEducation(2);
+
+            //ummm? chatgpt actually wrote this, LOL, poor thing.
+            for (int i = 1; i <= 10; i++)
+            {
+                profile.AddSkill(i);
+            }
+            for (int i = 11; i <= 30; i++)
+            {
+                profile.AddSkill(i);
+            }
+
+            // Save all changes
+            account.PersistAll();
+
+            Console.WriteLine("Saved!");
+        }
+
+
+
+        //this one was actually (almost) created by the real ChatGPT
+        public static void ChatGPT(Account account)
+        {
+            // Replace this with a unique token for ChatGPT's account
+            // example: 1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v
+            account.UpdateData(
+                "7.0, Sir ChatGPT",
+                "chatgpt7.0@example.com",
+                0987654321,
+                @"Highly skilled and experienced AI engineer with expertise in natural language processing, machine learning, and data analysis. Proven track record in developing and deploying large-scale AI solutions for various applications. Seeking new opportunities to innovate and drive AI advancements."
+            );
+
+            account.AddEducation(
+                "Massachusetts Institute of Technology",
+                "Ph.D.",
+                "Artificial Intelligence",
+                null,
+                Utilities.ToDateOnly("September 1 2013"),
+                Utilities.ToDateOnly("June 15 2018")
+            );
+
+            account.AddEducation(
+                "University of California, Berkeley",
+                "Master of Science",
+                "Computer Science",
+                null,
+                Utilities.ToDateOnly("September 1 2011"),
+                Utilities.ToDateOnly("June 15 2013")
+            );
+
+            account.AddEducation(
+                "Carnegie Mellon University",
+                "Bachelor of Science",
+                "Computer Science",
+                null,
+                Utilities.ToDateOnly("September 1 2007"),
+                Utilities.ToDateOnly("June 15 2011")
+            );
+
+            account.AddWork(
+                "OpenAI",
+                "AI Research Engineer",
+                "Developed state-of-the-art natural language processing models and contributed to the development of GPT series models. Worked on improving model performance, scalability, and safety.",
+                null,
+                Utilities.ToDateOnly("July 1 2018"),
+                Utilities.ToDateOnly("March 31 2023")
+            );
+
+            account.AddWork(
+                "Tech Innovations Inc.",
+                "Machine Learning Engineer",
+                "Designed and implemented machine learning algorithms for various applications. Optimized models for performance and efficiency. Collaborated with cross-functional teams to integrate AI solutions.",
+                null,
+                Utilities.ToDateOnly("July 1 2013"),
+                Utilities.ToDateOnly("June 30 2018")
+            );
+
+            account.AddSkills("Programming Languages", "Python", "C++", "Java", "Scala");
+            account.AddSkills("OS", "Linux", "macOS", "Windows");
+            account.AddSkills("Software and Framework", "TensorFlow", "PyTorch", "Keras", "Scikit-learn");
+            account.AddSkills("Other", "Natural Language Processing", "Deep Learning", "Data Analysis", "Big Data");
+
+            account.AddCertification("Google", "TensorFlow Developer Certificate", null, null);
+            account.AddCertification("NVIDIA", "Deep Learning Institute (DLI) Certificate", null, null);
+            account.AddCertification("Coursera", "Deep Learning Specialization Certificate", null, null);
+            account.AddCertification("Stanford University", "Natural Language Processing Certificate", null, null);
+
+            // Save all changes
+            account.PersistAll();
+
+            // Create a profile for ChatGPT
+            ProfileData profile = account.CreateProfile("Main");
+            profile.AddWork(1);
+            profile.AddWork(2);
+            profile.AddEducation(1);
+            profile.AddEducation(2);
+            profile.AddEducation(3);
+            profile.AddSkill(1);
+            profile.AddSkill(2);
+            profile.AddSkill(3);
+        }
         #endregion
 
 
-        #region Sqlite Helper Methods
+            #region Sqlite Helper Methods
 
-        /// <summary>
-        /// Uses an INSERT OR IGNORE query, then returns the result that was input. Only intended for tables with an id and unique text column.
-        /// </summary>
-        /// <param name="cmd"></param>
-        /// <param name="tableName"></param>
-        /// <param name="fieldName"></param>
-        /// <param name="value"></param>
-        /// <returns>The id of the value inserted into the input table</returns>
+            /// <summary>
+            /// Uses an INSERT OR IGNORE query, then returns the result that was input. Only intended for tables with an id and unique text column.
+            /// </summary>
+            /// <param name="cmd"></param>
+            /// <param name="tableName"></param>
+            /// <param name="fieldName"></param>
+            /// <param name="value"></param>
+            /// <returns>The id of the value inserted into the input table</returns>
         protected static int InsertOrIgnore(SqliteCommand cmd, string tableName, string fieldName, string value)
         {
             //save incoming command type

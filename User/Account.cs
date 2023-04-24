@@ -398,9 +398,20 @@ namespace SCCPP1.User
             if (skillNames == null || skillNames.Length == 0)
                 return;
 
+            //first make a dictionary of all the skills in the category
+            //(used to prevent duplicates from being added)
+            Dictionary<string, SkillData> skillsInCategory = SavedSkills.Values
+                .ToList()
+                .Concat(UnsavedSkills)
+                .Where(s => s.SkillCategoryName.Equals(skillCategory))
+                .ToDictionary(s => s.SkillName, s => s);
+
             foreach (string skillName in skillNames)
             {
-                //Skills.Add(new SkillData(this, skillCategory, skillName, -1)); //later will need to remove this
+                //don't add duplicates
+                if (skillsInCategory.ContainsKey(skillName))
+                    continue;
+
                 UnsavedSkills.Add(new SkillData(this, skillCategory, skillName, -1));
             }
 
@@ -446,10 +457,10 @@ namespace SCCPP1.User
 
 
         #region Remove Data methods
-        public void RemoveSkills(params string[] skillNames)
+        public void RemoveSkill(int id)
         {
-
-            //TODO, need to make DB methods to remove colleague records that are requested
+            if ((GetSkillData(id)?.Delete()) is null)
+                UnsavedSkills.Find(x => x.RecordID == id)?.Delete();
         }
 
         public void RemoveSkills(params int[] ids)
@@ -457,9 +468,15 @@ namespace SCCPP1.User
             foreach (int id in ids)
             {
                 //delete all in the dictionary
-                if ((GetSkillData(id)?.Delete()) is null)
-                    UnsavedSkills.Find(x => x.RecordID == id)?.Delete();
+                RemoveSkill(id);
             }
+        }
+
+        public void RemoveEducation(int id)
+        {
+            //delete all in the dictionary
+            if ((GetEducationData(id)?.Delete()) is null)
+                UnsavedEducationHistory.Find(x => x.RecordID == id)?.Delete();
         }
 
         public void RemoveEducations(params int[] ids)
@@ -467,9 +484,15 @@ namespace SCCPP1.User
             foreach (int id in ids)
             {
                 //delete all in the dictionary
-                if ((GetEducationData(id)?.Delete()) is null)
-                    UnsavedEducationHistory.Find(x => x.RecordID == id)?.Delete();
+                RemoveEducation(id);
             }
+        }
+
+        public void RemoveCertification(int id)
+        {
+            //delete all in the dictionary
+            if ((GetCertificationData(id)?.Delete()) is null)
+                UnsavedCertifications.Find(x => x.RecordID == id)?.Delete();
         }
 
         public void RemoveCertifications(params int[] ids)
@@ -477,9 +500,15 @@ namespace SCCPP1.User
             foreach (int id in ids)
             {
                 //delete all in the dictionary
-                if ((GetCertificationData(id)?.Delete()) is null)
-                    UnsavedCertifications.Find(x => x.RecordID == id)?.Delete();
+                RemoveCertification(id);
             }
+        }
+
+        public void RemoveWork(int id)
+        {
+            //delete all in the dictionary
+            if ((GetWorkData(id)?.Delete()) is null)
+                UnsavedWorkHistory.Find(x => x.RecordID == id)?.Delete();
         }
 
         public void RemoveWorks(params int[] ids)
@@ -490,6 +519,19 @@ namespace SCCPP1.User
                 if ((GetWorkData(id)?.Delete()) is null)
                     UnsavedWorkHistory.Find(x => x.RecordID == id)?.Delete();
             }
+        }
+
+
+
+        public void RemoveProfile(int id)
+        {
+            bool? success = false;
+            Console.WriteLine("Removing profile with id: " + id);
+            //delete all in the dictionary
+            if ((success = (GetProfileData(id)?.Delete())) is null)
+                success = (UnsavedProfiles.Find(x => x.RecordID == id)?.Delete());
+            if ((success is not null) && success.Value)
+                Console.WriteLine("Profile " + id + " has remove flag set");
         }
 
 
@@ -508,6 +550,23 @@ namespace SCCPP1.User
             }
         }
 
+        #endregion
+
+        //used to update account's data without deleting and creating new objects
+        #region Edit Data methods
+        public void EditSkills(string category, params string[] skillNames)
+        {
+            if (skillNames == null || skillNames.Length == 0)
+                return;
+
+            //search through entire list of skills
+            foreach (SkillData d in SavedSkills.Values.ToList().Concat(UnsavedSkills))
+            {
+             //   if (d.SkillCategoryName.Equals(category))
+            }
+
+            NeedsSave = IsUpdated = true;
+        }
         #endregion
         #endregion
 

@@ -91,7 +91,7 @@ namespace SCCPP1.Session
             //TODO: make easier to use debugs with SSO
             if (Data.Username.Equals("ww8FDk-bnuBk1KJXVreseNbsDmGnt62pNRpswwgGC7k"))
             {
-                DatabaseConnector.Thomas(acc = new Account(Data, false));
+                DatabaseConnector.Andrew(acc = new Account(Data, false));
                 page = "/UserHome";
                 //new TableModels();
                 //DatabaseConnector.TestQueryMaker();

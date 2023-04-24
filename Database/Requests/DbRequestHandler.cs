@@ -141,13 +141,13 @@ namespace SCCPP1.Database.Requests
 
         internal async Task<bool> ShutDownAsync()
         {
-            // Set the cancellation token to request cancellation
+            //set the token to request cancellation
             _cancellationTokenSource.Cancel();
 
-            // Wait for the semaphore to be released by the ProcessRequestsAsync() method
+            //wait for semaphore to be released by the ProcessRequestsAsync() method
             await _semaphore.WaitAsync();
 
-            // Complete all remaining requests as failed
+            //dequeue and mark all requests as failed
             while (Requests.Count > 0)
             {
                 DbRequest request = Requests.Dequeue();

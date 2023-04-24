@@ -95,6 +95,10 @@ namespace SCCPP1.Pages
 
                 if (v.IsSelected)
                 {
+                    //Andrew, you could've just used a switch statement for this,
+                    //or an if statement and for loop in the .cs.html
+                    //lol :)
+                    //Love, Thomas
                     if (Account.GetSkillData(v.RecordID).SkillCategoryName == "Programming Languages")
                     {
                         progLangs += $"<li><div style = \"display:block\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName + " "} </div></li> ";
