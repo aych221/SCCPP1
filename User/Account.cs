@@ -1,5 +1,6 @@
 ﻿using SCCPP1.Database;
 using SCCPP1.Database.Entity;
+using SCCPP1.Database.Requests;
 using SCCPP1.Database.Sqlite;
 using SCCPP1.Models;
 using SCCPP1.Session;
@@ -296,7 +297,7 @@ namespace SCCPP1.User
             SavedProfiles = new ReadOnlyDictionary<int, ProfileData>(new Dictionary<int, ProfileData>());
         }
 
-
+#if DEBUG
         /// <summary>
         /// This constructor should only be used for testing purposes. This is not valid for a real account.
         /// </summary>
@@ -328,7 +329,7 @@ namespace SCCPP1.User
             DeletedProfiles = new List<ProfileData>();
 
         }
-
+#endif
 
         #region Add/Remove/Edit data methods
 
@@ -710,17 +711,20 @@ namespace SCCPP1.User
         /// <returns>true if changes are saved in database, false otherwise.</returns>
         public override bool Save()
         {
-           /* if (!NeedsSave)
-                return true;*/
+            /* if (!NeedsSave)
+                 return true;*/
+            if (Program.DbRequestSystem)
+                return !(NeedsSave = !(IsUpdated = DbRequestManager.Save(this)));
+            else
+                return !(NeedsSave = !(IsUpdated = DatabaseConnector.SaveUser(this)));
 
-            return !(NeedsSave = !(IsUpdated = DatabaseConnector.SaveUser(this)));
         }
 
-        #endregion
+#endregion
 
 
 
-        #region Delete methods
+#region Delete methods
         /// <summary>
         /// Deletes the user's data and all records associated with it.
         /// </summary>
@@ -730,10 +734,10 @@ namespace SCCPP1.User
             return Remove = NeedsSave = IsUpdated = true;
         }
 
-        #endregion
+#endregion
 
 
-        #region Persist methods
+#region Persist methods
         /// <summary>
         /// This method will save, update, or delete and reload data to ensure all data is updated in the database.
         /// </summary>
@@ -748,6 +752,7 @@ namespace SCCPP1.User
                 success5 = PersistWorkHistory(),
                 success6 = PersistProfiles();
             bool success = success1 && success2 && success3 && success4 && success5 && success6;
+#if DEBUG
             Console.WriteLine("**********************All data persisted? " + success);
             if (!success)
             {
@@ -758,6 +763,7 @@ namespace SCCPP1.User
                 Console.WriteLine("**********************Work data persisted? " + success5);
                 Console.WriteLine("**********************Profile data persisted? " + success6);
             }
+#endif
             /*
             if (SavedSkills.Count > 0)
             {
@@ -809,14 +815,30 @@ namespace SCCPP1.User
             //load the new skill data
 
             Dictionary<int, SkillData> savedSkills;
-
-            if (!DatabaseConnector.LoadColleagueSkills1(this, out savedSkills))
+            if (Program.DbRequestSystem)
             {
-                success = false;
+                object? result = AwaitDbResult(DbRequestManager.LoadColleagueSkills(this));
+                if (result != null)
+                {
+                    savedSkills = (result as Dictionary<int, SkillData>);
+                }
+                else
+                {
+                    savedSkills = new Dictionary<int, SkillData>();
+                }
+            }
+            else
+            {
+                if (!DatabaseConnector.LoadColleagueSkills1(this, out savedSkills))
+                {
+                    success = false;
+                }
             }
 
             SavedSkills = new ReadOnlyDictionary<int, SkillData>(savedSkills);
+#if DEBUG
             Console.WriteLine("-------------Skills Saved " + UnsavedSkills.Count + ", Skills Loaded " + SavedSkills.Count);
+#endif
             UnsavedSkills.Clear();
 
             return success;
@@ -842,14 +864,30 @@ namespace SCCPP1.User
             //load the new education history data
 
             Dictionary<int, EducationData> savedEducationHistory;
-
-            if (!DatabaseConnector.LoadColleagueEducationHistory1(this, out savedEducationHistory))
+            if (Program.DbRequestSystem)
             {
-                success = false;
+                object? result = AwaitDbResult(DbRequestManager.LoadColleagueEducationHistory(this));
+                if (result != null)
+                {
+                    savedEducationHistory = (result as Dictionary<int, EducationData>);
+                }
+                else
+                {
+                    savedEducationHistory = new();
+                }
+            }
+            else
+            {
+                if (!DatabaseConnector.LoadColleagueEducationHistory1(this, out savedEducationHistory))
+                {
+                    success = false;
+                }
             }
 
             SavedEducationHistory = new ReadOnlyDictionary<int, EducationData>(savedEducationHistory);
+#if DEBUG
             Console.WriteLine("-------------Education Saved " + UnsavedEducationHistory.Count + ", Education Loaded " + SavedEducationHistory.Count);
+#endif
             UnsavedEducationHistory.Clear();
 
             return success;
@@ -875,13 +913,30 @@ namespace SCCPP1.User
 
             Dictionary<int, CertificationData> savedCertifications;
 
-            if (!DatabaseConnector.LoadColleagueCertifications(this, out savedCertifications))
+            if (Program.DbRequestSystem)
             {
-                success = false;
+                object? result = AwaitDbResult(DbRequestManager.LoadColleagueCertifications(this));
+                if (result != null)
+                {
+                    savedCertifications = (result as Dictionary<int, CertificationData>);
+                }
+                else
+                {
+                    savedCertifications = new();
+                }
+            }
+            else
+            {
+                if (!DatabaseConnector.LoadColleagueCertifications(this, out savedCertifications))
+                {
+                    success = false;
+                }
             }
 
             SavedCertifications = new ReadOnlyDictionary<int, CertificationData>(savedCertifications);
+#if DEBUG
             Console.WriteLine("-------------Certifications Saved " + UnsavedCertifications.Count + ", Certifications Loaded " + SavedCertifications.Count);
+#endif
             UnsavedCertifications.Clear();
 
             return success;
@@ -909,13 +964,30 @@ namespace SCCPP1.User
 
             Dictionary<int, WorkData> savedWorkHistory;
 
-            if (!DatabaseConnector.LoadColleagueWorkHistory1(this, out savedWorkHistory))
+            if (Program.DbRequestSystem)
             {
-                success = false;
+                object? result = AwaitDbResult(DbRequestManager.LoadColleagueWorkHistory(this));
+                if (result != null)
+                {
+                    savedWorkHistory = (Dictionary<int, WorkData>) result;
+                }
+                else
+                {
+                    savedWorkHistory = new();
+                }
+            }
+            else
+            {
+                if (!DatabaseConnector.LoadColleagueWorkHistory1(this, out savedWorkHistory))
+                {
+                    success = false;
+                }
             }
 
             SavedWorkHistory = new ReadOnlyDictionary<int, WorkData>(savedWorkHistory);
+#if DEBUG
             Console.WriteLine("-------------Work Saved " + UnsavedWorkHistory.Count + ", Work Loaded " + SavedWorkHistory.Count);
+#endif
             UnsavedWorkHistory.Clear();
 
             return success;
@@ -926,12 +998,9 @@ namespace SCCPP1.User
         {
             bool success = true;
 
-            //bool saved = false;
             //persist all saved profile data
             foreach (ProfileData d in SavedProfiles.Values.Concat(UnsavedProfiles))
             {
-                //saved = false;
-                //Console.WriteLine($"BeforePersist Profile {d.RecordID} (Remove={d.Remove}, IsRemoved={d.IsRemoved}, Saved={saved})");
 
                 //remove from unsaved if it was flagged for removal
                 if (d.RecordID < 1 && d.Remove)
@@ -941,19 +1010,29 @@ namespace SCCPP1.User
                     success = false;
                 }
 
-                //Console.WriteLine($"AftertPersist Profile {d.RecordID} (Remove={d.Remove} IsRemoved={d.IsRemoved}, Saved={saved})");
-                //if (d.IsRemoved)
-                //{
-                //    Console.WriteLine($"-------------Profile {d.RecordID} deleted.");
-                //}
             }
 
             //load the new profile data
 
             Dictionary<int, ProfileData> savedProfiles;
 
-            if (!DatabaseConnector.LoadColleageProfiles(this, out savedProfiles))
-                success = false;
+            if (Program.DbRequestSystem)
+            {
+                object? result = AwaitDbResult(DbRequestManager.LoadColleagueProfiles(this));
+                if (result != null)
+                {
+                    savedProfiles = (Dictionary<int, ProfileData>)result;
+                }
+                else
+                {
+                    savedProfiles = new();
+                }
+            }
+            else
+            {
+                if (!DatabaseConnector.LoadColleageProfiles(this, out savedProfiles))
+                    success = false;
+            }
 
             SavedProfiles = new ReadOnlyDictionary<int, ProfileData>(savedProfiles);
 
@@ -978,15 +1057,17 @@ namespace SCCPP1.User
                 totalRemovedIDs += ValidateContentIDs(d, d.SelectedWorkIDs, SavedWorkHistory);
             }
 
+#if DEBUG
             Console.WriteLine($"Removed a total of {totalRemovedIDs} IDs from profiles.");
 
             Console.WriteLine("-------------Profiles Saved " + UnsavedProfiles.Count + ", Profiles Loaded " + SavedProfiles.Count);
+#endif
             UnsavedProfiles.Clear();
 
             return success;
         }
 
-        #endregion
+#endregion
 
 
         public DbAccountRecord ToDbRecord()

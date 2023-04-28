@@ -5,13 +5,9 @@ using SCCPP1.User.Data;
 using System.Data;
 using System.Text;
 using SCCPP1.Database.Tables;
-using System.Collections.ObjectModel;
-using Microsoft.IdentityModel.Tokens;
 using SCCPP1.Database;
 using SCCPP1.Database.Entity;
 using SCCPP1.Database.Sqlite;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Net;
 
 namespace SCCPP1
 {
@@ -721,7 +717,7 @@ namespace SCCPP1
                     using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleRow))
                     {
 
-                        //account was found.
+                        //account was not found.
                         if (!r.Read())
                             return null;
 
@@ -742,6 +738,40 @@ namespace SCCPP1
                     }
                 }
             }
+        }
+
+
+
+        public static int[] SearchKeyphraseColleagues(string keyphrase)
+        {
+            if (keyphrase == null)
+                return new int[0];
+
+            List<int> ids = new List<int>();
+
+            using (SqliteConnection conn = new(connStr))
+            {
+                conn.Open();
+
+                string sql = @"SELECT id, name, email, phone, address, intro_narrative
+                                FROM colleagues
+                                WHERE (name LIKE @keyphrase OR email LIKE @keyphrase OR address LIKE @keyphrase OR intro_narrative LIKE @keyphrase);";
+
+                using (SqliteCommand cmd = new(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@keyphrase", ValueCleaner(keyphrase));
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            ids.Add(GetInt32(r, 0));
+                        }
+                    }
+                }
+            }
+
+            return ids.ToArray();
         }
 
 
@@ -816,42 +846,6 @@ namespace SCCPP1
                         a.MainProfileID = GetInt32(r, 8);
 
                         return a;
-                    }
-                }
-            }
-        }
-
-        [Obsolete("Use GetAccount() instead.")]
-        public static bool GetUser(Account acc)
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"SELECT id, role, name, email, phone, address, intro_narrative, main_profile_id FROM colleagues WHERE (user_hash=@user_hash);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@user_hash", acc.GetUsername());
-                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleRow))
-                    {
-
-                        //could not find account.
-                        //redirect account to creation page, if any input is entered, save new account to database
-                        if (!r.Read())
-                            return false;
-
-
-                        //load new instance with basic colleague information
-                        acc.IsReturning = true;
-                        acc.RecordID = GetInt32(r, 0);
-                        acc.Role = GetInt32(r, 1);
-                        acc.Name = GetString(r, 2);
-                        acc.EmailAddress = GetString(r, 3);
-                        acc.PhoneNumber = GetInt64(r, 4);
-                        acc.StreetAddress = GetString(r, 5);
-                        acc.IntroNarrative = GetString(r, 6);
-                        acc.MainProfileID = GetInt32(r, 7);
-
-                        return true;
                     }
                 }
             }
@@ -1537,6 +1531,40 @@ namespace SCCPP1
 
             return true;
         }
+
+        public static int[] SearchKeyphraseSkills(string keyphrase)
+        {
+            if (keyphrase == null)
+                return new int[0];
+
+            List<int> ids = new List<int>();
+
+            using (SqliteConnection conn = new(connStr))
+            {
+                conn.Open();
+
+                string sql = @"SELECT cs.id, cs.colleague_id, sc.name AS skill_category, cs.skill_category_id, s.name AS skill, cs.skill_id, cs.rating
+                                FROM colleague_skills cs
+                                JOIN skills s ON cs.skill_id = s.id
+                                LEFT JOIN skill_categories sc ON cs.skill_category_id = sc.id
+                                WHERE (sc.name LIKE @keyphrase OR s.name LIKE @keyphrase);";
+
+                using (SqliteCommand cmd = new(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@keyphrase", ValueCleaner(keyphrase));
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            ids.Add(GetInt32(r, 0));
+                        }
+                    }
+                }
+            }
+
+            return ids.ToArray();
+        }
         #endregion
 
 
@@ -2047,7 +2075,6 @@ namespace SCCPP1
                         }
 
                         account.EducationHistory = list;
-                        return true;
                     }
                 }
             }
@@ -2055,6 +2082,41 @@ namespace SCCPP1
             //Console.WriteLine($"Found Education Records: {list?.Count}");
 
             return true;
+        }
+
+
+        public static int[] SearchKeyphraseEducationHistory(string keyphrase)
+        {
+            if (keyphrase == null)
+                return new int[0];
+
+            List<int> ids = new List<int>();
+
+            using (SqliteConnection conn = new(connStr))
+            {
+                conn.Open();
+
+                string sql = @"SELECT eh.id, eh.colleague_id, eh.education_type_id, eh.institution_id, eh.municipality_id, eh.state_id, eh.start_date, eh.end_date, eh.description, et.type AS education_type, i.name AS institution
+                                FROM education_history eh
+                                JOIN education_types et ON eh.education_type_id = et.id
+                                JOIN institutions i ON eh.institution_id = i.id
+                                WHERE (eh.description LIKE @keyphrase OR et.type LIKE @keyphrase OR i.name LIKE @keyphrase);";
+
+                using (SqliteCommand cmd = new(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@keyphrase", ValueCleaner(keyphrase));
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            ids.Add(GetInt32(r, 0));
+                        }
+                    }
+                }
+            }
+
+            return ids.ToArray();
         }
         #endregion
 
@@ -2424,185 +2486,6 @@ namespace SCCPP1
         #endregion
 
 
-
-        [Obsolete("Use LoadColleagueWorkHistory1 instead.")]
-        public static bool LoadColleagueWorkHistory(Account account, bool useCache = false)
-        {
-            if (account == null || account.RecordID < 0)
-                return false;
-
-            //temp caches
-            Dictionary<int, string> employers = new(), jobTitles = new();
-
-            //create work history list
-            StringBuilder sqlEmp = new("SELECT id, name FROM employers WHERE id IN ("),
-                sqlJob = new("SELECT id, title FROM job_titles WHERE id IN (");
-
-            List<WorkData> list;
-
-            string sql;
-
-            using (SqliteConnection conn = new(connStr))
-            {
-                conn.Open();
-                sql = @"SELECT id, colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description FROM work_history WHERE (colleague_id=@colleague_id);";
-
-                using (SqliteCommand cmd = new(sql, conn))
-                {
-
-                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
-
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        list = new List<WorkData>();
-
-                        while (r.Read())
-                        {
-                            WorkData wd = new WorkData(account, GetInt32(r, 0));
-                            wd.EmployerID = GetInt32(r, 2);
-                            wd.JobTitleID = GetInt32(r, 3);
-                            wd.Location = new Location(GetInt32(r, 4), GetInt32(r, 5));
-
-                            wd.StartDate = GetDateOnly(r, 6);
-                            wd.EndDate = GetDateOnly(r, 7);
-
-                            wd.Description = GetString(r, 8);
-
-                            list.Add(wd);
-
-                            //add employer_id
-                            if (employers.TryAdd(wd.EmployerID, null))
-                            {
-                                //new id, add it
-                                sqlEmp.Append(wd.EmployerID);
-                                sqlEmp.Append(',');
-                            }
-
-                            //add job_title_id
-                            if (jobTitles.TryAdd(wd.JobTitleID, null))
-                            {
-                                //new id, add it
-                                sqlJob.Append(wd.JobTitleID);
-                                sqlJob.Append(',');
-                            }
-
-                        }
-
-                        //emove last comma, then append ending
-                        sqlEmp.Remove(sqlEmp.Length - 1, 1).Append(");");
-                        sqlJob.Remove(sqlJob.Length - 1, 1).Append(");");
-
-                        account.WorkHistory = list;
-                    }
-                }
-
-                //no records found
-                if (account.WorkHistory == null || account.WorkHistory.Count < 1)
-                    return false;
-
-                //Console.WriteLine($"Found Work Records: {list.Count}");
-
-                //load employers
-                using (SqliteCommand cmd = new SqliteCommand(sqlEmp.ToString(), conn))
-                {
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-
-                        //fill employer dict
-                        while (r.Read())
-                            employers[GetInt32(r, 0)] = GetString(r, 1);
-
-                    }
-                }
-
-                //Console.WriteLine($"Found Employers: {employers.Count}");
-
-                //load job titles.
-                using (SqliteCommand cmd = new SqliteCommand(sqlJob.ToString(), conn))
-                {
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-
-                        //fill job title dict
-                        while (r.Read())
-                            jobTitles[GetInt32(r, 0)] = GetString(r, 1);
-
-                    }
-                }
-
-                //Console.WriteLine($"Found Job Titles: {jobTitles.Count}");
-            }
-
-            //these should always have at least 1 count if one record is loaded.
-            if (employers.Count == 0 || jobTitles.Count == 0)
-                return false;
-
-            //fill data
-            foreach (WorkData wd in list)
-            {
-                wd.Employer = employers[wd.EmployerID];
-                wd.JobTitle = jobTitles[wd.JobTitleID];
-            }
-
-            //Console.WriteLine($"Loaded {list.Count} work experience records!");
-
-            return true;
-
-        }
-
-
-
-        public static bool LoadColleagueWorkHistory1(Account account, bool useCache = false)
-        {
-            if (account == null || account.RecordID < 0)
-                return false;
-
-            //create work history list
-            List<WorkData> list;
-
-            using (SqliteConnection conn = new(connStr))
-            {
-                conn.Open();
-
-                string sql = @"SELECT wh.id, wh.colleague_id, wh.employer_id, wh.job_title_id, wh.municipality_id, wh.state_id, wh.start_date, wh.end_date, wh.description, e.name AS employer_name, jt.title AS job_title_name
-                                FROM work_history wh
-                                JOIN employers e ON wh.employer_id = e.id
-                                JOIN job_titles jt ON wh.job_title_id = jt.id
-                                WHERE wh.colleague_id=@colleague_id;";
-
-                using (SqliteCommand cmd = new(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
-
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        list = new List<WorkData>();
-
-                        while (r.Read())
-                        {
-                            WorkData wd = new WorkData(account, GetInt32(r, 0));
-                            wd.EmployerID = GetInt32(r, 2);
-                            wd.JobTitleID = GetInt32(r, 3);
-                            wd.Location = new Location(GetInt32(r, 4), GetInt32(r, 5));
-                            wd.StartDate = GetDateOnly(r, 6);
-                            wd.EndDate = GetDateOnly(r, 7);
-                            wd.Description = GetString(r, 8);
-                            wd.Employer = GetString(r, 9);
-                            wd.JobTitle = GetString(r, 10);
-                            list.Add(wd);
-                        }
-
-                        account.WorkHistory = list;
-                    }
-                }
-            }
-
-
-            //Console.WriteLine($"Found Work Records: {list?.Count}");
-
-            return true;
-        }
-
         public static bool LoadColleagueWorkHistory1(Account account, out Dictionary<int, WorkData> dict, bool useCache = false)
         {
             dict = new();
@@ -2656,6 +2539,42 @@ namespace SCCPP1
             //Console.WriteLine($"Found Work Records: {list?.Count}");
 
             return true;
+        }
+
+
+        //AND(cc.description LIKE @keyword OR ct.type LIKE @keyword OR i.name LIKE @keyword);";
+        public static int[] SearchKeyphraseWorkHistory(string keyphrase)
+        {
+            if (keyphrase == null)
+                return new int[0];
+
+            List<int> ids = new List<int>();
+
+            using (SqliteConnection conn = new(connStr))
+            {
+                conn.Open();
+
+                string sql = @"SELECT wh.id, wh.colleague_id, wh.employer_id, wh.job_title_id, wh.municipality_id, wh.state_id, wh.start_date, wh.end_date, wh.description, e.name AS employer_name, jt.title AS job_title_name
+                                FROM work_history wh
+                                JOIN employers e ON wh.employer_id = e.id
+                                JOIN job_titles jt ON wh.job_title_id = jt.id
+                                WHERE (wh.description LIKE @keyphrase OR e.name LIKE @keyphrase OR jt.title LIKE @keyphrase);";
+
+                using (SqliteCommand cmd = new(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@keyphrase", ValueCleaner(keyphrase));
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        while (r.Read())
+                        {
+                            ids.Add(GetInt32(r, 0));
+                        }
+                    }
+                }
+            }
+
+            return ids.ToArray();
         }
         #endregion
 
@@ -2968,6 +2887,209 @@ namespace SCCPP1
 
             return (pd.RecordID = InsertProfile(pd)) >= 0;
         }
+
+
+
+        public static int[] SearchKeyphraseProfiles(string keyphrase)
+        {
+
+            if (keyphrase == null)
+                return new int[0];
+
+            ProfileResultSet resultSet = new ProfileResultSet();
+            List<int> ids = new List<int>();
+
+            using (SqliteConnection conn = new(connStr))
+            {
+                conn.Open();
+
+                //would eventually need a max limit to selection size
+                //only select in batches
+                //or exclude ids and continue search until max size is met, then batch size after
+                string sql = @"SELECT id, colleague_id, title, colleague_skills_ids, education_history_ids, colleague_certs_ids, work_history_ids
+                                FROM profiles;";
+
+                //first load all profiles
+                using (SqliteCommand cmd = new(sql, conn))
+                {
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+                        ProfileResult result;
+                        while (r.Read())
+                        {
+                            resultSet.AddResult(
+                                result = new ProfileResult(
+                                    GetInt32(r, 0),
+                                    GetInt32(r, 1),
+                                    GetString(r, 2),
+                                    GetString(r, 3),
+                                    GetString(r, 4),
+                                    GetString(r, 5),
+                                    GetString(r, 6)
+                                    )
+                                );
+
+                            //check the title while we're here.
+                            if (result.Title != null && result.Title.Contains(keyphrase))
+                                ids.Add(result.RecordID);
+                        }
+                    }
+                }
+
+                int[] colleagueIDs = SearchKeyphraseColleagues(keyphrase);
+                int[] skillIDs = SearchKeyphraseSkills(keyphrase);
+                int[] educationIDs = SearchKeyphraseEducationHistory(keyphrase);
+                int[] certifcationIDs = SearchKeyphraseCertifications(keyphrase);
+                int[] workIDs = SearchKeyphraseWorkHistory(keyphrase);
+
+                foreach (ProfileResult p in resultSet.Results)
+                {
+
+                    foreach (int i in skillIDs)
+                    {
+                        //match found, add profile to list and skip everything else
+                        if (p.SkillRecordIDs.Contains(i))
+                        {
+                            ids.Add(p.RecordID);
+                            goto nextLoop; // because we want to break out of this loop and continue the outer loop
+                        }
+
+                    }
+
+                    foreach (int i in educationIDs)
+                    {
+                        //match found, add profile to list and skip everything else
+                        if (p.EducationRecordIDs.Contains(i))
+                        {
+                            ids.Add(p.RecordID);
+                            goto nextLoop; // because we want to break out of this loop and continue the outer loop
+                        }
+
+                    }
+
+                    foreach (int i in certifcationIDs)
+                    {
+                        //match found, add profile to list and skip everything else
+                        if (p.CertificationRecordIDs.Contains(i))
+                        {
+                            ids.Add(p.RecordID);
+                            goto nextLoop; // because we want to break out of this loop and continue the outer loop
+                        }
+
+                    }
+
+                    foreach (int i in workIDs)
+                    {
+                        //match found, add profile to list and skip everything else
+                        if (p.WorkRecordIDs.Contains(i))
+                        {
+                            ids.Add(p.RecordID);
+                            goto nextLoop; // because we want to break out of this loop and continue the outer loop
+                        }
+
+                    }
+
+                //warning, goto statement
+                nextLoop:
+                    continue;
+
+                }
+
+
+            }
+
+            return ids.ToArray();
+        }
+
+        internal class ProfileResultSet
+        {
+            public List<ProfileResult> Results;
+            public Dictionary<int, HashSet<int>> SkillIDToProfileID;
+            public Dictionary<int, HashSet<int>> EducationIDToProfileID;
+            public Dictionary<int, HashSet<int>> CertificationIDToProfileID;
+            public Dictionary<int, HashSet<int>> WorkIDToProfileID;
+
+            public ProfileResultSet()
+            {
+                Results = new List<ProfileResult>();
+                SkillIDToProfileID = new Dictionary<int, HashSet<int>>();
+                EducationIDToProfileID = new Dictionary<int, HashSet<int>>();
+                CertificationIDToProfileID = new Dictionary<int, HashSet<int>>();
+                WorkIDToProfileID = new Dictionary<int, HashSet<int>>();
+            }
+
+
+            public void AddResult(ProfileResult result)
+            {
+                Results.Add(result);
+
+                AddToDictionary(result.RecordID, result.SkillRecordIDs, SkillIDToProfileID);
+                AddToDictionary(result.RecordID, result.EducationRecordIDs, EducationIDToProfileID);
+                AddToDictionary(result.RecordID, result.CertificationRecordIDs, CertificationIDToProfileID);
+                AddToDictionary(result.RecordID, result.WorkRecordIDs, WorkIDToProfileID);
+            }
+
+
+            private void AddToDictionary(int recordID, HashSet<int> recordIDs, Dictionary<int, HashSet<int>> dict)
+            {
+                HashSet<int> profileIDs;
+                foreach (int i in recordIDs)
+                {
+                    if (dict.TryGetValue(i, out profileIDs))
+                    {
+                        profileIDs.Add(recordID);
+                    }
+                    else
+                    {
+                        profileIDs = new HashSet<int>() { recordID };
+                        dict.Add(i, profileIDs);
+                    }
+                }
+            }
+        }
+
+
+
+        internal class ProfileResult
+        {
+            public int RecordID, ColleagueID;
+
+            public HashSet<int> SkillRecordIDs, EducationRecordIDs, CertificationRecordIDs, WorkRecordIDs;
+
+            public string Title;
+
+            public string FullName;
+
+            public string IntroNarative;
+
+            public string EmailAddress;
+
+            public string PhoneNumber;
+
+
+            public ProfileResult(int profileID, int colleagueID, string title, string skillIDsCsv, string eduIDsCsv, string certIDsCsv, string workIDsCsv)
+            {
+                RecordID = profileID;
+                Title = title;
+                ColleagueID = colleagueID;
+                SkillRecordIDs = CreateHashSet(skillIDsCsv);
+                EducationRecordIDs = CreateHashSet(eduIDsCsv);
+                CertificationRecordIDs = CreateHashSet(certIDsCsv);
+                WorkRecordIDs = CreateHashSet(workIDsCsv);
+            }
+
+
+            HashSet<int> CreateHashSet(string values)
+            {
+                if (string.IsNullOrEmpty(values))
+                    return new HashSet<int>();
+                else if (values.Length == 1)
+                    return new HashSet<int>() { int.Parse(values) };
+                else
+                    return new HashSet<int>(values.Split(',').Select(int.Parse));
+            }
+
+        }
         #endregion
 
 
@@ -3120,6 +3242,44 @@ namespace SCCPP1
             return true;
         }
 
+        // WHERE cc.colleague_id=@colleague_id
+        //AND(cc.description LIKE @keyword OR ct.type LIKE @keyword OR i.name LIKE @keyword);";
+        public static int[] SearchKeyphraseCertifications(string keyphrase)
+        {
+
+            if (keyphrase == null)
+                return new int[0];
+
+            List<int> ids = new List<int>();
+
+            using (SqliteConnection conn = new SqliteConnection(connStr))
+            {
+                conn.Open();
+
+
+                string sql = @"SELECT cc.id, cc.colleague_id, cc.cert_type_id, cc.institution_id, cc.municipality_id, cc.state_id, cc.start_date, cc.end_date, cc.description, ct.type AS cert_type, i.name AS institution
+                                            FROM colleague_certs cc
+                                            JOIN cert_types ct ON cc.cert_type_id = ct.id
+                                            JOIN institutions i ON cc.institution_id = i.id
+                                            WHERE (cc.description LIKE @keyphrase OR ct.type LIKE @keyphrase OR i.name LIKE @keyphrase);";
+
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@keyphrase", ValueCleaner(keyphrase));
+
+                    using (SqliteDataReader r = cmd.ExecuteReader())
+                    {
+
+                        //get all matching ids
+                        while (r.Read())
+                            ids.Add(GetInt32(r, 0));
+
+                    }
+                }
+            }
+
+            return ids.ToArray();
+        }
         #endregion
 
 
@@ -3445,9 +3605,52 @@ namespace SCCPP1
                 profile.AddSkill(i);
             }
 
+
+            profile = account.CreateProfile("Sub1");
+            profile.AddWork(1);
+            profile.AddWork(2);
+            profile.AddWork(3);
+            profile.AddWork(4);
+            profile.AddEducation(1);
+            profile.AddEducation(3);
+            profile.AddEducation(2);
+
+            //ummm? chatgpt actually wrote this, LOL, poor thing.
+            for (int i = 1; i <= 10; i++)
+            {
+                profile.AddSkill(i);
+            }
+            for (int i = 11; i <= 30; i++)
+            {
+                profile.AddSkill(i);
+            }
+
+
+            profile = account.CreateProfile("Sub2");
+            profile.AddWork(1);
+            profile.AddWork(2);
+            profile.AddWork(3);
+            profile.AddWork(4);
+            profile.AddEducation(1);
+            profile.AddEducation(3);
+            profile.AddEducation(2);
+
+            //ummm? chatgpt actually wrote this, LOL, poor thing.
+            for (int i = 1; i <= 10; i++)
+            {
+                profile.AddSkill(i);
+            }
+            for (int i = 11; i <= 30; i++)
+            {
+                profile.AddSkill(i);
+            }
+
             // Save all changes
             account.PersistAll();
 
+            Console.WriteLine(SearchKeyphraseProfiles("C#").Length);
+            Console.WriteLine(SearchKeyphraseProfiles("Mandy").Length);
+            Console.WriteLine(SearchKeyphraseProfiles("Augusta University").Length);
             Console.WriteLine("Saved!");
         }
 
@@ -3780,7 +3983,7 @@ namespace SCCPP1
 
         CREATE TABLE colleagues (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          user_hash TEXT NOT NULL,
+          user_hash TEXT UNIQUE NOT NULL,
           role INTEGER NOT NULL, --0=admin 1=normal
           name TEXT NOT NULL,
           email TEXT,

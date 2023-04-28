@@ -1,5 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
+using SCCPP1.Session;
 using SCCPP1.User;
+using System.Security.AccessControl;
 
 namespace SCCPP1.Database.Requests
 {
@@ -15,25 +17,35 @@ namespace SCCPP1.Database.Requests
 
         public RequestStatus Status { get; set; }
 
-        private Account _account;
+        private SessionData _sessionData;
+
         private DbRequestHandler _handler;
+
         private bool _isExecuting;
         public bool Success { get; internal set; }
         protected object? Result;
 
-        protected internal DbRequest(Account account)
+        protected internal DbRequest(SessionData sessionData)
         {
-            _account = account;
+            _sessionData = sessionData;
             Status = RequestStatus.PENDING;
+
+#if DEBUG_HANDLER
+            Console.WriteLine($"[{GetType().Name}] new request for object: {sessionData.GetType().Name}");
+#endif
         }
 
-        public Account GetAccount() => _account;
+        public SessionData GetSessionData() => _sessionData;
+
 
         internal void SetHandler(DbRequestHandler handler)
         {
             // Only set once
             if (_handler == null)
             {
+#if DEBUG_HANDLER
+                Console.WriteLine($"[{GetType().Name}] handler set.");
+#endif
                 _handler = handler;
             }
         }
@@ -44,27 +56,39 @@ namespace SCCPP1.Database.Requests
         {
             if (_handler != null)
                 throw new System.Exception("This request is already being processed by another handler.");
-
+#if DEBUG_HANDLER
+            Console.WriteLine($"[{GetType().Name}] executing request...");
+#endif
             SetHandler(handler);
             try
             {
+                ResetCommand();
                 Success = RunCommand(handler.Command);
             }
             catch (SqliteException e)
             {
-                Console.WriteLine(e.Message);
-                Console.WriteLine($"Command: {e.BatchCommand}");
-                Console.WriteLine($"Data: {e.Data}");
+
+#if DEBUG_HANDLER
+                Console.WriteLine($"[{GetType().Name}] handler set.");
+                Console.WriteLine($"[{GetType().Name}] {e.Message}");
+                Console.WriteLine($"[{GetType().Name}] Command: {e.BatchCommand}");
+                Console.WriteLine($"[{GetType().Name}] Data: {e.Data}");
+#endif
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+#if DEBUG_HANDLER
+                Console.WriteLine($"[{GetType().Name}] {e.Message}");
+#endif
             }
             finally
             {
                 _isExecuting = false;
+                Status = RequestStatus.COMPLETED;
+#if DEBUG_HANDLER
+                Console.WriteLine($"[{GetType().Name}] Executed request. Success? {Success}");
+#endif
             }
-
             return Success;
         }
 
@@ -74,11 +98,27 @@ namespace SCCPP1.Database.Requests
 
 
         #region Sql helper methods
+        protected virtual bool Delete(SqliteCommand cmd, string tableName, int id)
+        {
+            cmd.CommandText = $"DELETE FROM {tableName} WHERE id={id};";
+            cmd.ExecuteNonQuery();
+            return true;
+        }
+
         public int ResultAsID()
         {
             if (Result != null)
                 return Convert.ToInt32(Result);
             return -1;
+        }
+
+        public object? ResultAsObject()
+        {
+
+#if DEBUG_HANDLER
+            Console.WriteLine($"[{GetType().Name}] Returning result as object.");
+#endif
+            return Result;
         }
 
         protected void ResetCommand()
@@ -160,84 +200,4 @@ namespace SCCPP1.Database.Requests
         }
         #endregion
     }
-
-
-    public class InsertDbRequest : DbRequest
-    {
-        private string _tableName;
-        private Dictionary<string, object> _values;
-
-        public InsertDbRequest(Account account, string tableName, Dictionary<string, object> values) : base(account)
-        {
-            _tableName = tableName;
-            _values = values;
-        }
-
-        protected internal override bool RunCommand(SqliteCommand cmd)
-        {
-            cmd.CommandText = $"INSERT INTO {_tableName} ({string.Join(",", _values.Keys)}) VALUES ({string.Join(",", _values.Values.Select(v => $"@{v}"))})";
-            foreach (var vals in _values)
-            {
-                cmd.Parameters.AddWithValue($"@{vals.Key}", vals.Value);
-            }
-
-            return true;
-        }
-    }
-
-    public class UpdateDbRequest : DbRequest
-    {
-        private string _tableName;
-        private Dictionary<string, object> _values;
-        private string _whereClause;
-
-        public UpdateDbRequest(Account account, string tableName, Dictionary<string, object> values, string whereClause) : base(account)
-        {
-            _tableName = tableName;
-            _values = values;
-            _whereClause = whereClause;
-        }
-
-        protected internal override bool RunCommand(SqliteCommand cmd)
-        {
-            var setValues = string.Join(",", _values.Select(kvp => $"{kvp.Key} = @{kvp.Key}"));
-            cmd.CommandText = $"UPDATE {_tableName} SET {setValues} WHERE {_whereClause}";
-            foreach (var vals in _values)
-            {
-                cmd.Parameters.AddWithValue($"@{vals.Key}", vals.Value);
-            }
-
-            return true;
-        }
-    }
-
-    public class SelectDbRequest<T> : DbRequest
-    {
-        private string _tableName;
-        private string _whereClause;
-        private Func<SqliteDataReader, T> _resultSelector;
-
-        public SelectDbRequest(Account account, string tableName, string whereClause, Func<SqliteDataReader, T> resultSelector) : base(account)
-        {
-            _tableName = tableName;
-            _whereClause = whereClause;
-            _resultSelector = resultSelector;
-        }
-
-        protected internal override bool RunCommand(SqliteCommand cmd)
-        {
-            cmd.CommandText = $"SELECT * FROM {_tableName} WHERE {_whereClause}";
-
-            using (var reader = cmd.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    var result = _resultSelector(reader);
-                }
-            }
-
-            return true;
-        }
-    }
-
 }

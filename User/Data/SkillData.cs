@@ -1,4 +1,5 @@
 ﻿using SCCPP1.Database.Entity;
+using SCCPP1.Database.Requests;
 
 namespace SCCPP1.User.Data
 {
@@ -85,8 +86,13 @@ namespace SCCPP1.User.Data
             /*if (!NeedsSave)
                 return true;*/
 
-            NeedsSave = !(IsUpdated = DatabaseConnector.SaveColleagueSkill(this));
-            return IsUpdated && !NeedsSave;
+            if (Program.DbRequestSystem)
+                return !(NeedsSave = !(IsUpdated = DbRequestManager.Save(this)));
+            else
+            {
+                NeedsSave = !(IsUpdated = DatabaseConnector.SaveColleagueSkill(this));
+                return IsUpdated && !NeedsSave;
+            }
         }
 
 

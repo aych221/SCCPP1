@@ -5,7 +5,7 @@ using System.Data;
 
 namespace SCCPP1.Database.Requests.Operations
 {
-    public abstract class SingleValueRecordRequest : DbRequest
+    public abstract class SingleValueRecordRequest : RecordDataRequest
     {
 
         protected string TableName { get; private set; }

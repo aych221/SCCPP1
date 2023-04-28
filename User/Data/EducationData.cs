@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using SCCPP1.Database.Requests;
+using System.Security.Cryptography;
 
 namespace SCCPP1.User.Data
 {
@@ -95,7 +96,13 @@ namespace SCCPP1.User.Data
             /* if (!NeedsSave)
                  return true;*/
 
-            return !(NeedsSave = !(IsUpdated = DatabaseConnector.SaveEducationHistory(this)));
+
+            if (Program.DbRequestSystem)
+                return !(NeedsSave = !(IsUpdated = DbRequestManager.Save(this)));
+            else
+            {
+                return !(NeedsSave = !(IsUpdated = DatabaseConnector.SaveEducationHistory(this)));
+            }
         }
 
 

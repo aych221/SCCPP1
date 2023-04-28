@@ -1,4 +1,6 @@
 ﻿using SCCPP1.Database.Entity;
+using SCCPP1.Database.Requests;
+using static SCCPP1.Database.Requests.DbRequest;
 
 namespace SCCPP1.User
 {
@@ -64,6 +66,19 @@ namespace SCCPP1.User
                 NeedsSave = true;
                 field = value;
             }
+        }
+
+        public virtual object? AwaitDbResult(DbRequest request)
+        {
+#if DEBUG
+            Console.WriteLine("Awaiting result");
+#endif
+            while (request.Status != RequestStatus.COMPLETED) ;
+
+#if DEBUG
+            Console.WriteLine("returning result.");
+#endif
+            return request.ResultAsObject();
         }
 
         public abstract bool Save();

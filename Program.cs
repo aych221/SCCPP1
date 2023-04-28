@@ -1,20 +1,29 @@
-using Microsoft.AspNetCore.Authentication;
+#define DEBUG
+#define DEBUG_HANDLER
+
+#if DEBUG
+#else
+#undef DEBUG_HANDLER
+#endif
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using SCCPP1;
-using SCCPP1.Controllers;
 using SCCPP1.Session;
 
 internal class Program
 {
-
+    public const bool DbRequestSystem = false;
     private static void Main(string[] args)
     {
         //before site loads
-        DatabaseConnector.CreateDatabase();
+        if (DbRequestSystem)
+        {
+        }
+        else
+        {
+            DatabaseConnector.CreateDatabase();
+        }
         //DatabaseConnector.SaveBrittany(new SCCPP1.User.Account(new SessionData("brittl"), false));
         var builder = WebApplication.CreateBuilder(args);
 

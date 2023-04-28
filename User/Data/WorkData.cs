@@ -1,4 +1,6 @@
-﻿namespace SCCPP1.User.Data
+﻿using SCCPP1.Database.Requests;
+
+namespace SCCPP1.User.Data
 {
     public class WorkData : OwnerRecordData
     {
@@ -99,7 +101,13 @@
             /*if (!this.NeedsSave)
                 return true;*/
 
-            return !(NeedsSave = !(IsUpdated = DatabaseConnector.SaveWorkHistory(this)));
+
+            if (Program.DbRequestSystem)
+                return !(NeedsSave = !(IsUpdated = DbRequestManager.Save(this)));
+            else
+            {
+                return !(NeedsSave = !(IsUpdated = DatabaseConnector.SaveWorkHistory(this)));
+            }
         }
 
 

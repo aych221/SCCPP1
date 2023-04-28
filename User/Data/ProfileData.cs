@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
+using SCCPP1.Database.Requests;
 using SCCPP1.Models;
 
 namespace SCCPP1.User.Data
@@ -279,11 +280,18 @@ namespace SCCPP1.User.Data
         {
             if (!NeedsSave)
                 return true;
-            //Console.WriteLine($"BeforeSave called on ProfileData (Remove={Remove}, Saved={IsUpdated})");
-            IsUpdated = DatabaseConnector.SaveProfile(this);
-            NeedsSave = false;
-            //Console.WriteLine($"AfterSave called on ProfileData (Remove={Remove}, Saved={IsUpdated})");
-            return IsUpdated && !NeedsSave;
+
+
+            if (Program.DbRequestSystem)
+                return !(NeedsSave = !(IsUpdated = DbRequestManager.Save(this)));
+            else
+            {
+                //Console.WriteLine($"BeforeSave called on ProfileData (Remove={Remove}, Saved={IsUpdated})");
+                IsUpdated = DatabaseConnector.SaveProfile(this);
+                NeedsSave = false;
+                //Console.WriteLine($"AfterSave called on ProfileData (Remove={Remove}, Saved={IsUpdated})");
+                return IsUpdated && !NeedsSave;
+            }
         }
 
 

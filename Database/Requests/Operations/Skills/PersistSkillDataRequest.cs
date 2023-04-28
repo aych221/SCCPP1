@@ -3,18 +3,19 @@ using SCCPP1.User;
 using SCCPP1.User.Data;
 using System.Data;
 
-namespace SCCPP1.Database.Requests.Operations
+namespace SCCPP1.Database.Requests.Operations.Skills
 {
-    public class SkillDataRequest : OwnerRecordDataRequest
+    public class PersistSkillDataRequest : OwnerRecordDataRequest
     {
         protected SkillData _data;
 
-        public SkillDataRequest(SkillData data)
+        public PersistSkillDataRequest(SkillData data)
             : base(data.Owner)
         {
             _data = data;
         }
 
+        //persists a single skill record
         protected internal override bool RunCommand(SqliteCommand cmd)
         {
             if (_data.Remove)
@@ -32,7 +33,7 @@ namespace SCCPP1.Database.Requests.Operations
 
             //check if null (since category is not required to be set)
             if (_data.SkillCategoryName != null)
-              _data.SkillCategoryID = PersistSingleValue(cmd, "skill_categories", "name", _data.SkillCategoryName);
+                _data.SkillCategoryID = PersistSingleValue(cmd, "skill_categories", "name", _data.SkillCategoryName);
 
             if (_data.RecordID > 0)
             {
