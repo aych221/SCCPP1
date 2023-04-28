@@ -183,7 +183,7 @@ namespace SCCPP1.Pages
             }
 
 
-            //ValidateRecordData(SavedSkills, Account.SavedSkills, Account.RemoveSkill);
+            ValidateRecordData(SavedSkills, Account.SavedSkills, Account.RemoveSkill);
             ValidateRecordData(SavedEducation, Account.SavedEducationHistory, Account.RemoveEducation);
             ValidateRecordData(SavedCertifications, Account.SavedCertifications, Account.RemoveCertification);
             ValidateRecordData(SavedWork, Account.SavedWorkHistory, Account.RemoveWork);

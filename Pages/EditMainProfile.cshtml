@@ -6,7 +6,6 @@
     ViewData["Title"] = "Edit Main Profile";
 }
 
-<!-- This page is used to create the user's profile. Will only be seen once upon inital login. -->
 <style>
     body {
         font-family: Arial, Helvetica, sans-serif;
@@ -83,18 +82,18 @@
 
     /* Submit button styling*/
     input[type=submit] {
-        background-color: white;
-        color: #0062F3;
+        background-color: #00868B;
+        color: white;
         padding: 12px 20px;
-        border: 1px solid #0062F3;
+        border: 1px solid #00868B;
         border-radius: 4px;
         cursor: pointer;
     }
 
         input[type=submit]:hover {
-            background-color: #0062F3;
+            background-color: #7E94CB;
             color: white;
-            border: 1px solid #0062F3;
+            border: 1px solid #7E94CB;
         }
 
     .profile {
@@ -142,9 +141,8 @@
         border: 1px solid black;
     }
 </style>
-
 <body style="background-image: url(https://www.teamsparq.com/wp-content/themes/rural-sourcing/assets/images/backgrounds/pattern-gradient.jpg)">
-    <h1 style="color: white;">Edit Your Main Profile</h1>
+    <h1 style="color: white; text-align: center;">EDIT YOUR MAIN PROFILE</h1>
     <br />
     <div class="profile">
         <form method="post" id="myForm" style="background-image: url(https://www.teamsparq.com/wp-content/themes/rural-sourcing/assets/images/backgrounds/stars-light-left.svg)">
@@ -190,7 +188,7 @@
                         {
                             <li class="tag">
                                 @Model.Account.GetSkillData(Model.SavedSkills[i].RecordID).SkillName
-                                <button class="tag-close-btn">×</button>
+                                <button class="tag-close-btn" onclick="removePopulatedTag(this)">×</button>
                                 <input type="hidden" asp-for="@Model.SavedSkills[i].RecordID" />
                                 <input type="hidden" asp-for="@Model.SavedSkills[i].Category" />
                             </li>
@@ -206,13 +204,13 @@
                 <input type="text" asp-for="Skill!.OS" style="display:none;" />
                 @Html.HiddenFor(m => m.Skill.OS, new { id = "op-sys-input" })
                 <ul class="tags-list" id="op-sys-list">
-                    @for (int i = 0; i < Model.SavedSkills.Count; i ++)
+                    @for (int i = 0; i < Model.SavedSkills.Count; i++)
                     {
                         @if (Model.SavedSkills[i].Category.Equals("OS"))
                         {
                             <li class="tag">
                                 @Model.Account.GetSkillData(Model.SavedSkills[i].RecordID).SkillName
-                                <button class="tag-close-btn">×</button>
+                                <button class="tag-close-btn" onclick="removePopulatedTag(this)">×</button>
                                 <input type="hidden" asp-for="@Model.SavedSkills[i].RecordID" />
                                 <input type="hidden" asp-for="@Model.SavedSkills[i].Category" />
                             </li>
@@ -228,13 +226,13 @@
                 <input type="text" asp-for="Skill!.SoftAndFrame" style="display:none;" />
                 @Html.HiddenFor(m => m.Skill.SoftAndFrame, new { id = "soft-frame-input" })
                 <ul class="tags-list" id="soft-frame-list">
-                    @for (int i = 0; i < Model.SavedSkills.Count; i ++)
+                    @for (int i = 0; i < Model.SavedSkills.Count; i++)
                     {
                         @if (Model.SavedSkills[i].Category.Equals("Software and Framework"))
                         {
                             <li class="tag">
                                 @Model.Account.GetSkillData(Model.SavedSkills[i].RecordID).SkillName
-                                <button class="tag-close-btn">×</button>
+                                <button class="tag-close-btn" onclick="removePopulatedTag(this)">×</button>
                                 <input type="hidden" asp-for="@Model.SavedSkills[i].RecordID" />
                                 <input type="hidden" asp-for="@Model.SavedSkills[i].Category" />
                             </li>
@@ -251,13 +249,13 @@
                 @Html.HiddenFor(m => m.Skill.Other, new { id = "other-input" })
                 <ul class="tags-list" id="other-list">
                     @*Unfortunately, we have to loop through the whole list 4 times with this set up*@
-                    @for (int i = 0; i < Model.SavedSkills.Count; i ++)
+                    @for (int i = 0; i < Model.SavedSkills.Count; i++)
                     {
                         @if (Model.SavedSkills[i].Category.Equals("Other"))
                         {
                             <li class="tag">
                                 @Model.Account.GetSkillData(Model.SavedSkills[i].RecordID).SkillName
-                                <button class="tag-close-btn">×</button>
+                                <button class="tag-close-btn" onclick="removePopulatedTag(this)">×</button>
                                 <input type="hidden" asp-for="@Model.SavedSkills[i].RecordID" />
                                 <input type="hidden" asp-for="@Model.SavedSkills[i].Category" />
                             </li>
@@ -272,10 +270,10 @@
 
             <div id="experience-list">
                 <label for="Employer">Employer:</label>
-                <input type="text" asp-for="Work!.Employer">
+                <input type="text" asp-for="Work!.Employer" placeholder="Company Name">
 
                 <label for="JobTitle">Job Title:</label>
-                <input type="text" asp-for="Work!.JobTitle">
+                <input type="text" asp-for="Work!.JobTitle" placeholder="Position">
 
                 <label for="StartDate">Start Date:</label>
                 <input type="date" asp-for="Work!.StartDate">
@@ -288,7 +286,7 @@
 
                 <button type="button" onclick="addExperience()">Add Experience</button>
                 <ul id="experience-ul">
-                    @for (int i = 0; i < Model.SavedWork.Count; i ++)
+                    @for (int i = 0; i < Model.SavedWork.Count; i++)
                     {
                         WorkData d = Model.Account.GetWorkData(Model.SavedWork[i].RecordID);
                         <li>
@@ -315,13 +313,13 @@
 
             <div id="education-list">
                 <label for="Institution"> Institution: </label>
-                <input type="text" asp-for="Education!.Institution">
+                <input type="text" asp-for="Education!.Institution" placeholder="University Name">
 
                 <label for="Degree">Degree:</label>
-                <input type="text" asp-for="Education!.Degree">
+                <input type="text" asp-for="Education!.Degree" placeholder="Degree Earned Ex: (Bachelors, Masters, PHD)">
 
                 <label for="Field">Field:</label>
-                <input type="text" asp-for="Education!.Field">
+                <input type="text" asp-for="Education!.Field" placeholder="Subject Of Degree Ex: (Computer Science, CyberSecurity)">
 
                 <label for="StartDate">Start Date:</label>
                 <input type="date" asp-for="Education!.StartDate">
@@ -334,7 +332,7 @@
 
                 <button type="button" onclick="addEducation()">Add Education</button>
                 <ul id="education-ul">
-                    @for (int i = 0; i < Model.SavedEducation.Count; i ++)
+                    @for (int i = 0; i < Model.SavedEducation.Count; i++)
                     {
                         EducationData d = Model.Account.GetEducationData(Model.SavedEducation[i].RecordID);
                         <li>
@@ -362,10 +360,10 @@
 
             <div id="certification-list">
                 <label for="Institution"> Institution: </label>
-                <input type="text" asp-for="Certification!.Institution">
+                <input type="text" asp-for="Certification!.Institution" placeholder="University Name">
 
                 <label for="Certificate">Certificate:</label>
-                <input type="text" asp-for="Certification!.Certificate">
+                <input type="text" asp-for="Certification!.Certificate" placeholder="Name of Certificate Earned">
 
                 <label for="StartDate">Start Date:</label>
                 <input type="date" asp-for="Certification!.StartDate">
@@ -378,7 +376,7 @@
 
                 <button type="button" onclick="addCertification()">Add Certification</button>
                 <ul id="certification-ul">
-                    @for (int i = 0; i < Model.SavedCertifications.Count; i ++)
+                    @for (int i = 0; i < Model.SavedCertifications.Count; i++)
                     {
                         CertificationData d = Model.Account.GetCertificationData(Model.SavedCertifications[i].RecordID);
                         <li>
@@ -660,3 +658,9 @@
         }
     });</script>
 
+
+<script>
+    function removePopulatedTag(button) {
+        button.parentNode.remove();
+    }
+</script>
