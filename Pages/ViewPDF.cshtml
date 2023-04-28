@@ -148,17 +148,18 @@
 
                 <button type="button" onclick="hideAbout()" id="aboutButton" class="accordion">About</button>
                 <div id="aboutPanel" class="panel">
-                    <input type="checkbox" id="nameC" name="nameC" onchange="hideName()" checked>
-                    <label for="about"><b>Colleague Name</b></label><br>
-
-                    <input type="checkbox" id="phoneC" name="phoneC" onchange="hidePhone()" checked>
-                    <label for="about"><b>Colleague Phone</b></label><br>
-
-                    <input type="checkbox" id="emailC" name="emailC" onchange="hideEmail()" checked>
-                    <label for="about"><b>Colleague Email</b></label><br>
-
-                    <input type="checkbox" id="introC" name="introC" onchange="hideIntro()" checked>
-                    <label for="about"><b>Intro Narrative</b></label><br>
+                    @*<input type="checkbox" id="nameC" name="nameC" onchange="hideName()" checked>
+                    <label for="about"><b>Colleague Name</b></label><br>*@
+                    @Html.Raw(ViewData["name"])
+                    @*input type="checkbox" id="phoneC" name="phoneC" onchange="hidePhone()" checked>
+                    <label for="about"><b>Colleague Phone</b></label><br>*@
+                             @Html.Raw(ViewData["phone"])
+                   @* <input type="checkbox" id="emailC" name="emailC" onchange="hideEmail()" checked>
+                    <label for="about"><b>Colleague Email</b></label><br>*@
+                             @Html.Raw(ViewData["email"])
+                    @*<input type="checkbox" id="introC" name="introC" onchange="hideIntro()" checked>
+                    <label for="about"><b>Intro Narrative</b></label><br>*@
+                             @Html.Raw(ViewData["intro"])
                 </div>
                 <br>
 
@@ -261,27 +262,34 @@
 
 
             <div id="about" style="display:block">
-                <div id="name" style="display:block">
+                @*<div id="name" style="display:block">
                     <h1><b>@Model.Account.Name </b></h1>
-                </div>
+                </div>*@
+                @Html.Raw(ViewData["nameDisplay"])
                 <div id="contact">
                     <ul class="aboutList">
                         <li>
-                            <div id="phone" style="display:block">
+                            @*<div id="phone" style="display:block">
                                 | <i class="fa fa-phone"></i>   @Model.Account.PhoneNumber |
-                            </div>
+                            </div>*@
+
+                            @Html.Raw(ViewData["phoneDisplay"])
                         </li>
                         <li>
-                            <div id="email" style="display:block">
+                            @*<div id="email" style="display:block">
                                 | <i class="fa fa-envelope"></i>   @Model.Account.EmailAddress |
-                            </div>
+                            </div>*@
+
+                            @Html.Raw(ViewData["emailDisplay"])
                         </li>
                     </ul>
                 </div>
-                <div id="intro" style="display:block; text-align: left">
+                @*<div id="intro" style="display:block; text-align: left">
                     <h5><i class="fa fa-user"></i><b> About </b></h5>
                     <p id="red"> @Html.Raw(Model.Account.IntroNarrative) </p>
-                </div>
+                </div>*@
+
+                @Html.Raw(ViewData["introDisplay"])
             </div>
 
             <br>

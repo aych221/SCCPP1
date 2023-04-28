@@ -222,7 +222,7 @@
 
             <label for="SoftAndFrame">Software & Frameworks:</label>
             <div class="tags-input">
-                <input type="text" class="tags-input-field" data-list-selector="#soft-frame-list" placeholder="What languages do you know?... (Press enter to save)" onkeydown="onKeyDown(event)" />
+                <input type="text" class="tags-input-field" data-list-selector="#soft-frame-list" placeholder="What software suites and frameworks are you familiar with?... (Press enter to save)" onkeydown="onKeyDown(event)" />
                 <input type="text" asp-for="Skill!.SoftAndFrame" style="display:none;" />
                 @Html.HiddenFor(m => m.Skill.SoftAndFrame, new { id = "soft-frame-input" })
                 <ul class="tags-list" id="soft-frame-list">
@@ -244,7 +244,7 @@
 
             <label for="Other">Other:</label>
             <div class="tags-input">
-                <input type="text" class="tags-input-field" data-list-selector="#other-list" placeholder="What languages do you know?... (Press enter to save)" onkeydown="onKeyDown(event)" />
+                <input type="text" class="tags-input-field" data-list-selector="#other-list" placeholder="What other relevent skills do you have?... (Press enter to save)" onkeydown="onKeyDown(event)" />
                 <input type="text" asp-for="Skill!.Other" style="display:none;" />
                 @Html.HiddenFor(m => m.Skill.Other, new { id = "other-input" })
                 <ul class="tags-list" id="other-list">
@@ -360,7 +360,7 @@
 
             <div id="certification-list">
                 <label for="Institution"> Institution: </label>
-                <input type="text" asp-for="Certification!.Institution" placeholder="University Name">
+                <input type="text" asp-for="Certification!.Institution" placeholder="Certifier's Name">
 
                 <label for="Certificate">Certificate:</label>
                 <input type="text" asp-for="Certification!.Certificate" placeholder="Name of Certificate Earned">

@@ -23,7 +23,14 @@ namespace SCCPP1.Pages
 
 
         //This section sets up the binding for the savable checkboxes
-
+        [BindProperty]
+        public string nameC { get; set; }
+        [BindProperty]
+        public string phoneC { get; set; }
+        [BindProperty]
+        public string emailC { get; set; }
+        [BindProperty]
+        public string introC { get; set; }
         [BindProperty]
         public List<CheckBoxViewModel> Skills { get; set; }
 
@@ -94,6 +101,74 @@ namespace SCCPP1.Pages
             string sF = "";
             string other = "";
             bool first = true;
+
+
+            //These sections set the intial state of the About section in both the left checkbox and right PDF sections
+
+            string name = "", nameDisplay;
+
+            if (p.ShowName)
+            {
+                name = "<input type=\"checkbox\" id=\"nameC\" name=\"nameC\" onchange=\"hideName()\" checked>                  <label for=\"nameC\"><b>Colleague Name</b></label><br>";
+                nameDisplay = $"<div id=\"name\" style=\"display:block\">      <h1><b>{Account.Name} </b></h1>          </div>";
+
+            }
+            else
+            {
+                name = "<input type=\"checkbox\" id=\"nameC\" name=\"nameC\" onchange=\"hideName()\" >                  <label for=\"nameC\"><b>Colleague Name</b></label><br>";
+                nameDisplay = $"<div id=\"name\" style=\"display:none\">      <h1><b>{Account.Name} </b></h1>          </div>";
+            }
+            ViewData["name"] = name;
+            ViewData["nameDisplay"] = nameDisplay;
+
+
+            string phone = "", phoneDisplay = "";
+
+            if (p.ShowPhoneNumber)
+            {
+                phone = "<input type=\"checkbox\" id=\"phoneC\" name=\"phoneC\" onchange=\"hidePhone()\" checked>                   <label for=\"phoneC\"><b>Colleague Phone</b></label><br>";
+                phoneDisplay = $"<div id=\"phone\" style=\"display:block\">   | <i class=\"fa fa-phone\"></i>   {Account.PhoneNumber} |                  </div>";
+
+            }
+            else
+            {
+                phone = "<input type=\"checkbox\" id=\"phoneC\" name=\"phoneC\" onchange=\"hidePhone()\">                   <label for=\"phoneC\"><b>Colleague Phone</b></label><br>";
+                phoneDisplay = $"<div id=\"phone\" style=\"display:none\">   | <i class=\"fa fa-phone\"></i>   {Account.PhoneNumber} |                  </div>";
+            }
+            ViewData["phone"] = phone;
+            ViewData["phoneDisplay"] = phoneDisplay;
+
+            string email = "", emailDisplay = "";
+
+            if (p.ShowEmailAddress)
+            {
+                email = " <input type=\"checkbox\" id=\"emailC\" name=\"emailC\" onchange=\"hideEmail()\" checked>                  <label for=\"emailC\"><b>Colleague Email</b></label><br>";
+                emailDisplay = $"<div id=\"email\" style=\"display:block\">                 | <i class=\"fa fa-envelope\"></i>   {Account.EmailAddress} |   </div>";
+
+            }
+            else
+            {
+                email = " <input type=\"checkbox\" id=\"emailC\" name=\"emailC\" onchange=\"hideEmail()\" >                  <label for=\"emailC\"><b>Colleague Email</b></label><br>";
+                emailDisplay = $"<div id=\"email\" style=\"display:none\">                 | <i class=\"fa fa-envelope\"></i>   {Account.EmailAddress} |   </div>";
+            }
+
+            ViewData["email"] = email;
+            ViewData["emailDisplay"] = emailDisplay;
+
+            string intro = "", introDisplay = "";
+
+            if (p.ShowIntroNarrative)
+            {
+                intro = "<input type=\"checkbox\" id=\"introC\" name=\"introC\" onchange=\"hideIntro()\" checked>\r\n                    <label for=\"introC\"><b>Intro Narrative</b></label><br>";
+                introDisplay = $"<div id=\"intro\" style=\"display:block; text-align: left\">               <h5><i class=\"fa fa-user\"></i><b> About </b></h5>        <p id=\"red\"> {Account.IntroNarrative} </p>      </div>";
+            }
+            else
+            { 
+                intro = "<input type=\"checkbox\" id=\"introC\" name=\"introC\" onchange=\"hideIntro()\" >\r\n                    <label for=\"introC\"><b>Intro Narrative</b></label><br>";
+                introDisplay = $"<div id=\"intro\" style=\"display:none; text-align: left\">               <h5><i class=\"fa fa-user\"></i><b> About </b></h5>        <p id=\"red\"> {Account.IntroNarrative} </p>      </div>";
+            }
+            ViewData["intro"] = intro;
+            ViewData["introDisplay"] = introDisplay;
 
 
             //The following sections (one each for skills, edu, work, and certs) will iterate through all of the saved data, and assign them their condition in the HTML (namely, whether they are displayed or hidden via the Display: CSS)
@@ -231,14 +306,50 @@ namespace SCCPP1.Pages
         public IActionResult OnPost(List<CheckBoxViewModel> Skills, List<CheckBoxViewModel> EducationHistory, List<CheckBoxViewModel> Certifications, List<CheckBoxViewModel> WorkHistory)
         {
             // Handle form submission
-            if (!ModelState.IsValid)
-            {
-                Console.WriteLine("ERROR");
-                return Page();
-            }
+            //if (!ModelState.IsValid)
+            //{
+            //    Console.WriteLine("ERROR");
+            //    return Page();
+            //}
 
             p = Account.ChosenProfile();
 
+
+            //saves the bool of whether these have been selected or not
+            if(nameC == "on")
+            {
+                p.ShowName = true;
+            }
+            else
+            {
+                p.ShowName=false;
+            }
+
+            if (phoneC == "on")
+            {
+                p.ShowPhoneNumber = true;
+            }
+            else
+            {
+                p.ShowPhoneNumber = false;
+            }
+
+            if (emailC == "on")
+            {
+                p.ShowEmailAddress= true;
+            }
+            else
+            {
+                p.ShowEmailAddress = false;
+            }
+            if (introC == "on")
+            {
+                p.ShowIntroNarrative= true;
+            }
+            else
+            {
+                p.ShowIntroNarrative= false;
+            }
 
             //Saves what has been selected, by either adding or removing the skill from the profile if has been checked or not.
             foreach (var s in Skills)
@@ -289,6 +400,7 @@ namespace SCCPP1.Pages
                 }
             }
 
+            p.Save();
             //Saves the profile
             Account.PersistAll();
 
