@@ -16,7 +16,7 @@ namespace SCCPP1.Database.Requests
 {
     public static class DbRequestManager
     {
-        private const string _connectionString = @"Data Source=CPPDatabse.db";
+        private static string _connectionString = DbConstants.ConnectionString;
 
         private static SemaphoreSlim _handlerSemaphore;
 

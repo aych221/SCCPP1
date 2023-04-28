@@ -268,6 +268,12 @@ namespace SCCPP1.User.Data
         }
 
 
+
+        /// <summary>
+        /// Removes an id from a hashset if it exists, and sets NeedsSave to true if it was removed.
+        /// </summary>
+        /// <param name="hs"></param>
+        /// <param name="id"></param>
         private void RemoveFromHashSet(HashSet<int> hs, int id)
         {
             if (hs.Remove(id))

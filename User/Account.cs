@@ -878,7 +878,7 @@ namespace SCCPP1.User
             }
             else
             {
-                if (!DatabaseConnector.LoadColleagueEducationHistory1(this, out savedEducationHistory))
+                if (!DatabaseConnector.LoadColleagueEducationHistory(this, out savedEducationHistory))
                 {
                     success = false;
                 }
@@ -978,7 +978,7 @@ namespace SCCPP1.User
             }
             else
             {
-                if (!DatabaseConnector.LoadColleagueWorkHistory1(this, out savedWorkHistory))
+                if (!DatabaseConnector.LoadColleagueWorkHistory(this, out savedWorkHistory))
                 {
                     success = false;
                 }

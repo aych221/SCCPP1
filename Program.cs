@@ -22,7 +22,7 @@ internal class Program
         }
         else
         {
-            DatabaseConnector.CreateDatabase();
+            DatabaseConnector.InitiateDatabase();
         }
         //DatabaseConnector.SaveBrittany(new SCCPP1.User.Account(new SessionData("brittl"), false));
         var builder = WebApplication.CreateBuilder(args);

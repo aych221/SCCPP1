@@ -3,6 +3,7 @@
 
     static class DbConstants
     {
+        public static string ConnectionString => @"Data Source=CPPDatabse.db";
 
         /// <summary>
         /// Primarily used to determine default priorities of requests.
@@ -109,7 +110,6 @@
             return sql;
         }
 
-
         private const string _resetTablesSql = @"
 
         PRAGMA foreign_keys = 0;
@@ -133,6 +133,7 @@
         PRAGMA foreign_keys = 1;
 
         ";
+
         ///<summary>
         ///This is initial query used for creating the initial database and tables.
         ///Should only be used if the database is being completely reset or initially created.
