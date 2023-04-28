@@ -21,12 +21,11 @@ namespace SCCPP1.Pages
             Console.WriteLine("[ViewPDFModel] constructor called");
         }
 
+
+        //This section sets up the binding for the savable checkboxes
+
         [BindProperty]
         public List<CheckBoxViewModel> Skills { get; set; }
-
-
-        [BindProperty]
-        public List<CheckBoxViewModel> Buttons { get; set; }
 
 
         [BindProperty]
@@ -44,10 +43,12 @@ namespace SCCPP1.Pages
 
         private ProfileData p;
 
-        public IActionResult OnGet()
+        public IActionResult OnGet()  //on page load
         {
+            //sets selected profile to one chosen on User Home
+
             p = Account.ChosenProfile();
-            if (p is null)
+            if (p is null) //If someone navigates directly to the page, i.e. does not select a profile, auto-generates one
                 Account.ChooseProfile(Account.CreateProfile("ViewPDF Profile"));
             ViewData["profileName"] = p.Title;
 
@@ -59,6 +60,8 @@ namespace SCCPP1.Pages
                     IsSelected = true
                 }).ToList();
             }
+
+            //This section pre-loads the checkboxes
 
             Skills = Account.SavedSkills.Select(v => new CheckBoxViewModel
             {
@@ -90,15 +93,15 @@ namespace SCCPP1.Pages
             string opSys = "";
             string sF = "";
             string other = "";
+            bool first = true;
+
+
+            //The following sections (one each for skills, edu, work, and certs) will iterate through all of the saved data, and assign them their condition in the HTML (namely, whether they are displayed or hidden via the Display: CSS)
             foreach (var v in Skills)
             {
-
                 if (v.IsSelected)
                 {
-                    //Andrew, you could've just used a switch statement for this,
-                    //or an if statement and for loop in the .cs.html
-                    //lol :)
-                    //Love, Thomas
+                    
                     if (Account.GetSkillData(v.RecordID).SkillCategoryName == "Programming Languages")
                     {
                         progLangs += $"<li><div style = \"display:block\" id = \"skills_{v.RecordID}\"> {Account.GetSkillData(v.RecordID).SkillName + " "} </div></li> ";
@@ -150,57 +153,73 @@ namespace SCCPP1.Pages
             string edu = "";
             foreach (var v in EducationHistory)
             {
+
+                //This subsection determines if a default date is used for an enddate (done when selecting "Present" in the CreateMain) and replaces it with Present
+                string date;
+                if (Account.GetEducationData(v.RecordID).EndDate.ToString().Equals("1/1/0001"))
+                    date = "Present";
+                else
+                    date = Account.GetEducationData(v.RecordID).EndDate.ToString();
+
+                if (!first)
+                    edu += "<br>";
+                first = false;
                 if (v.IsSelected)
                 {
                     Console.WriteLine($"EDU {v.RecordID} is selected");
-                    edu += $"<div style = \"display:block\" id =\"edu_{v.RecordID}\"><b>" + Account.GetEducationData(v.RecordID).Institution + "</b><br><i>" + Account.GetEducationData(v.RecordID).EducationType + " in " + Account.GetEducationData(v.RecordID).Description + "</i><br>" + "From: " + Account.GetEducationData(v.RecordID).StartDate + "to " + Account.GetEducationData(v.RecordID).EndDate + "</div><br>";
+                    edu += $"<div style = \"display:block\" id =\"edu_{v.RecordID}\"><b>" + Account.GetEducationData(v.RecordID).Institution + "</b><br><i>" + Account.GetEducationData(v.RecordID).EducationType + " in " + Account.GetEducationData(v.RecordID).Description + "</i><br>" + "From: " + Account.GetEducationData(v.RecordID).StartDate + "to " + date + "</div>";
                 }
                 else
                 {
-                    edu += $"<div style = \"display:none\" id =\"edu_{v.RecordID}\"><b>" + Account.GetEducationData(v.RecordID).Institution + "</b><br><i>" + Account.GetEducationData(v.RecordID).EducationType + " in " + Account.GetEducationData(v.RecordID).Description + " </i><br>" + "From: " + Account.GetEducationData(v.RecordID).StartDate + "to " + Account.GetEducationData(v.RecordID).EndDate + "</div><br>";
+                    edu += $"<div style = \"display:none\" id =\"edu_{v.RecordID}\"><b>" + Account.GetEducationData(v.RecordID).Institution + "</b><br><i>" + Account.GetEducationData(v.RecordID).EducationType + " in " + Account.GetEducationData(v.RecordID).Description + " </i><br>" + "From: " + Account.GetEducationData(v.RecordID).StartDate + "to " + date + "</div>";
                 }
 
             
             }
-            //if (edu != "")
-            //{
-            //    edu = $"<div class=\"education\"><h5><i class=\"fa fa-graduation-cap\"></i><b> Education </b></h5><p id=\"blue\">{edu}</p></div>";
-            //}
             ViewData["eduDisplay"] = edu;
 
-
+            first = true;
             string certs = "";
             foreach (var v in Certifications)
             {
+                if (!first)
+                    certs += "<br>";
+                first = false;
                 if (v.IsSelected)
                 {
                     Console.WriteLine($"Skill {v.RecordID} is selected");
-                    certs += $"<div style = \"display:block\" id = \"certs_{v.RecordID}\"> {Account.GetCertificationData(v.RecordID).Institution} {Account.GetCertificationData(v.RecordID).CertificationType} </div> <br> ";
+                    certs += $"<div style = \"display:block\" id = \"certs_{v.RecordID}\"> {Account.GetCertificationData(v.RecordID).Institution} {Account.GetCertificationData(v.RecordID).CertificationType} </div>  ";
                 }
                 else
                 {
-                    certs += $"<div style = \"display:none\" id = \"certs_{v.RecordID}\"> {Account.GetCertificationData(v.RecordID).Institution} {Account.GetCertificationData(v.RecordID).CertificationType} </div> <br> ";
+                    certs += $"<div style = \"display:none\" id = \"certs_{v.RecordID}\"> {Account.GetCertificationData(v.RecordID).Institution} {Account.GetCertificationData(v.RecordID).CertificationType} </div>  ";
                 }
             }
-            //if (certs != "")
-            //{
-            //    certs = $"<div class=\"education\"><h5><i class=\"fa fa-graduation-cap\"></i><b> Certiications </b></h5><p id=\"blue\">{certs}</p></div>";
-            //}
             ViewData["certDisplay"] = certs;
 
 
-
+            first = true;
             string work = "";
             foreach (var v in WorkHistory)
             {
+                if (!first)
+                    work += "<br>";
+                first = false;
+
+                string date;                
+                if (Account.GetWorkData(v.RecordID).EndDate.ToString().Equals("1/1/0001"))
+                    date = "Present";
+                else
+                    date = Account.GetWorkData(v.RecordID).EndDate.ToString();
+
                 if (v.IsSelected)
                 {
                     Console.WriteLine($"Skill {v.RecordID} is selected");
-                    work += $"<div style = \"display:block\" id = \"work_{v.RecordID}\"> <b>{Account.GetWorkData(v.RecordID).Employer}</b> <br> {Account.GetWorkData(v.RecordID).JobTitle} <br> {Account.GetWorkData(v.RecordID).Description} <br> {Account.GetWorkData(v.RecordID).StartDate} to {Account.GetWorkData(v.RecordID).EndDate} <br> {Account.GetWorkData(v.RecordID).Description}  </div> <br> ";
+                    work += $"<div style = \"display:block\" id = \"work_{v.RecordID}\"> <b>{Account.GetWorkData(v.RecordID).Employer}</b> <br> {Account.GetWorkData(v.RecordID).JobTitle} <br> {Account.GetWorkData(v.RecordID).StartDate} to {date} <br> {Account.GetWorkData(v.RecordID).Description}  </div> ";
                 }
                 else
                 {
-                    work += $"<div style = \"display:none\" id = \"work_{v.RecordID}\"> <b>{Account.GetWorkData(v.RecordID).Employer}</b> <br> {Account.GetWorkData(v.RecordID).JobTitle} <br> {Account.GetWorkData(v.RecordID).Description} <br> {Account.GetWorkData(v.RecordID).StartDate} to {Account.GetWorkData(v.RecordID).EndDate} <br> {Account.GetWorkData(v.RecordID).Description} </div> <br> ";
+                    work += $"<div style = \"display:none\" id = \"work_{v.RecordID}\"> <b>{Account.GetWorkData(v.RecordID).Employer}</b> <br> {Account.GetWorkData(v.RecordID).JobTitle} <br> {Account.GetWorkData(v.RecordID).StartDate} to {date} <br> {Account.GetWorkData(v.RecordID).Description} </div> ";
                 }
             } 
             ViewData["workDisplay"] = work;
@@ -220,6 +239,8 @@ namespace SCCPP1.Pages
 
             p = Account.ChosenProfile();
 
+
+            //Saves what has been selected, by either adding or removing the skill from the profile if has been checked or not.
             foreach (var s in Skills)
             {
                 if (s.IsSelected)
@@ -268,7 +289,10 @@ namespace SCCPP1.Pages
                 }
             }
 
+            //Saves the profile
             Account.PersistAll();
+
+            //The prsumption is they are done when they click the exit button, so dumps back to the Home page.
             return RedirectToPage("UserHome");
 
         }

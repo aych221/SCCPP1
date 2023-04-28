@@ -8,7 +8,7 @@
 
 
 <style>
-
+    /* Styling for live PDF viewer */
     body {
         font-family: sans-serif;
     }
@@ -52,11 +52,16 @@
         height: auto;
         padding: 10px;
         margin: 10px;
+        border-style:  double;
+        border-color: #002b49;
+        border-radius: 5%;
+        
     }
 
+    /* Styling for left side */
     .accordion {
-        background-color: #0062f3;
-        color: #f2f2f2;
+        background-color: white;
+        color: #111243;
         cursor: pointer;
         padding: 10px;
         text-align: center;
@@ -67,9 +72,8 @@
     }
 
         .accordion:hover {
-            border: 5px solid black;
-            border-radius: 4px;
-            box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19)
+            background-color: #7E94CB !important;
+            color: white;
         }
 
 
@@ -93,55 +97,54 @@
         margin: auto;
     }
 
-    .bs {
-        margin-top: 10px;
-        margin-buttom: 10px;
-        background-color: lightgrey;
-        border: 2px solid #0062F3;
-        border-radius: 4px;
-    }
-
-        .bs:hover {
-            background-color: #0062F3;
-            color: white;
-            border: 5px solid black;
-            box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
-            transition: 0.3s;
-        }
-
     .miniButton {
         float: left;
         width: 25%;
-        background-color: #0062f3;
-        color: #f2f2f2;
+        background-color: white;
+        color: #111243;
         cursor: pointer;
         text-align: center;
         outline: none;
         transition: 0.3s;
-        border: 1px solid black;
+        /*border: 1px solid black;*/
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
         .miniButton:hover {
-            border: 5px solid black;
-            border-radius: 4px;
-            box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19)
+            background-color: #7E94CB !important;
+            color: white;
         }
+
+    .bs {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        background-color: white;
+        color: #111243;
+    }
+
+        .bs:hover {
+            background-color: #7E94CB;
+            color: white;
+        }
+
+    .panel {
+        color: white;
+    }
 </style>
 
 
-<body>
+<body style="background-image: url(https://www.teamsparq.com/wp-content/themes/rural-sourcing/assets/images/backgrounds/stars-light-left.svg)">
     <div id="container">
 
         @*
         Below is the the generated checkboxes that determine what data should be shown on the PDF*@
 
-        <div class="left" id="left">
+        <div class="left" id="left" style="background-image: url(https://www.teamsparq.com/wp-content/themes/rural-sourcing/assets/images/backgrounds/pattern-gradient.jpg)">
             <form method="post">
 
 
-                <h3 style="text-align:center">@Html.Raw(ViewData["profileName"])</h3>
+                <h2 style="text-align:center; color:white;">@Html.Raw(ViewData["profileName"])</h2>
 
                 <button type="button" onclick="hideAbout()" id="aboutButton" class="accordion">About</button>
                 <div id="aboutPanel" class="panel">
@@ -165,7 +168,7 @@
                 @*Oddly, type=button is needed to prevent posting.*@
                 <button type="button" id="eduButton" class="accordion" onclick="hideEdu()">Education</button>
 
-                <div id="eduPanel" style="display:block">
+                <div id="eduPanel" style="display:block" class="panel">
                     @*              These sections are responsible for actually determining whether or not the checkbox was saved as selected in the profile, and displays them as such if they are, unchecked if not.*@
 
                     @for (int i = 0; i < Model.EducationHistory.Count; i++)
@@ -402,7 +405,8 @@
             a.style.display = "block";
             b.style.display = "block";
             c.innerHTML = "Education";
-            c.style.backgroundColor = "#0062f3";
+            c.style.backgroundColor = "#FFFFFF";
+            a.style.color = "#111243";
         }
         else {
             a.style.display = "none";
@@ -421,7 +425,8 @@
             a.style.display = "block";
             b.style.display = "block";
             c.innerHTML = "Certifications";
-            c.style.backgroundColor = "#0062f3";
+            c.style.backgroundColor = "#FFFFFF";
+            a.style.color = "#111243";
         }
         else {
             a.style.display = "none";
@@ -438,7 +443,8 @@
             a.style.display = "block";
             b.style.display = "block";
             c.innerHTML = "Work History";
-            c.style.backgroundColor = "#0062f3";
+            c.style.backgroundColor = "#FFFFFF";
+            a.style.color = "#111243";
         }
         else {
             a.style.display = "none";
@@ -455,7 +461,8 @@
             a.style.display = "block";
             b.style.display = "block";
             c.innerHTML = "Skills";
-            c.style.backgroundColor = "#0062f3";
+            c.style.backgroundColor = "#FFFFFF";
+            a.style.color = "#111243";
         }
         else {
             a.style.display = "none";
@@ -473,7 +480,8 @@
         if (a.style.display != "block") {
             a.style.display = "block";
             b.innerHTML = "Languages";
-            b.style.backgroundColor = "#0062f3";
+            b.style.backgroundColor = "#FFFFFF";
+            a.style.color = "#111243";
         }
         else {
             a.style.display = "none";
@@ -489,7 +497,8 @@
         if (a.style.display != "block") {
             a.style.display = "block";
             b.innerHTML = "OpSys";
-            b.style.backgroundColor = "#0062f3";
+            b.style.backgroundColor = "#FFFFFF";
+            a.style.color = "#111243";
         }
         else {
             a.style.display = "none";
@@ -505,7 +514,8 @@
         if (a.style.display != "block") {
             a.style.display = "block";
             b.innerHTML = "Software";
-            b.style.backgroundColor = "#0062f3";
+            b.style.backgroundColor = "#FFFFFF";
+            a.style.color = "#111243";
         }
         else {
             a.style.display = "none";
@@ -521,7 +531,8 @@
         if (a.style.display != "block") {
             a.style.display = "block";
             b.innerHTML = "Others";
-            b.style.backgroundColor = "#0062f3";
+            b.style.backgroundColor = "#FFFFFF";
+            a.style.color = "#111243";
         }
         else {
             a.style.display = "none";
@@ -538,7 +549,8 @@
             a.style.display = "block";
             b.style.display = "block";
             c.innerHTML = "About";
-            c.style.backgroundColor = "#0062f3";
+            c.style.backgroundColor = "#FFFFFF";
+            a.style.color = "#111243";
         }
         else {
             a.style.display = "none";
@@ -587,7 +599,7 @@
 
 
 
-    //strips away non-PDF elements
+    //strips away non-PDF elements for printing and saving
     function printPDF() {
         var x = document.getElementById("topbar");
         var y = document.getElementById("left");

@@ -38,7 +38,7 @@ namespace SCCPP1.Pages
 
             foreach (ProfileData e in Account.SavedProfiles.Values)
             {
-                st += $"<div class = \"subp\"> <i style='font-size:120px' class='far'>&#xf15c;</i> <input type = \"submit\" name = \"subP\" Value = \"{e.Title}\" > </div>";
+                st += $"<div id =\"{e.Title}\" class = \"subp\"> <i style='font-size:120px' class='far'>&#xf15c;</i> <input type = \"submit\" class = \"subP\" name = \"subP\" Value = \"{e.Title}\" > </div>";
             }
             ViewData["subProfiles"] = st;
 

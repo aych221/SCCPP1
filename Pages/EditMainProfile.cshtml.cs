@@ -359,7 +359,7 @@ namespace SCCPP1.Pages
                 Account.PersistAll();
             }
 
-                return Page();
+            return RedirectToPage("UserHome");
         }
     }
 }

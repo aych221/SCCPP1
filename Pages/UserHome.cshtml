@@ -5,7 +5,7 @@
 }
 <style>
     /* Submit button styling*/
-    input[type=submit] {
+    .buttons {
         background-color: #00868B;
         color: white;
         padding: 12px 20px;
@@ -14,7 +14,7 @@
         cursor: pointer;
     }
 
-        input[type=submit]:hover {
+        .buttons:hover {
             background-color: #7E94CB;
             color: white;
             border: 1px solid #7E94CB;
@@ -51,6 +51,7 @@
     .search-container {
         margin-top: 20px;
         margin-bottom: 20px;
+        float: right;
     }
 
         .search-container input[type=text] {
@@ -58,7 +59,7 @@
             margin-right: 10px;
             border: none;
             border-radius: 3px;
-            width: 30%;
+            width: 250px;
             box-sizing: border-box;
             background-color: #f1f1f1;
         }
@@ -67,6 +68,30 @@
                 background-color: #ddd;
                 outline: none;
             }
+
+    .subprofiles {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .subprofile {
+        border-radius: 5px;
+        background-color: white;
+        padding: 20px;
+        margin: 0 10px 20px 0;
+    }
+
+        .subprofile:not(:last-child) {
+            margin-bottom: 20px;
+        }
+
+    .subp {
+        padding: 10px;
+    }
+
 </style>
 <html>
 <head>
@@ -75,22 +100,49 @@
     <!--Get your own code at fontawesome.com-->
 </head>
 <body style="background-image: url(https://www.teamsparq.com/wp-content/themes/rural-sourcing/assets/images/backgrounds/stars-light-left.svg)">
-    <h1 style="color: #7E94CB;">USER HOME</h1>
-    @* this provides the link to edit the main page, followed by the placing of the profiles*@
-    <a class="transport" href="EditMainProfile"><button>Edit Main Profile</button></a>
-    <br />
-    <br />
-    <div class="search-container">
-        <form method="get" action="">
-            <input type="text" placeholder="Search profiles" name="searchTerm" />
-            <input type="submit" value="Search" />
+    <div class="wrapper">
+        <h1 style="color: #7E94CB; text-align: center;">USER HOME</h1>
+        <div class="search-container">
+            <form method="get" action="">
+                <input type="text" placeholder="Search profiles" id="searchBox" name="searchTerm" />
+                <button class="buttons" type="button" onclick="search()">Search</button>
+            </form>
+        </div>
+        <i style='font-size:120px' class='far'>&#xf15c;</i>
+        @* this provides the link to edit the main page, followed by the placing of the profiles*@
+        <a class="transport" href="EditMainProfile"><button class="buttons">Edit Main Profile</button></a>
+        <form method="post">
+            <br>
+            <i style='font-size:120px' class='far'>&#xf15c;</i>
+            <input type="text" name="newSubP" placeholder="Name your new profile" required maxlength="50"/>
+            <button value = "Submit" class="buttons" name="newProf">Create Profile</button>
+            <br />
+
+        </form>
+            <form method="post">
+            <div class="subprofiles">
+                @Html.Raw(ViewData["subProfiles"])
+            </div>
         </form>
     </div>
-    <form method="post">
-        @Html.Raw(ViewData["subProfiles"])
-        <br>
-        <input type="text" name="newSubP" placeholder="Enter a name to create a new Profile!" />
-        <input type="submit" name="newProf" />
-    </form>
 </body>
 </html>
+
+<script>
+    function search() {
+        var s = document.getElementById("searchBox").value;
+        var subP = document.getElementsByClassName("subP");
+        console.log(s);
+        console.log(subP.length);
+        for (i = 0; i < subP.length; i++) {
+            console.log(subP[i].value.toUpperCase());
+            if (subP[i].value.toUpperCase().includes(s.toUpperCase())) {
+                subP[i].hidden = false;
+                document.getElementById(subP[i].value).hidden = false;
+            } else {
+                subP[i].hidden = true;
+                document.getElementById(subP[i].value).hidden = true;
+            }
+        }
+    }
+</script>

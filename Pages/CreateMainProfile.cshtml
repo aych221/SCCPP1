@@ -139,33 +139,34 @@
         padding: 10px;
         border: 1px solid black;
     }
+
 </style>
 <body style="background-image: url(https://www.teamsparq.com/wp-content/themes/rural-sourcing/assets/images/backgrounds/pattern-gradient.jpg)">
-    <h1 style="color: white;">CREATE YOUR MAIN PROFILE</h1>
+    <h1 style="color: white; text-align: center;">CREATE YOUR MAIN PROFILE</h1>
     <br />
     <div class="profile">
         <form method="post" id="myForm" style="background-image: url(https://www.teamsparq.com/wp-content/themes/rural-sourcing/assets/images/backgrounds/stars-light-left.svg)">
             <legend><b>About:</b></legend>
 
             <label for="FirstName">First Name:*</label>
-            <input type="text" asp-for="Colleague!.FirstName" placeholder="Ex. John" required />
+            <input type="text" asp-for="Colleague!.FirstName" placeholder="Ex: John" required />
             <br />
 
             <label for="LastName">Last Name:*</label>
-            <input type="text" asp-for="Colleague!.LastName" placeholder="Ex. Doe" required />
+            <input type="text" asp-for="Colleague!.LastName" placeholder="Ex: Doe" required />
             <br />
 
             <label for="MiddleName">Middle Name:</label>
-            <input type="text" asp-for="Colleague!.MiddleName" placeholder="Ex. Bob" />
+            <input type="text" asp-for="Colleague!.MiddleName" placeholder="Ex: Bob" />
             <br />
 
             <label for="PhoneNumber">Phone:*</label>
-            <input type="tel" asp-for="Colleague!.PhoneNumber" placeholder="Ex. (987)-654-3210" required />
+            <input type="tel" asp-for="Colleague!.PhoneNumber" placeholder="Ex: (987)-654-3210" required />
             <br />
             <br />
 
             <label for="EmailAddress">Email Address:*</label>
-            <input type="email" asp-for="Colleague!.EmailAddress" placeholder="Ex. jdoe@example.com" required />
+            <input type="email" asp-for="Colleague!.EmailAddress" placeholder="Ex: jdoe@example.com" required />
             <br />
             <br />
 
@@ -216,10 +217,10 @@
 
             <div id="experience-list">
                 <label for="Employer">Employer:</label>
-                <input type="text" asp-for="Work!.Employer">
+                <input type="text" asp-for="Work!.Employer" placeholder="Company Name">
 
                 <label for="JobTitle">Job Title:</label>
-                <input type="text" asp-for="Work!.JobTitle">
+                <input type="text" asp-for="Work!.JobTitle" placeholder="Position">
 
                 <label for="StartDate">Start Date:</label>
                 <input type="date" asp-for="Work!.StartDate">
@@ -247,13 +248,13 @@
 
             <div id="education-list">
                 <label for="Institution"> Institution: </label>
-                <input type="text" asp-for="Education!.Institution">
+                <input type="text" asp-for="Education!.Institution" placeholder="University Name">
 
                 <label for="Degree">Degree:</label>
-                <input type="text" asp-for="Education!.Degree">
+                <input type="text" asp-for="Education!.Degree" placeholder="Degree Earned Ex: (Bachelors, Masters, PHD)">
 
                 <label for="Field">Field:</label>
-                <input type="text" asp-for="Education!.Field">
+                <input type="text" asp-for="Education!.Field" placeholder="Subject Of Degree Ex: (Computer Science, CyberSecurity)">
 
                 <label for="StartDate">Start Date:</label>
                 <input type="date" asp-for="Education!.StartDate">
@@ -281,10 +282,10 @@
 
             <div id="certification-list">
                 <label for="Institution"> Institution: </label>
-                <input type="text" asp-for="Certification!.Institution">
+                <input type="text" asp-for="Certification!.Institution" placeholder="University Name">
 
                 <label for="Certificate">Certificate:</label>
-                <input type="text" asp-for="Certification!.Certificate">
+                <input type="text" asp-for="Certification!.Certificate" placeholder="Name of Certificate Earned">
 
                 <label for="StartDate">Start Date:</label>
                 <input type="date" asp-for="Certification!.StartDate">
@@ -702,4 +703,3 @@
             e.preventDefault();
         }
     });</script>
-
