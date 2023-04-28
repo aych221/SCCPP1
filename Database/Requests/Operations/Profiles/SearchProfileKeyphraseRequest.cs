@@ -1,7 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
-using SCCPP1.User.Data;
 using SCCPP1.User;
-using static SCCPP1.DatabaseConnector;
 
 namespace SCCPP1.Database.Requests.Operations.Profiles
 {

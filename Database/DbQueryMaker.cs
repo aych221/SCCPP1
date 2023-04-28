@@ -803,44 +803,6 @@ namespace SCCPP1.Database
         }
 
 
-        public static DatabaseResponse InsertOrIgnore(SqliteCommand cmd, DbTable table, params DbRecord[] records)
-        {
-            //pre-command process
-            CommandType commandType = cmd.CommandType;
-            cmd.CommandType = CommandType.Text;
-            string commandText = cmd.CommandText;
-            cmd.Parameters.Clear();
-
-
-            //generate sql string
-            string sql = InsertOrIgnore(table, records);
-            cmd.CommandText = sql;
-
-            Console.WriteLine(sql);
-
-
-            DbColumn col;
-
-            //replace all tuple params with values
-            for (int i = 0; i < records.Length; i ++)
-            {
-                for (int j = 0; j < records[i].Columns.Length; j ++)
-                {
-                    col = records[i].Columns[j];
-                    cmd.Parameters.AddWithValue($"{col.Name}{i}", col.Value);
-                }
-            }
-
-            Console.WriteLine("Rows affected: " + cmd.ExecuteNonQuery());
-            
-
-            //post-command process
-            cmd.CommandType = commandType;
-            cmd.CommandText = commandText;
-
-            return null;
-        }
-
         /// <summary>
         /// Generates an UPDATE statement for a table, setting only the required columns to their corresponding parameter values.
         /// </summary>

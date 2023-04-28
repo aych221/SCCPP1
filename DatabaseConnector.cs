@@ -484,7 +484,7 @@ namespace SCCPP1
                 {
 
                     cmd.Parameters.AddWithValue("@id", account.RecordID);
-                    AddParameterValues(account, cmd.Parameters);
+                    AddAccountParameterValues(account, cmd.Parameters);
 
                     return cmd.ExecuteNonQuery();
                 }
@@ -497,7 +497,7 @@ namespace SCCPP1
         /// </summary>
         /// <param name="account">The account to pull values from.</param>
         /// <param name="parameters">The collection of parameters from the command.</param>
-        private static void AddParameterValues(Account account, SqliteParameterCollection parameters)
+        private static void AddAccountParameterValues(Account account, SqliteParameterCollection parameters)
         {
             //since this is hashed, we won't need to clean the value
             parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(account.GetUsername()));
@@ -615,31 +615,6 @@ namespace SCCPP1
         }
 
 
-        public static int GetUserRecordID(string username)
-        {
-
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"SELECT id, role, email, name FROM colleagues WHERE (user_hash=@user);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@user", Utilities.ToSHA256Hash(username));
-                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleRow))
-                    {
-
-                        //could not find account.
-                        //redirect account to creation page, if any input is entered, save new account to database
-                        if (!r.Read())
-                            return -1;
-
-                        return GetInt32(r, 0);
-                    }
-                }
-            }
-        }
-
-
 
         /// <summary>
         /// Loads a new Account object into the SessionData provided.
@@ -657,51 +632,6 @@ namespace SCCPP1
             return account;
         }
 
-
-        /**
-         * 
-
-        CREATE TABLE colleagues (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          user_hash TEXT NOT NULL,
-          role INTEGER NOT NULL, --0=admin 1=normal
-          name TEXT NOT NULL,
-          email TEXT,
-          phone INTEGER,
-          address TEXT,
-          intro_narrative TEXT
-        );
-
-         * 
-         * 
-         * 
-         */
-        public static int CreateUser(SessionData data)
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"INSERT INTO colleagues (user_hash, role, name, email, phone, address, intro_narrative, main_profile_id) VALUES (@user_hash, @role, @name, @email, @phone, @address, @intro_narrative, @main_profile_id) RETURNING id;";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    Account account = new Account(data, false);
-
-                    cmd.Parameters.AddWithValue("@user_hash", Utilities.ToSHA256Hash(account.GetUsername()));
-
-                    cmd.Parameters.AddWithValue("@role", account.Role);
-                    cmd.Parameters.AddWithValue("@name", ValueCleaner(account.Name));
-                    cmd.Parameters.AddWithValue("@email", ValueCleaner(account.EmailAddress));
-
-                    object? accountID = cmd.ExecuteScalar();
-
-                    if (accountID == null)
-                        return -1;
-
-                    return account.RecordID = Convert.ToInt32(accountID);//return record ID
-
-                }
-            }
-        }
 
 
         public static Account LoadAccount(SessionData data)
@@ -774,44 +704,6 @@ namespace SCCPP1
             return ids.ToArray();
         }
 
-
-
-        [Obsolete ("Use GetAccount() instead.")]
-        public static Account? GetUser(string userID)
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"SELECT id, role, name, email, phone, address, intro_narrative, main_profile_id FROM colleagues WHERE (user_hash=@user_hash);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@user_hash", userID);
-                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleRow))
-                    {
-
-                        //could not find account.
-                        //redirect account to creation page, if any input is entered, save new account to database
-                        if (!r.Read())
-                            return null;
-
-
-                        //load new instance with basic colleague information
-                        Account a = new Account(null, true);
-
-                        a.RecordID = GetInt32(r, 0);
-                        a.Role = GetInt32(r, 1);
-                        a.Name = GetString(r, 2);
-                        a.EmailAddress = GetString(r, 3);
-                        a.PhoneNumber = GetInt64(r, 4);
-                        a.StreetAddress = GetString(r, 5);
-                        a.IntroNarrative = GetString(r, 6);
-                        a.MainProfileID = GetInt32(r, 7);
-
-                        return a;
-                    }
-                }
-            }
-        }
 
 
         //loads user based on ID into an Account, likely will be used by admins
@@ -1335,95 +1227,6 @@ namespace SCCPP1
 
 
         /// <summary>
-        /// Returns all of the saved colleague skills.
-        /// </summary>
-        /// <param name="account">The account associated with the skills</param>
-        /// <returns>a list of SkillData that stores the record in memory</returns>
-        public static List<SkillData>? GetColleagueSkills(Account account)
-        {
-            //session must've not had an account, so user must not exist
-            if (account == null)
-                return null;
-
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"SELECT * FROM colleague_skills WHERE (colleague_id=@id);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@id", account.RecordID);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        List<SkillData> list = new List<SkillData>();
-
-                        SkillData sd;
-                        while (r.Read())
-                        {
-
-                            sd = new SkillData(account, GetInt32(r, 0));
-                            sd.SkillID = GetInt32(r, 2);
-                            sd.Rating = GetInt32(r, 3);
-
-                            list.Add(sd);
-                        }
-
-                        return list;
-                    }
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Returns all of the saved colleague skills.
-        /// </summary>
-        /// <param name="account">The account associated with the skills</param>
-        /// <param name="skillIds">array of skill ids in order of loading</param>
-        /// <returns>a list of SkillData that stores the record in memory</returns>
-        public static List<SkillData>? GetColleagueSkills(Account account, out List<int>? skillIds)
-        {
-            //session must've not had an account, so user must not exist
-            if (account == null)
-            {
-                skillIds = null;
-                return null;
-            }
-
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"SELECT * FROM colleague_skills WHERE (colleague_id=@id);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@id", account.RecordID);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        List<SkillData> list = new List<SkillData>();
-
-                        //this is used so that we don't need to open and close multiple sessions
-                        //and so we don't have to run a loop more than once when populating skillNames
-                        skillIds = new List<int>();
-
-                        SkillData sd;
-
-                        while (r.Read())
-                        {
-
-                            sd = new SkillData(account, GetInt32(r, 0));
-                            skillIds.Add(sd.SkillID = GetInt32(r, 2));
-                            sd.Rating = GetInt32(r, 3);
-
-                            list.Add(sd);
-                        }
-
-                        return list;
-                    }
-                }
-            }
-        }
-
-
-        /// <summary>
         /// Loads the colleague's skills into the Account class. This will populate the Account.Skills list.
         /// </summary>
         /// <param name="account">The account associated with the skills</param>
@@ -1848,132 +1651,12 @@ namespace SCCPP1
             }
         }
 
-        [Obsolete("Use the LoadColleagueEducationHistory1 method instead.")]
         /// <summary>
         /// Loads the education history of a colleague into the Account class. This method populates the Account.EducationHistory list.
         /// </summary>
         /// <param name="account">The Account object to which the education history will be associated.</param>
         /// <param name="useCache">A boolean parameter indicating whether the cached data should be used or not. The default value is false.</param>
         /// <returns>Returns true if the education history was loaded successfully, false otherwise.</returns>
-        public static bool LoadColleagueEducationHistory(Account account, bool useCache = false)
-        {
-            if (account == null || account.RecordID < 0)
-                return false;
-
-            //temp caches
-            Dictionary<int, string> educationTypes = new(), institutionNames = new();
-
-            //create skills list
-            StringBuilder sqlEduType = new StringBuilder("SELECT id, type FROM education_types WHERE id IN ("),
-                sqlInsti = new StringBuilder("SELECT id, name FROM institutions WHERE id IN (");
-            List<EducationData> list;
-
-
-            string sql;
-
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                sql = @"SELECT id, colleague_id, education_type_id, institution_id, municipality_id, state_id, start_date, end_date, description FROM education_history WHERE (colleague_id=@colleague_id);";
-
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@colleague_id", account.RecordID);
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-                        list = new List<EducationData>();
-
-                        while (r.Read())
-                        {
-                            EducationData ed = new EducationData(account, GetInt32(r, 0));
-                            ed.EducationTypeID = GetInt32(r, 2);
-                            ed.InstitutionID = GetInt32(r, 3);
-                            ed.Location = new Location(GetInt32(r, 4), GetInt32(r, 5));
-
-                            ed.StartDate = GetDateOnly(r, 6);
-                            ed.EndDate = GetDateOnly(r, 7);
-
-                            ed.Description = GetString(r, 8);
-
-                            list.Add(ed);
-
-                            //add education_type_id
-                            if (educationTypes.TryAdd(ed.EducationTypeID, null))
-                            {
-                                //new id, add it
-                                sqlEduType.Append(ed.EducationTypeID);
-                                sqlEduType.Append(',');
-                            }
-
-                            //add institution_id
-                            if (institutionNames.TryAdd(ed.InstitutionID, null))
-                            {
-                                //new id, add it
-                                sqlInsti.Append(ed.InstitutionID);
-                                sqlInsti.Append(',');
-                            }
-                        }
-
-                        //remove last comma, then append ending
-                        sqlEduType.Remove(sqlEduType.Length - 1, 1).Append(");");
-                        sqlInsti.Remove(sqlInsti.Length - 1, 1).Append(");");
-
-                        account.EducationHistory = list;
-                    }
-                }
-
-                //no records found.
-                if (account.EducationHistory == null || account.EducationHistory.Count < 1)
-                    return false;
-
-                //Console.WriteLine($"Found Education Records: {list.Count}");
-
-                //load edu types.
-                using (SqliteCommand cmd = new SqliteCommand(sqlEduType.ToString(), conn))
-                {
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-
-                        //fill edutype dict
-                        while (r.Read())
-                            educationTypes[GetInt32(r, 0)] = GetString(r, 1);
-
-                    }
-                }
-                //Console.WriteLine($"Found EducationTypes: {educationTypes.Count}");
-
-                //load institution names.
-                using (SqliteCommand cmd = new SqliteCommand(sqlInsti.ToString(), conn))
-                {
-                    using (SqliteDataReader r = cmd.ExecuteReader())
-                    {
-
-                        //fill institution dict
-                        while (r.Read())
-                            institutionNames[GetInt32(r, 0)] = GetString(r, 1);
-
-                    }
-                }
-
-                //Console.WriteLine($"Found Institutions: {institutionNames.Count}");
-            }
-
-            //these should always have at least 1 count if one record is loaded.
-            if (educationTypes.Count == 0 || institutionNames.Count == 0)
-                return false;
-
-            //fill data
-            foreach (EducationData ed in list)
-            {
-                ed.EducationType = educationTypes[ed.EducationTypeID];
-                ed.Institution = institutionNames[ed.InstitutionID];
-            }
-
-            //Console.WriteLine($"Loaded {list.Count} education records!");
-
-            return true;
-        }
-
         public static bool LoadColleagueEducationHistory1(Account account, bool useCache = false)
         {
             if (account == null || account.RecordID < 0)
@@ -2158,63 +1841,6 @@ namespace SCCPP1
         }
 
 
-        public static int InsertOrIgnoreWorkHistory(int colleagueID, string employer, string jobTitle, string municipality, int stateID, DateOnly startDate, DateOnly endDate, string description)
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-
-                using (SqliteTransaction transaction = conn.BeginTransaction())
-                {
-                    try
-                    {
-                        int workHistoryID = -1, employerID, jobTitleID, municipalityID;
-
-                        string sql = @"INSERT INTO OR IGNORE work_history (colleague_id, employer_id, job_title_id, municipality_id, state_id, start_date, end_date, description) 
-                                        VALUES (@colleague_id, @employer_id, @job_title_id, @municipality_id, @state_id, @start_date, @end_date, @description);
-                                        SELECT last_insert_rowid();";
-
-                        using (SqliteCommand cmd = new SqliteCommand("", conn, transaction))
-                        {
-                            employerID = InsertOrIgnore(cmd, "employers", "name", employer);
-                            jobTitleID = InsertOrIgnore(cmd, "job_titles", "title", jobTitle);
-                            municipalityID = InsertOrIgnore(cmd, "municipalities", "name", municipality);
-
-
-                            cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(colleagueID));
-                            cmd.Parameters.AddWithValue("@employer_id", ValueCleaner(employerID));
-                            cmd.Parameters.AddWithValue("@job_title_id", ValueCleaner(jobTitleID));
-                            cmd.Parameters.AddWithValue("@municipality_id", ValueCleaner(municipalityID));
-                            cmd.Parameters.AddWithValue("@state_id", ValueCleaner(stateID));
-                            cmd.Parameters.AddWithValue("@start_date", ValueCleaner(startDate));
-                            cmd.Parameters.AddWithValue("@end_date", ValueCleaner(endDate));
-                            cmd.Parameters.AddWithValue("@description", ValueCleaner(description));
-
-                            object? id = cmd.ExecuteScalar();
-
-                            if (id == null)
-                                return -1;
-
-                            workHistoryID = Convert.ToInt32(id);
-
-                        }
-
-                        transaction.Commit();
-
-                        return workHistoryID;
-                    }
-                    catch (Exception ex)
-                    {
-                        transaction.Rollback();
-                        //Console.WriteLine(ex.Message);
-                        throw;
-                    }
-                }
-            }
-        }
-
-
-
 
         public static int InsertWorkHistory(WorkData wd)
         {
@@ -2335,32 +1961,6 @@ namespace SCCPP1
                 }
             }
         }
-
-        /// <summary>
-        /// Retrieves the employer names based on the ids.
-        /// </summary>
-        /// <param name="ids">the employer ids</param>
-        /// <returns>an array with employer ids</returns>
-        public static string[] GetEmployers(params int[] ids)
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = $"SELECT name FROM employers WHERE (id={string.Join(",", ids)});";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
-                    {
-                        List<string> employerNames = new List<string>();
-                        while (r.Read())
-                            employerNames.Add(GetString(r, 0));
-
-                        return employerNames.ToArray();
-                    }
-                }
-            }
-        }
-
 
         public static int InsertEmployer(string name)
         {
