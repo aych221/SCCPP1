@@ -19,6 +19,8 @@ namespace SCCPP1.Pages
             _logger = logger;
         }
 
+        //binds to allow for selection
+
         [BindProperty]
         public string subP { get; set; }
 
@@ -33,7 +35,7 @@ namespace SCCPP1.Pages
         {
             
 
-
+            //This loads and places each profile on the main page, together with an icon. The title is used as the value to be returned when clicking the button
             string st = "";
 
             foreach (ProfileData e in Account.SavedProfiles.Values)
@@ -51,14 +53,14 @@ namespace SCCPP1.Pages
 
         public IActionResult OnPost()
         {
-            
+            //the submit response is to prevent a new profile being created when an old one is called
             if (newProf=="Submit")
             {
-                Account.ChooseProfile(Account.CreateProfile(newSubP));
+                Account.ChooseProfile(Account.CreateProfile(newSubP)); //creates and selects new profile with the new name
             }
             else
             {
-                foreach (ProfileData e in Account.SavedProfiles.Values)
+                foreach (ProfileData e in Account.SavedProfiles.Values) //if not submit, it searches for the returned title and selects that
                 {
                     if (e.Title == subP)
                     {

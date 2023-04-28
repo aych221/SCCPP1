@@ -161,7 +161,7 @@
             <br />
 
             <label for="PhoneNumber">Phone:*</label>
-            <input type="tel" asp-for="Colleague!.PhoneNumber" placeholder="Ex: (987)-654-3210" required />
+            <input type="tel" asp-for="Colleague!.PhoneNumber" placeholder="Ex: 1231231234 no (),-, or spaces" required />
             <br />
             <br />
 
@@ -213,7 +213,7 @@
             <br />
 
 
-            <legend><b>Experience:</b></legend>
+            <legend><b id="expLegend">Experience:</b></legend>
 
             <div id="experience-list">
                 <label for="Employer">Employer:</label>
@@ -244,7 +244,7 @@
             <br />
             <br />
 
-            <legend><b>Education:</b></legend>
+            <legend><b id ="eduLegend">Education:</b></legend>
 
             <div id="education-list">
                 <label for="Institution"> Institution: </label>
@@ -278,7 +278,7 @@
             <br />
             <br />
 
-            <legend><b>Certification:</b></legend>
+            <legend><b id="certLegend">Certifications:</b></legend>
 
             <div id="certification-list">
                 <label for="Institution"> Institution: </label>
@@ -509,7 +509,13 @@
         var endDateInput = document.getElementById("Work_EndDate"); // Input field for end date
         var presentCheckbox = document.querySelector("#present-checkbox"); // Present employer checkbox
         var hiddenInput = document.querySelector("#hidden-experience-list"); // Hidden input field for experience list
+        var legend = document.getElementById("expLegend")
+       
+        if (employerInput.value == "" && jobTitleInput.value == "") //If the fields are not filled in, do not create a child
+        {legend.innerHTML="Experience: MUST INCLUDE EITHER EMPLOYER OR TITLE"; legend.style.color = "red";}
 
+
+        else{
         // Creates new list item to hold experience details
         var li = document.createElement("li");
 
@@ -550,6 +556,9 @@
         startDateInput.value = "";
         endDateInput.value = "";
         presentCheckbox.checked = false;
+
+            legend.innerHTML = "Experience:"; legend.style.color = "black";
+        }
     }
 
     function removeLastExperience() {
@@ -573,7 +582,14 @@
         var endDateInput = document.getElementById("Education_EndDate"); // Input field for end date
         var currentlyCheckbox = document.querySelector("#currently-checkbox"); // Currently enrolled checkbox
         var hiddenInput = document.querySelector("#hidden-education-list"); // Hidden input field for education list
+        var legend = document.getElementById("eduLegend")
 
+        if(institutionInput.value == "")
+        {
+            legend.innerHTML = "Education: MUST INCLUDE INSTITUTION";
+            legend.style.color = "red";
+        }
+        else{
         // Creates new list item to hold education details
         var li = document.createElement("li");
 
@@ -620,6 +636,10 @@
         startDateInput.value = "";
         endDateInput.value = "";
         currentlyCheckbox.checked = false;
+
+            legend.innerHTML = "Education: ";
+            legend.style.color = "black";
+        }
     }
 
     function removeLastEducation() {
@@ -642,7 +662,14 @@
         var endDateInput = document.getElementById("Certification_EndDate"); // Input field for end date
         var currentCheckbox = document.querySelector("#current-checkbox"); // Present employer checkbox
         var hiddenInput = document.querySelector("#hidden-certification-list"); // Hidden input field for certification list
+        var legend = document.getElementById("certLegend");
 
+
+        if(certificateInput.value == ""){
+            legend.innerHTML = "Certifications: MUST INCLUDE CERTIFICATE NAME";
+            legend.style.color = "red";
+        }
+        else{
         // Creates new list item to hold certification details
         var li = document.createElement("li");
 
@@ -683,6 +710,11 @@
         startDateInput.value = "";
         endDateInput.value = "";
         currentCheckbox.checked = false;
+
+        legend.innerHTML = "Certifications: ";
+        legend.style.color = "black";
+
+        }
     }
 
     function removeLastCertification() {
