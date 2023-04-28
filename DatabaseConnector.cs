@@ -18,25 +18,43 @@ namespace SCCPP1
 
         //load these tables in memory to reduce CPU usage
         //may not need to do this
-        private static Dictionary<int, string> skills;
-        private static Dictionary<int, string> education_types;
-        private static Dictionary<int, string> institutions;
-        private static Dictionary<int, string> municipalities;
+        private static Dictionary<int, string> skills, education_types, institutions, municipalities, employers, job_titles;
 
         //states are saved as abbreviation on first two chars and the other chars are the full name
         private static Dictionary<int, string> states;
-        private static Dictionary<int, string> employers;
-        private static Dictionary<int, string> job_titles;
+
 
         public static void InitiateDatabase(bool loadCaches = false)
         {
+/*            if (DbConstants.STARTUP_DROP_DATABASE_FILE)
+            {
+                SqliteConnection.ClearAllPools();
+
+                File.Delete("MyDatabase.db");
+
+                SqliteConnection.CreateFile("MyDatabase.db");
+            }*/
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
-                Console.WriteLine("Server Version: " + conn.ServerVersion);
+                Console.WriteLine("Sqlite Server Version: " + conn.ServerVersion);
                 using (SqliteCommand cmd = new SqliteCommand(dbSQL, conn))
                 {
-                    cmd.ExecuteNonQuery();
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (SqliteException e)
+                    {
+                        Console.WriteLine($"[{typeof(DatabaseConnector).Name}] handler set.");
+                        Console.WriteLine($"[{typeof(DatabaseConnector).Name}] {e.Message}");
+                        Console.WriteLine($"[{typeof(DatabaseConnector).Name}] Command: {e.BatchCommand}");
+                        Console.WriteLine($"[{typeof(DatabaseConnector).Name}] Data: {e.Data}");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"[{typeof(DatabaseConnector).Name}] {e.Message}");
+                    }
 
 
                     if (loadCaches)
@@ -1991,15 +2009,10 @@ namespace SCCPP1
                     }
                 }
             }
-
-
-            //Console.WriteLine($"Found Work Records: {list?.Count}");
-
             return true;
         }
 
 
-        //AND(cc.description LIKE @keyword OR ct.type LIKE @keyword OR i.name LIKE @keyword);";
         public static int[] SearchKeyphraseWorkHistory(string keyphrase)
         {
             if (keyphrase == null)
@@ -2071,7 +2084,9 @@ namespace SCCPP1
                             cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(pd.Owner.RecordID));
                             cmd.Parameters.AddWithValue("@title", ValueCleaner(pd.Title));
                             cmd.Parameters.AddWithValue("@about_section", ValueCleaner(aboutSection));
+#if DEBUG
                             Console.WriteLine(aboutSection);
+#endif
                             cmd.Parameters.AddWithValue("@colleague_skills_ids", ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
                             cmd.Parameters.AddWithValue("@education_history_ids", ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
                             cmd.Parameters.AddWithValue("@colleague_certs_ids", ValueCleaner(string.Join(",", pd.SelectedCertificationIDs)));
@@ -2132,7 +2147,9 @@ namespace SCCPP1
                             cmd.Parameters.AddWithValue("@colleague_id", ValueCleaner(pd.Owner.RecordID));
                             cmd.Parameters.AddWithValue("@title", ValueCleaner(pd.Title));
                             cmd.Parameters.AddWithValue("@about_section", ValueCleaner(aboutSection));
+#if DEBUG
                             Console.WriteLine(aboutSection);
+#endif
                             cmd.Parameters.AddWithValue("@colleague_skills_ids", ValueCleaner(string.Join(",", pd.SelectedSkillIDs)));
                             cmd.Parameters.AddWithValue("@education_history_ids", ValueCleaner(string.Join(",", pd.SelectedEducationIDs)));
                             cmd.Parameters.AddWithValue("@colleague_certs_ids", ValueCleaner(string.Join(",", pd.SelectedCertificationIDs)));
@@ -2222,11 +2239,13 @@ namespace SCCPP1
 
                             string[] aboutVals = GetString(r, 3).Split('|');
 
-                            pd.ShowName = aboutVals[0].Equals("true");
-                            pd.ShowEmailAddress = aboutVals[1].Equals("true");
-                            pd.ShowPhoneNumber = aboutVals[2].Equals("true");
-                            pd.ShowIntroNarrative = aboutVals[3].Equals("true");
+                            pd.ShowName = aboutVals[0].Equals("True");
+                            pd.ShowEmailAddress = aboutVals[1].Equals("True");
+                            pd.ShowPhoneNumber = aboutVals[2].Equals("True");
+                            pd.ShowIntroNarrative = aboutVals[3].Equals("True");
 
+                            string aboutSectionPD = $"PD: {pd.ShowName}|{pd.ShowEmailAddress}|{pd.ShowPhoneNumber}|{pd.ShowIntroNarrative}";
+                            Console.WriteLine(aboutSectionPD);
                         }
 
                         account.Profiles = list;
@@ -2306,14 +2325,18 @@ namespace SCCPP1
                                 ));
 
                             string aboutSection = GetString(r, 3);
+#if DEBUG
                             Console.WriteLine(aboutSection);
+#endif
                             string[] aboutVals = aboutSection.Split('|');
 
-                            pd.ShowName = aboutVals[0].Equals("true");
-                            pd.ShowEmailAddress = aboutVals[1].Equals("true");
-                            pd.ShowPhoneNumber = aboutVals[2].Equals("true");
-                            pd.ShowIntroNarrative = aboutVals[3].Equals("true");
+                            pd.ShowName = aboutVals[0].Equals("True");
+                            pd.ShowEmailAddress = aboutVals[1].Equals("True");
+                            pd.ShowPhoneNumber = aboutVals[2].Equals("True");
+                            pd.ShowIntroNarrative = aboutVals[3].Equals("True");
 
+                            string aboutSectionPD = $"PD: {pd.ShowName}|{pd.ShowEmailAddress}|{pd.ShowPhoneNumber}|{pd.ShowIntroNarrative}";
+                            Console.WriteLine(aboutSectionPD);
                             dict.TryAdd(pd.RecordID, pd);
                         }
 
@@ -2321,9 +2344,6 @@ namespace SCCPP1
                     }
                 }
             }
-
-
-            //Console.WriteLine($"Found Profile Records: {dict?.Count}");
 
             return true;
         }
@@ -2548,7 +2568,6 @@ namespace SCCPP1
 
 
         #region Certification methods
-
         public static int SaveCertificationType(string certificationType)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))

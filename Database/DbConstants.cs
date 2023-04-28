@@ -1,4 +1,6 @@
-﻿namespace SCCPP1.Database
+﻿using Microsoft.Extensions.Configuration;
+
+namespace SCCPP1.Database
 {
 
     static class DbConstants
@@ -95,8 +97,9 @@
         public const int MAX_ACCOUNTS_PER_HANDLER = (100 / CONNECTION_POOL_SIZE);
 
 
+        public const bool STARTUP_DROP_DATABASE_FILE = false;
         public const bool STARTUP_RESET_TABLES = false;
-        public const bool STARTUP_SCHEMA_CHECK = false;
+        public const bool STARTUP_SCHEMA_CHECK = true;
         public const bool STARTUP_ADD_MOCK_DATA = false;
 
 
