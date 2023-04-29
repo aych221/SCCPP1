@@ -40,12 +40,6 @@ namespace SCCPP1.Pages
         // If successfully saved, redirect the user to "/UserHome", else, return to this page.
         public IActionResult OnPost()
         {
-            // Currently broken
-            /*
-            if (!ModelState.IsValid)
-                return Page();
-            */
-
             if (Colleague != null)
             {
                 // Save the "About" of the user
@@ -167,65 +161,6 @@ namespace SCCPP1.Pages
                 }
                 // Print to console (checks to see it it saved)
                 Console.WriteLine(Certification.Value);
-
-                //Account.Name = $"{Colleague.LastName}, {Colleague.FirstName} {Colleague.MiddleName?.ToString()} ";
-                //Account.EmailAddress = Colleague.EmailAddress;
-                //Account.PhoneNumber = Utilities.ParsePhoneNumber(Colleague.PhoneNumber);
-                //Account.IntroNarrative = Colleague.IntroNarrative;
-                //// Account.EducationHistory[0].Remove.RecordID;
-
-
-
-                //Console.WriteLine(Skill.ProgLang);
-                //Console.WriteLine(Skill.OS);
-                //Console.WriteLine(Skill.SoftAndFrame);
-
-                //Account.AddSkills(
-                //    Skill.ProgLang,
-                //    Skill.OS,
-                //    Skill.SoftAndFrame
-                //    );
-                //ProgLang.Split()
-                // and then loop,
-                // also check the info before going into account
-
-                //Account.AddWork(
-                //    Work.Employer,
-                //    Work.JobTitle,
-                //    Work.Description,
-                //    Work.Location,
-                //    Work.StartDate,
-                //    Work.EndDate
-                //    );
-
-                //Account.AddEducation(
-                //    Education.Institution,
-                //    Education.Degree,
-                //    Education.Field,
-                //    Education.Location,
-                //    Education.StartDate,
-                //    Education.EndDate
-                //    );
-
-                //Account.AddCertification(
-                //    Certification.Institution,
-                //    Certification.Certificate,
-                //    Certification.StartDate,
-                //    Certification.EndDate
-                //    );
-
-                //if (DatabaseConnector.SaveUser(Account))
-                //{
-                //    //Maybe have save and continue?
-                //    Console.WriteLine("Saved");
-                //    ViewData["UserData"] = "Saved!";
-                //    return RedirectToPage("/UserHome");
-                //}
-                //else
-                //{
-                //    Console.WriteLine("Could not save");
-                //    ViewData["UserData"] = "Error Saving";
-                //}
 
                 Account.PersistAll();
             }

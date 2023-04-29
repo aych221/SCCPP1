@@ -3,9 +3,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SCCPP1.Models
 {
-    // Here we have our Work class, with the getters and setters for the "Experience" section of the Account
-    // Consideration is still being put in how we would like to format Experience
-    // Ex. Do we want to save Experience as ExperienceTitle, ExperienceYear, and ExperienceDescription
+    // Here we have our Work class for model binding, with the getters and setters for the "Experience" section of the Account
+    // ie. Experience, Employer, Job Title, Dates etc.
+    // Description and Location is not used, but could be used for future ititerations of this project
+
     public class Work
     {
         public int ID { get; set; }

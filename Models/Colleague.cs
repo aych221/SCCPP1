@@ -2,8 +2,9 @@
 
 namespace SCCPP1.Models
 {
-    // Here we have our Colleague class, with the getters and setters for the "About" section of the Account
-    // ie. First Name, Last Name, Number etc.
+    // Here we have our Colleague class for model binding, with the getters and setters for the "About" section of the Account
+    // ie. Name, Phone, Email, Intro etc.
+
     public class Colleague
     {
         public int ID { get; set; }

@@ -2,8 +2,9 @@
 
 namespace SCCPP1.Models
 {
-    // Here we have our Skill class, with the getters and setters for the "Skill" section of the Account
-    // ie. languages known, operating system, software, and framework
+    // Here we have our Skill class for model binding, with the getters and setters for the "Skill" section of the Account
+    // ie. Programming Languages, Operating Systems, Software & Framework, Other etc.
+
     public class Skill
     {
         public int ID { get; set; }

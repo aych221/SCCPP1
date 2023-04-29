@@ -17,7 +17,9 @@ namespace SCCPP1.Pages
             _logger = logger;
         }
 
-        // The [BindProperty] attribute, takes the data from the POST request and maps it to our Model which can then be intereacted with our database.
+        // The [BindProperty] is used in ASP.NET Core for model binding.
+        // This automates the process of passing information from an HTTP request into an input model.
+        // In short, it tells our program to target binding on specific properties.
         [BindProperty]
         public Colleague? Colleague { get; set; }
 
@@ -33,22 +35,20 @@ namespace SCCPP1.Pages
         [BindProperty]
         public Certification? Certification { get; set; }
 
-
         [BindProperty]
         public List<SkillDataModel> SavedSkills { get; set; }
 
+        [BindProperty]
+        public List<WorkDataModel> SavedWork { get; set; }
 
         [BindProperty]
         public List<EducationDataModel> SavedEducation { get; set; }
-
 
         [BindProperty]
         public List<CertificationDataModel> SavedCertifications { get; set; }
 
 
-        [BindProperty]
-        public List<WorkDataModel> SavedWork { get; set; }
-
+        
         public abstract class RecordDataModel
         {
             public int RecordID { get; set; }
@@ -68,7 +68,6 @@ namespace SCCPP1.Pages
 
         protected void PopulateRecordLists()
         {
-
             SavedSkills = Account.SavedSkills
                 .Select(v => new SkillDataModel
                 {
@@ -94,7 +93,6 @@ namespace SCCPP1.Pages
             {
                 RecordID = v.Value.RecordID
             }).ToList();
-
         }
         
 
@@ -104,11 +102,6 @@ namespace SCCPP1.Pages
         public IActionResult OnGet()
         {
             Console.WriteLine("EditMainProfile.OnGet() Called");
-            // invalid model state or the account is new
-            /*
-            if (!ModelState.IsValid || !Account.IsReturning)
-                return Page();
-            */
             if (Colleague == null)
                 Colleague = new Colleague();
 
@@ -122,9 +115,7 @@ namespace SCCPP1.Pages
             Colleague.IntroNarrative = Account.IntroNarrative;
             Colleague.EmailAddress = Account.EmailAddress;
 
-
             PopulateRecordLists();
-
 
             return Page();
         }
@@ -133,8 +124,6 @@ namespace SCCPP1.Pages
 
         // When the Submit button on the form is pressed on, OnPost() starts, grabs the information the user typed and then saves it into the database.
         // If it is successfully saved into the database, redirect the user to "/UserHome", if it fails, return this page.
-        // Currently, we have the user stay on this page after they, Submit, but for testing purposes we are leaving it on this page.
-        // We are also considering making CreateMainProfile and EditMainProfile as just one page, but that is still to be decided.
         public IActionResult OnPost(
             List<SkillDataModel> SavedSkills,
             List<EducationDataModel> SavedEducation,
@@ -142,8 +131,6 @@ namespace SCCPP1.Pages
             List<WorkDataModel> SavedWork)
         {
             Console.WriteLine("EditMainProfile.OnPost() Called");
-            /*if (!ModelState.IsValid)
-                return Page();*/
 
             //first remove all records not on these lists
             this.SavedSkills = SavedSkills;
@@ -155,7 +142,6 @@ namespace SCCPP1.Pages
             Console.WriteLine("Edus found: " + SavedEducation.Count);
             Console.WriteLine("Certs found: " + SavedCertifications.Count);
             Console.WriteLine("Work found: " + SavedWork.Count);
-
 
             //ids to keep (makes this process 2n instead of n^2)
             HashSet<int> keepIDs = new HashSet<int>();

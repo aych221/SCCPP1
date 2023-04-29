@@ -3,8 +3,10 @@ using SCCPP1.User.Data;
 
 namespace SCCPP1.Models
 {
-    // Here we have our Education class, with the getters and setters for the "Education" section of the Account
-    // ie. the title of their degree/certification and the corresponding year of completion
+    // Here we have our Education class for model binding, with the getters and setters for the "Education" section of the Account
+    // ie. Institution, Degree, Field, Dates etc.
+    // Location is not used, but could be used for future ititerations of this project
+
     public class Education
     {
         public int ID { get; set; }
