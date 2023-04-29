@@ -14,6 +14,12 @@ using System.Diagnostics;
 
 namespace SCCPP1.Database.Requests
 {
+    /// <summary>
+    /// The <see cref="DbRequestManager"/> class manages the database requests made by the application.
+    /// It provides methods for saving and loading different types of data objects from the database,
+    /// as well as searching for profiles using a keyphrase. It also manages a pool of database
+    /// <see cref="DbRequestHandler"/>'s to handle incoming requests.
+    /// </summary>
     public static class DbRequestManager
     {
         private static string _connectionString = DbConstants.ConnectionString;
@@ -30,6 +36,9 @@ namespace SCCPP1.Database.Requests
 
 
 
+        /// <summary>
+        /// Initializes the database and starts the request handler cleanup and request processing tasks.
+        /// </summary>
         static DbRequestManager()
         {
             
@@ -52,6 +61,10 @@ namespace SCCPP1.Database.Requests
         }
 
 
+        /// <summary>
+        /// Performs handler cleanup operations on a regular interval to remove idle and unused handlers.
+        /// </summary>
+        /// <returns>An asynchronous operation.</returns>
         private static async Task HandlerCleanupAsync()
         {
             while (true)
@@ -85,7 +98,10 @@ namespace SCCPP1.Database.Requests
         }
 
 
-
+        /// <summary>
+        /// Registers a new <see cref="DbRequestHandler"/> instance.
+        /// </summary>
+        /// <returns>An asynchronous operation that returns a new <see cref="DbRequestHandler"/> instance.</returns>
         private static async Task<DbRequestHandler> RegisterHandler()
         {
             await _handlerSemaphore.WaitAsync();
@@ -114,13 +130,23 @@ namespace SCCPP1.Database.Requests
             return handler;
         }
 
+
+        /// <summary>
+        /// Unregisters the specified <see cref="DbRequestHandler"/> instance.
+        /// </summary>
+        /// <param name="handler">The handler to unregister.</param>
+        /// <returns>A boolean value indicating whether the handler was successfully unregistered or not.</returns>
         private static bool UnregisterHandler(DbRequestHandler handler)
         {
             return _handlers.TryTake(out handler);
         }
 
 
-
+        /// <summary>
+        /// This method processes database requests by dequeuing them from the request queue and assigning them to a suitable
+        /// <see cref="DbRequestHandler"/>. It also periodically cleans up inactive request handlers and handles session cleanup. 
+        /// </summary>
+        /// <returns>A task that completes when the method finishes processing requests.</returns>
         private static async Task ProcessRequestsAsync()
         {
             Stopwatch sw = Stopwatch.StartNew();
@@ -170,7 +196,12 @@ namespace SCCPP1.Database.Requests
         }
 
 
-
+        /// <summary>
+        /// Handles a request by attempting to get the associated <see cref="DbRequestHandler"/> for the session,
+        /// updating the request status, and enqueuing the request for processing.
+        /// </summary>
+        /// <param name="request">The request to be handled.</param>
+        /// <returns>Returns true if the request was successfully handled, false otherwise.</returns>
         private static async Task<bool> HandleRequestAsync(DbRequest request)
         {
 
@@ -206,10 +237,11 @@ namespace SCCPP1.Database.Requests
 
 
         /// <summary>
-        /// Attempts to get a handler for a session. 
+        /// Attempts to get a handler for a session by looking through the session-handler map for an existing handler,
+        /// or registering a new handler if a suitable one is not found.
         /// </summary>
-        /// <param name="sessionData"></param>
-        /// <returns></returns>
+        /// <param name="sessionData">The session for which a handler is being requested.</param>
+        /// <returns>Returns a DbRequestHandler if one is available, null otherwise.</returns>
         private static async Task<DbRequestHandler?> GetHandlerForSession(SessionData sessionData)
         {
 
@@ -278,6 +310,12 @@ namespace SCCPP1.Database.Requests
 
         }
 
+
+        /// <summary>
+        /// Enqueues a database request to the request queue for processing.
+        /// </summary>
+        /// <param name="request">The request to be enqueued.</param>
+        /// <returns>Returns true if the request was successfully enqueued, false otherwise.</returns>
         private static bool EnqueueRequest(DbRequest request)
         {
 
@@ -297,9 +335,15 @@ namespace SCCPP1.Database.Requests
 
 
         #region Request Methods
+
+        /// <summary>
+        /// Saves the data within the <see cref="RecordData"/> object to the database.
+        /// </summary>
+        /// <param name="data">The data object to saved from.</param>
+        /// <returns>Returns true if the request was successfully enqueued, false otherwise.</returns>
         public static bool Save(RecordData data)
         {
-
+            //probably should've used interfaces for this part...
 #if DEBUG_HANDLER
 //            Console.WriteLine($"[DbRequestManager] new save request for object: {data.GetType().Name}; Total requests: {_requests.Count}");
 #endif
@@ -332,30 +376,81 @@ namespace SCCPP1.Database.Requests
             return EnqueueRequest(request);
         }
 
-        //public static bool LoadAccount(SessionData data) => EnqueueRequest(new LoadColleagueDataRequest(data));
 
-
-
+        /// <summary>
+        /// Loads the account data from the database based on the given session data. (This is used for initial login)
+        /// </summary>
+        /// <param name="sessionData">The session data of the account to be loaded.</param>
+        /// <returns>Returns the DbRequest object representing the load request.</returns>
         public static DbRequest LoadAccount(SessionData sessionData) => LoadRequest(new LoadColleagueDataRequest(sessionData));
+
+
+        /// <summary>
+        /// Loads the account data from the database based on the given account object. (This is used for refreshing data)
+        /// </summary>
+        /// <param name="account">The Account object for which the data is to be loaded.</param>
+        /// <returns>Returns the DbRequest object representing the load request.</returns>
         public static DbRequest LoadAccount(Account account) => LoadAccount(account.Data);
 
+
+        /// <summary>
+        /// Loads the profiles of a colleague into the Account class. This method populates the <see cref="Account.SavedProfiles"/> dictionary.
+        /// </summary>
+        /// <param name="account">The Account object for which the profiles will be loaded.</param>
+        /// <returns>A database request object representing the request to load the colleague's profiles.</returns>
         public static DbRequest LoadColleagueProfiles(Account account) => LoadRequest(new LoadProfileDataRequest(account));
 
+
+        /// <summary>
+        /// Loads the skills of a colleague into the Account class. This method populates the <see cref="Account.SavedSkills"/> dictionary.
+        /// </summary>
+        /// <param name="account">The Account object for which the skills will be loaded.</param>
+        /// <returns>A database request object representing the request to load the colleague's skills.</returns>
         public static DbRequest LoadColleagueSkills(Account account) => LoadRequest(new LoadSkillDataRequest(account));
 
+
+        /// <summary>
+        /// Loads the education history of a colleague into the Account class. This method populates the <see cref="Account.SavedEducationHistory"/> dictionary.
+        /// </summary>
+        /// <param name="account">The Account object for which the education history will be loaded.</param>
+        /// <returns>A database request object representing the request to load the colleague's education history.</returns>
         public static DbRequest LoadColleagueEducationHistory(Account account) => LoadRequest(new LoadEducationDataRequest(account));
 
+
+        /// <summary>
+        /// Loads the certifications of a colleague into the Account class. This method populates the <see cref="Account.SavedCertifications"/> dictionary.
+        /// </summary>
+        /// <param name="account">The Account object for which the certifications will be loaded.</param>
+        /// <returns>A database request object representing the request to load the colleague's certifications.</returns>
         public static DbRequest LoadColleagueCertifications(Account account) => LoadRequest(new LoadCertificationDataRequest(account));
 
+
+        /// <summary>
+        /// Loads the work history of a colleague into the Account class. This method populates the <see cref="Account.SavedWorkHistory"/> dictionary.
+        /// </summary>
+        /// <param name="account">The Account object for which the work history will be loaded.</param>
+        /// <returns>A database request object representing the request to load the colleague's work history.</returns>
         public static DbRequest LoadColleagueWorkHistory(Account account) => LoadRequest(new LoadWorkDataRequest(account));
 
+
+        /// <summary>
+        /// Helper method to enqueue a database request and return it.
+        /// </summary>
+        /// <param name="request">The database request object to be enqueued.</param>
+        /// <returns>The database request object passed as a parameter.</returns>
         private static DbRequest LoadRequest(DbRequest request)
         {
             EnqueueRequest(request);
             return request;
         }
 
-        //admin methods
+
+        /// <summary>
+        /// Searches through all profiles containing the specified keyphrase.
+        /// </summary>
+        /// <param name="account">The account requesting the search.</param>
+        /// <param name="keyphrase">The keyphrase to search for.</param>
+        /// <returns>A database request object representing the search request.</returns>
         public static DbRequest SearchProfilesForKeyphrase(Account account, string keyphrase)
         {
             DbRequest request;
@@ -366,6 +461,9 @@ namespace SCCPP1.Database.Requests
 
 
         #region Startup code
+        /// <summary>
+        /// Initializes the database by executing the startup SQL script.
+        /// </summary>
         private static void InitializeDatabase()
         {
             //we won't use a handler for this since this is a one time operation

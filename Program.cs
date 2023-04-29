@@ -10,9 +10,16 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using SCCPP1;
 using SCCPP1.Session;
+using SCCPP1.Database.Requests;
 
 internal class Program
 {
+
+    /// <summary>
+    /// This will enable the database request system, which is currently unfinished.
+    /// Enabling this will switch the system to use the <see cref="DbRequestManager"/> system instead of the <see cref="DatabaseConnector"/>.
+    /// 
+    /// </summary>
     public const bool DbRequestSystem = false;
     private static void Main(string[] args)
     {

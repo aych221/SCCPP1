@@ -8,9 +8,20 @@ using SCCPP1.Database.Tables;
 using SCCPP1.Database;
 using SCCPP1.Database.Entity;
 using SCCPP1.Database.Sqlite;
+using System.Reflection;
+using SCCPP1.Database.Requests;
 
 namespace SCCPP1
 {
+
+    /// <summary>
+    /// This class is used to connect to the database and execute queries.
+    /// </summary>
+    /// <remarks>
+    /// This class was to be replaced entirely by the <see cref="DbRequestManager"/> which uses a connection
+    /// pool instead of static methods with new object creation. Due to time constraints, the other system was not fully completed
+    /// and tested, so, this class is still used as the primary connection to the database.
+    /// </remarks>
     public class DatabaseConnector
     {
 
@@ -24,21 +35,23 @@ namespace SCCPP1
         private static Dictionary<int, string> states;
 
 
+        /// <summary>
+        /// Initializes the database by executing the startup SQL script.
+        /// </summary>
         public static void InitiateDatabase(bool loadCaches = false)
         {
-/*            if (DbConstants.STARTUP_DROP_DATABASE_FILE)
-            {
-                SqliteConnection.ClearAllPools();
+            string sql = "";
 
-                File.Delete("MyDatabase.db");
+            if (DbConstants.STARTUP_RESET_TABLES)
+                sql = _resetTablesSql;
 
-                SqliteConnection.CreateFile("MyDatabase.db");
-            }*/
+            sql += _schemaCheckSql;
+
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
                 conn.Open();
                 Console.WriteLine("Sqlite Server Version: " + conn.ServerVersion);
-                using (SqliteCommand cmd = new SqliteCommand(dbSQL, conn))
+                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
                 {
                     try
                     {
@@ -68,31 +81,50 @@ namespace SCCPP1
             }
 
         }
-        
+
 
         #region Dictionary Loaders
-        //Dictionary loaders
+
+        /// <summary>
+        /// Loads the skills cache.
+        /// </summary>
         private static void LoadCacheSkills()
         {
             skills = LoadTwoColumnTable("skills");
         }
 
+
+        /// <summary>
+        /// Loads the education types cache.
+        /// </summary>
         private static void LoadCacheEducationTypes()
         {
             education_types = LoadTwoColumnTable("education_types");
         }
+
+
+        /// <summary>
+        /// Loads the institutions cache.
+        /// </summary>
         private static void LoadCacheInstitutions()
         {
             institutions = LoadTwoColumnTable("institutions");
         }
 
+
+        /// <summary>
+        /// Loads the municipalities cache.
+        /// </summary>
         private static void LoadCacheMunicipalities()
         {
             municipalities = LoadTwoColumnTable("municipalities");
         }
 
-        //maybe don't need, could just hard code
-        private static void LoadCacheStates()
+        
+        /// <summary>
+        /// Loads the states cache.
+        /// </summary>
+        private static void LoadCacheStates() //maybe don't need, could just hard code
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
             {
@@ -121,16 +153,28 @@ namespace SCCPP1
             }
         }
 
+
+        /// <summary>
+        /// Loads the employers cache.
+        /// </summary>
         private static void LoadCacheEmployers()
         {
             employers = LoadTwoColumnTable("employers");
         }
 
+
+        /// <summary>
+        /// Loads the job titles cache.
+        /// </summary>
         private static void LoadCacheJobTitles()
         {
             job_titles = LoadTwoColumnTable("job_titles");
         }
 
+
+        /// <summary>
+        /// Loads all caches.
+        /// </summary>
         private static void LoadCaches()
         {
             LoadCacheSkills();
@@ -142,6 +186,12 @@ namespace SCCPP1
             LoadCacheJobTitles();
         }
 
+
+        /// <summary>
+        /// Loads a two column table cache.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <returns>A dictionary with the table's ID as the key and the value as the string.</returns>
         private static Dictionary<int, string> LoadTwoColumnTable(string tableName)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -170,85 +220,167 @@ namespace SCCPP1
 
 
         #region Dictionary Getters
-        //Dictionary getters
+
+        /// <summary>
+        /// Gets a cached skill by ID.
+        /// </summary>
+        /// <param name="id">The ID of the skill to get.</param>
+        /// <returns>The cached skill as a string, or null if the skill was not found.</returns>
         private static string? GetCachedSkill(int id)
         {
             return GetCachedValue(skills, id);
         }
 
+
+        /// <summary>
+        /// Gets an array of cached skills by their IDs.
+        /// </summary>
+        /// <param name="ids">The IDs of the skills to get.</param>
+        /// <returns>An array of cached skills as strings.</returns>
         private static string[] GetCachedSkills(params int[] ids)
         {
             return GetCachedValues(skills, ids);
         }
 
 
+        /// <summary>
+        /// Gets a cached education type by ID.
+        /// </summary>
+        /// <param name="id">The ID of the education type to get.</param>
+        /// <returns>The cached education type as a string, or null if the education type was not found.</returns>
         private static string? GetCachedEducationType(int id)
         {
             return GetCachedValue(education_types, id);
         }
 
+
+        /// <summary>
+        /// Gets an array of cached education types by their IDs.
+        /// </summary>
+        /// <param name="ids">The IDs of the education types to get.</param>
+        /// <returns>An array of cached education types as strings.</returns>
         private static string[] GetCachedEducationTypes(params int[] ids)
         {
             return GetCachedValues(education_types, ids);
         }
 
 
+        /// <summary>
+        /// Gets a cached institution by ID.
+        /// </summary>
+        /// <param name="id">The ID of the institution to get.</param>
+        /// <returns>The cached institution as a string, or null if the institution was not found.</returns>
         private static string? GetCachedInstitution(int id)
         {
             return GetCachedValue(institutions, id);
         }
 
+
+        /// <summary>
+        /// Gets an array of cached institutions by their IDs.
+        /// </summary>
+        /// <param name="ids">The IDs of the institutions to get.</param>
+        /// <returns>An array of cached institutions as strings.</returns>
         private static string[] GetCachedInstitutions(params int[] ids)
         {
             return GetCachedValues(institutions, ids);
         }
 
 
+        /// <summary>
+        /// Gets a cached municipality by ID.
+        /// </summary>
+        /// <param name="id">The ID of the municipality to get.</param>
+        /// <returns>The cached municipality as a string, or null if the municipality was not found.</returns>
         public static string? GetCachedMunicipality(int id)
         {
             return GetCachedValue(municipalities, id);
         }
 
+
+        /// <summary>
+        /// Gets an array of cached municipalities by their IDs.
+        /// </summary>
+        /// <param name="ids">The IDs of the municipalities to get.</param>
+        /// <returns>An array of cached municipalities as strings.</returns>
         public static string[] GetCachedMunicipalities(params int[] ids)
         {
             return GetCachedValues(municipalities, ids);
         }
 
 
+        /// <summary>
+        /// Gets a cached state by ID.
+        /// </summary>
+        /// <param name="id">The ID of the state to get.</param>
+        /// <returns>The cached state as a string, or null if the state was not found.</returns>
         public static string? GetCachedState(int id)
         {
             return GetCachedValue(states, id);
         }
 
+
+        /// <summary>
+        /// Gets an array of cached states by their IDs.
+        /// </summary>
+        /// <param name="ids">The IDs of the states to get.</param>
+        /// <returns>An array of cached states as strings.</returns>
         public static string[] GetCachedStates(params int[] ids)
         {
             return GetCachedValues(states, ids);
         }
 
 
+        /// <summary>
+        /// Gets a cached employer by ID.
+        /// </summary>
+        /// <param name="id">The ID of the employer to get.</param>
+        /// <returns>The cached employer as a string, or null if the employer was not found.</returns>
         private static string? GetCachedEmployer(int id)
         {
             return GetCachedValue(employers, id);
         }
 
+
+        /// <summary>
+        /// Gets an array of cached employers by their IDs.
+        /// </summary>
+        /// <param name="ids">The IDs of the employers to get.</param>
+        /// <returns>An array of cached employers as strings.</returns>
         private static string[] GetCachedEmployers(params int[] ids)
         {
             return GetCachedValues(employers, ids);
         }
 
 
+        /// <summary>
+        /// Gets a cached job title by ID.
+        /// </summary>
+        /// <param name="id">The ID of the job title to get.</param>
+        /// <returns>The cached job title as a string, or null if the job title was not found.</returns>
         private static string? GetCachedJobTitle(int id)
         {
             return GetCachedValue(job_titles, id);
         }
 
+
+        /// <summary>
+        /// Gets an array of cached job titles by their IDs.
+        /// </summary>
+        /// <param name="ids">The IDs of the job titles to get.</param>
+        /// <returns>An array of cached job titles as strings.</returns>
         private static string[] GetCachedJobTitles(params int[] ids)
         {
             return GetCachedValues(job_titles, ids);
         }
 
 
-
+        /// <summary>
+        /// Gets a cached value from a given dictionary by ID.
+        /// </summary>
+        /// <param name="table">The dictionary to get the value from.</param>
+        /// <param name="id">The ID of the value to get.</param>
+        /// <returns>The cached value as a string, or null if the value was not found.</returns>
         private static string? GetCachedValue(Dictionary<int, string> table, int id)
         {
             string? s;
@@ -259,6 +391,13 @@ namespace SCCPP1
             return null;
         }
 
+
+        /// <summary>
+        /// Gets an array of cached values from a given dictionary by their IDs.
+        /// </summary>
+        /// <param name="table">The dictionary to get the values from.</param>
+        /// <param name="ids">The IDs of the values to get.</param>
+        /// <returns>An array of cached values as strings.</returns>
         private static string[] GetCachedValues(Dictionary<int, string> table, params int[] ids)
         {
             string[] arr = new string[ids.Length];
@@ -274,11 +413,11 @@ namespace SCCPP1
         }
 
 
-
-
-        //first searches the dictionary for the skill,
-        //if not found, it will search the database
-        //if nothing is found, it will return null.
+        /// <summary>
+        /// Attempts to get a cached skill by ID, first searching the dictionary cache, then the database.
+        /// </summary>
+        /// <param name="id">The ID of the skill to get.</param>
+        /// <returns>The cached skill as a string, or null if the skill was not found.</returns>
         private static string? TryGetCachedSkill(int id)
         {
             //check cache, if not there, reload cache
@@ -288,7 +427,15 @@ namespace SCCPP1
             return GetCachedSkill(id);
         }
 
-        //may not use
+
+        /// <summary>
+        /// Gets an array of cached skills by their IDs.
+        /// </summary>
+        /// <remarks>
+        /// This method is not currently used.
+        /// </remarks>
+        /// <param name="ids">The IDs of the skills to get.</param>
+        /// <returns>An array of cached skills as strings.</returns>
         private static string[] TryGetCachedSkills(params int[] ids)
         {
             return GetCachedSkills(ids);
@@ -298,48 +445,19 @@ namespace SCCPP1
         #endregion
 
         #region User Data
+
         /// <summary>
-        /// Loads a new Account object into the SessionData provided, if the user exists.
+        /// Inserts a new user into the database.
         /// </summary>
-        /// <param name="sessionData">The current session object</param>
-        /// <returns>true if the account exists, false if the account does not exist</returns>
-
-        [Obsolete("Use GetAccount() instead.")]
-        public static bool LoadUserData(SessionData sessionData)
-        {
-            using (SqliteConnection conn = new SqliteConnection(connStr))
-            {
-                conn.Open();
-                string sql = @"SELECT id, role, email, name FROM colleagues WHERE (user_hash=@user);";
-                using (SqliteCommand cmd = new SqliteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@user", Utilities.ToSHA256Hash(sessionData.Username));
-                    using (SqliteDataReader r = cmd.ExecuteReader(CommandBehavior.SingleResult))
-                    {
-
-                        //could not find account.
-                        //redirect account to creation page, if any input is entered, save new account to database
-                        if (!r.Read())
-                            return false;
-
-
-                        //load new instance with basic colleague information
-                        Account a = new Account(sessionData, true);
-
-                        a.RecordID = GetInt32(r, 0);
-                        a.Role = GetInt32(r, 1);
-                        a.Name = GetString(r, 2);
-                        a.EmailAddress = GetString(r, 3);
-
-                        sessionData.Owner = a;
-
-                        return true;
-                    }
-                }
-            }
-        }
-
-
+        /// <param name="userID"></param>
+        /// <param name="role"></param>
+        /// <param name="name"></param>
+        /// <param name="email"></param>
+        /// <param name="phone"></param>
+        /// <param name="address"></param>
+        /// <param name="introNarrative"></param>
+        /// <param name="mainProfileID"></param>
+        /// <returns>The ID of the inserted record, -1 if not inserted.</returns>
         public static int InsertUser(string userID, int role, string name, string email, long phone, string address, string introNarrative, int mainProfileID)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -371,7 +489,11 @@ namespace SCCPP1
         }
 
 
-
+        /// <summary>
+        /// Inserts a new account into the database.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns>True if the insertion was successful, false otherwise.</returns>
         public static bool InsertAccount(Account account)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -407,6 +529,11 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Updates the user with the given account object.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns>The number of rows manipulated, 0 if nothing was manipulated.</returns>
         public static int UpdateUser(Account account)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -425,6 +552,7 @@ namespace SCCPP1
                 }
             }
         }
+
 
         /// <summary>
         /// Updates all the <see cref="SqliteCommand.Parameters"></see> in the command with the values from the account object.
@@ -446,6 +574,20 @@ namespace SCCPP1
             parameters.AddWithValue("@main_profile_id", ValueCleaner(account.MainProfileID));
         }
 
+
+        /// <summary>
+        /// Updates the user with the given ID with the given values.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="userID"></param>
+        /// <param name="role"></param>
+        /// <param name="name"></param>
+        /// <param name="email"></param>
+        /// <param name="phone"></param>
+        /// <param name="address"></param>
+        /// <param name="introNarrative"></param>
+        /// <param name="mainProfileID"></param>
+        /// <returns>The number of rows manipulated, 0 if nothing was changed.</returns>
         public static int UpdateUser(int id, string userID, int role, string name, string email, long phone, string address, string introNarrative, int mainProfileID)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -473,9 +615,19 @@ namespace SCCPP1
         }
 
 
-        //used to save an account if you already have an id.
-        //just to be save, it still checks to see if the user exists.
-        //put -1 if id is unknown
+        /// <summary>
+        /// Saves the user to the database.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="userID"></param>
+        /// <param name="role"></param>
+        /// <param name="name"></param>
+        /// <param name="email"></param>
+        /// <param name="phone"></param>
+        /// <param name="address"></param>
+        /// <param name="introNarrative"></param>
+        /// <param name="mainProfileID"></param>
+        /// <returns>True if the user was saved, false otherwise.</returns>
         public static bool SaveUser(int id, string userID, int role, string name, string email, long phone, string address, string introNarrative, int mainProfileID)
         {
             if (!ExistsUser(id))
@@ -483,8 +635,19 @@ namespace SCCPP1
             return UpdateUser(id, userID, role, name, email, phone, address, introNarrative, mainProfileID) >= 0;
         }
 
-        //used if you don't have an ID
-        //put -1 if id is unknown
+
+        /// <summary>
+        /// Saves the user to the database.
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <param name="role"></param>
+        /// <param name="name"></param>
+        /// <param name="email"></param>
+        /// <param name="phone"></param>
+        /// <param name="address"></param>
+        /// <param name="introNarrative"></param>
+        /// <param name="mainProfileID"></param>
+        /// <returns>The ID of the user saved, -1 otherwise.</returns>
         public static int SaveUser(string userID, int role, string name, string email, long phone, string address, string introNarrative, int mainProfileID)
         {
             int id = ExistsUser(userID);
@@ -493,7 +656,12 @@ namespace SCCPP1
             return UpdateUser(id, userID, role, name, email, phone, address, introNarrative, mainProfileID);
         }
 
-        //used to save an account object, this will determine if the user needs to be created or not
+
+        /// <summary>
+        /// Saves the user to the database.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns>True if the save was successful, false otherwise.</returns>
         public static bool SaveUser(Account account)
         {
             if (account.IsReturning)
@@ -504,6 +672,11 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Checks if the user exists based on their ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>True if the user exists, false otherwise.</returns>
         public static bool ExistsUser(int id)
         {
             if (id < 1)
@@ -526,7 +699,12 @@ namespace SCCPP1
             }
         }
 
-        //exists by userID (the hashed user)
+
+        /// <summary>
+        /// Checks if the users exists by their user hash.
+        /// </summary>
+        /// <param name="userID"></param>
+        /// <returns>The ID of the user if they exist, -1 if they do not.</returns>
         public static int ExistsUser(string userID)
         {
             if (userID == null)
@@ -550,9 +728,8 @@ namespace SCCPP1
         }
 
 
-
         /// <summary>
-        /// Loads a new Account object into the SessionData provided.
+        /// Loads a new Account object into the SessionData provided, if the user exists.
         /// If the account does not exist, it will create a new account, but will not save it to the database.
         /// </summary>
         /// <param name="data">The current SessionData object</param>
@@ -568,7 +745,11 @@ namespace SCCPP1
         }
 
 
-
+        /// <summary>
+        /// Loads an account from the database, if it exists.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns>The a new Account object if it exists, null otherwise.</returns>
         public static Account LoadAccount(SessionData data)
         {
 
@@ -606,7 +787,11 @@ namespace SCCPP1
         }
 
 
-
+        /// <summary>
+        /// Searches the database for colleagues that contain data matching the keyphrase.
+        /// </summary>
+        /// <param name="keyphrase"></param>
+        /// <returns>An array of IDs that meet the criteria.</returns>
         public static int[] SearchKeyphraseColleagues(string keyphrase)
         {
             if (keyphrase == null)
@@ -641,7 +826,12 @@ namespace SCCPP1
 
 
 
-        //loads user based on ID into an Account, likely will be used by admins
+        /// <summary>
+        /// Loads an Account's data by their ID.
+        /// </summary>
+        /// <remarks>This method is intended to be used by admins.</remarks>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public static Account? GetUser(int id)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -682,13 +872,22 @@ namespace SCCPP1
 
         #region Skill Data
 
-        //TODO, do we need to care about case?
+        /// <summary>
+        /// Saves the skill record to the database, and returns the id of the record.
+        /// </summary>
+        /// <param name="skill"></param>
+        /// <returns>The ID of the skill record saved.</returns>
         private static int SaveSkill(SkillData skill)
         {
             return SaveSkill(skill.SkillName);
         }
 
-        //TODO, do we need to care about case?
+
+        /// <summary>
+        /// Saves the skill name to the database, and returns the id of the record.
+        /// </summary>
+        /// <param name="skillName"></param>
+        /// <returns>The ID of the skill saved.</returns>
         private static int SaveSkill(string skillName)
         {
             int id = GetSkillID(skillName);
@@ -699,6 +898,12 @@ namespace SCCPP1
             return id;
         }
 
+
+        /// <summary>
+        /// Saves the skill records to the database, and returns the ids of the records.
+        /// </summary>
+        /// <param name="skills"></param>
+        /// <returns>An array of IDs associated with the skill data records.</returns>
         private static int[] SaveSkills(params SkillData[] skills)
         {
             string[] skillNames = new string[skills.Length];
@@ -707,10 +912,17 @@ namespace SCCPP1
             return SaveSkills(skillNames);
         }
 
+
+        /// <summary>
+        /// Saves the skill names to the database, and returns the ids of the records.
+        /// </summary>
+        /// <param name="skillNames"></param>
+        /// <returns>An array of IDs associated with the skill names.</returns>
         private static int[] SaveSkills(params string[] skillNames)
         {
             return InsertSkills(skillNames);
         }
+
 
         /// <summary>
         /// Inserts a new skill to the database
@@ -779,7 +991,6 @@ namespace SCCPP1
             return GetSkillIDs(skillNames);
 
         }
-
 
 
         /// <summary>
@@ -859,7 +1070,12 @@ namespace SCCPP1
             }
         }
 
-        //will work great for large amounts of skills, not so sure if it's better for small amount of skills
+
+        /// <summary>
+        /// Retrieves the IDs for the skill names if they exists.
+        /// </summary>
+        /// <param name="skillNames"></param>
+        /// <returns>An array of IDs associated with the skill names. -1 will be in the array if a skillname was not found.</returns>
         public static int[]? GetSkillIDs(params string[] skillNames)
         {
             if (skillNames.Length < 1)
@@ -919,6 +1135,12 @@ namespace SCCPP1
             }
         }
 
+
+        /// <summary>
+        /// Saves all the colleague's skills to the database.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns>True if the save was successful, false otherwise.</returns>
         public static bool SaveColleageSkills(Account account)
         {
             //toInsert are skills with -1 ids, toUpdate are skills with existing ids
@@ -1000,6 +1222,12 @@ namespace SCCPP1
             return false;
         }
 
+
+        /// <summary>
+        /// Saves a colleage's skills to the database.
+        /// </summary>
+        /// <param name="skills"></param>
+        /// <returns>True if the save was successful, false otherwise.</returns>
         public static bool SaveColleageSkills(params SkillData[] skills)
         {
             //toInsert are skills with -1 ids, toUpdate are skills with existing ids
@@ -1083,21 +1311,11 @@ namespace SCCPP1
         }
 
 
-
-        /*
-         * 
-         * 
-        CREATE TABLE colleague_skills (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          colleague_id INTEGER NOT NULL,
-          skill_id INTEGER NOT NULL,
-          skill_category_id INTEGER,
-          rating INTEGER,
-          FOREIGN KEY (colleague_id) REFERENCES colleagues(id),
-          FOREIGN KEY (skill_id) REFERENCES skills(id),
-          FOREIGN KEY (skill_category_id) REFERENCES skill_categories(id)
-        );
-         */
+        /// <summary>
+        /// Saves a colleague's skill to the database.
+        /// </summary>
+        /// <param name="sd"></param>
+        /// <returns>True if the save was successful, false otherwise.</returns>
         public static bool SaveColleagueSkill(SkillData sd)
         {
 
@@ -1270,6 +1488,12 @@ namespace SCCPP1
             return true;
         }
 
+
+        /// <summary>
+        /// Searches the database for colleague skills that match the keyphrase.
+        /// </summary>
+        /// <param name="keyphrase"></param>
+        /// <returns>An array of colleague skill IDs.</returns>
         public static int[] SearchKeyphraseSkills(string keyphrase)
         {
             if (keyphrase == null)
@@ -1308,6 +1532,18 @@ namespace SCCPP1
 
         #region Education Data
 
+        /// <summary>
+        /// Inserts a new education history record into the database.
+        /// </summary>
+        /// <param name="colleagueID"></param>
+        /// <param name="educationTypeID"></param>
+        /// <param name="institutionID"></param>
+        /// <param name="municipalityID"></param>
+        /// <param name="stateID"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="description"></param>
+        /// <returns>The ID of the education history that was just inserted.</returns>
         public static int InsertEducationHistory(int colleagueID, int educationTypeID, int institutionID, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -1347,6 +1583,21 @@ namespace SCCPP1
             return InsertEducationHistory(ed.Owner.RecordID, ed.EducationTypeID, ed.InstitutionID, ed.Location.MunicipalityID, ed.Location.StateID, ed.StartDate, ed.EndDate, ed.Description);
         }
 
+
+
+        /// <summary>
+        /// Updates a colleagues education history record.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="colleagueID"></param>
+        /// <param name="educationTypeID"></param>
+        /// <param name="institutionID"></param>
+        /// <param name="municipalityID"></param>
+        /// <param name="stateID"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="description"></param>
+        /// <returns>The number of records that were affected.</returns>
         public static int UpdateEducationHistory(int id, int colleagueID, int educationTypeID, int institutionID, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -1371,11 +1622,23 @@ namespace SCCPP1
             }
         }
 
+
+        /// <summary>
+        /// Updates the education history record with the data from the EducationData object.
+        /// </summary>
+        /// <param name="ed"></param>
+        /// <returns>The ID of the education history record.</returns>
         public static int UpdateEducationHistory(EducationData ed)
         {
             return UpdateEducationHistory(ed.RecordID, ed.Owner.RecordID, ed.EducationTypeID, ed.InstitutionID, ed.Location.MunicipalityID, ed.Location.StateID, ed.StartDate, ed.EndDate, ed.Description);
         }
 
+
+        /// <summary>
+        /// Saves the education history record. If the record does not exist, it will be created. If it does exist, it will be updated.
+        /// </summary>
+        /// <param name="ed"></param>
+        /// <returns>True if the save was successful, false otherwise.</returns>
         public static bool SaveEducationHistory(EducationData ed)
         {
 
@@ -1396,6 +1659,12 @@ namespace SCCPP1
 
 
         #region Education Type
+
+        /// <summary>
+        /// Gets the education type ID for the given education type.
+        /// </summary>
+        /// <param name="educationType"></param>
+        /// <returns>The ID of the education type, -1 if it wasn't found.</returns>
         public static int GetEducationTypeID(string educationType)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -1418,6 +1687,11 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Inserts the education type into the database.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns>The ID of the education type that was inserted.</returns>
         public static int InsertEducationType(string type)
         {
 
@@ -1446,7 +1720,12 @@ namespace SCCPP1
 
         }
 
-        //TODO, do we need to care about case?
+
+        /// <summary>
+        /// Saves the education type. If the education type does not exist, it will be created. If it does exist, it will be updated.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns>The ID of the education type inserted, -1 if it was not inserted.</returns>
         public static int SaveEducationType(string type)
         {
             int id = GetEducationTypeID(type);
@@ -1461,6 +1740,11 @@ namespace SCCPP1
 
         #region Institutions
 
+        /// <summary>
+        /// Gets the institution ID for the given institution name.
+        /// </summary>
+        /// <param name="institutionName"></param>
+        /// <returns>The ID of the institution inserted, -1 if it was not found.</returns>
         public static int GetInstitutionID(string institutionName)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -1482,6 +1766,11 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Inserts the institution into the database.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns>The ID of the institution that was inserted, -1 if it was not inserted.</returns>
         public static int InsertInstitution(string name)
         {
 
@@ -1511,7 +1800,12 @@ namespace SCCPP1
 
         }
 
-        //TODO, do we need to care about case?
+
+        /// <summary>
+        /// Saves the institution. If the institution does not exist, it will be created. If it does exist, it will be updated.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns>The ID of the institution being saved.</returns>
         public static int SaveInstitution(string name)
         {
             int id = GetInstitutionID(name);
@@ -1524,6 +1818,11 @@ namespace SCCPP1
         #endregion
 
 
+        /// <summary>
+        /// Checks if the education history record exists in the database.
+        /// </summary>
+        /// <param name="id">The ID of the education history record</param>
+        /// <returns>True if the record exists, false otherwise.</returns>
         public static bool ExistsEducationHistory(int id)
         {
             if (id < 0)
@@ -1606,6 +1905,14 @@ namespace SCCPP1
 
 
 
+
+
+        /// <summary>
+        /// Loads the education history of a given colleague from the database and populates a dictionary with the data.
+        /// </summary>
+        /// <param name="account">The account of the colleague whose education history should be loaded.</param>
+        /// <param name="dict">The dictionary that should be populated with the education history data.</param>
+        /// <param name="useCache">Specifies whether cached data should be used, if available.</param>
         public static bool LoadColleagueEducationHistory(Account account, out Dictionary<int, EducationData> dict, bool useCache = false)
         {
             dict = new Dictionary<int, EducationData>();
@@ -1663,6 +1970,11 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Searches for a keyphrase in the education history of all colleagues.
+        /// </summary>
+        /// <param name="keyphrase">The keyphrase to search for</param>
+        /// <returns>The IDs of education histories that contain the keyphrase.</returns>
         public static int[] SearchKeyphraseEducationHistory(string keyphrase)
         {
             if (keyphrase == null)
@@ -1701,6 +2013,19 @@ namespace SCCPP1
 
         #region Work Data
 
+
+        /// <summary>
+        /// Loads the work history of a given colleague from the database and populates a list with the data.
+        /// </summary>
+        /// <param name="colleagueID"></param>
+        /// <param name="employerID"></param>
+        /// <param name="jobTitleID"></param>
+        /// <param name="municipalityID"></param>
+        /// <param name="stateID"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="description"></param>
+        /// <returns>The ID of the inserted work history record, -1 if it was not inserted.</returns>
         public static int InsertWorkHistory(int colleagueID, int employerID, int jobTitleID, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -1736,13 +2061,29 @@ namespace SCCPP1
         }
 
 
-
+        /// <summary>
+        /// Inserts the work history of a given colleague to the database.
+        /// </summary>
+        /// <param name="wd">The WorkData object to insert.</param>
+        /// <returns>The ID of the inserted work history record, -1 if it was not inserted.</returns>
         public static int InsertWorkHistory(WorkData wd)
         {
             return InsertWorkHistory(wd.Owner.RecordID, wd.EmployerID, wd.JobTitleID, wd.Location.MunicipalityID, wd.Location.StateID, wd.StartDate, wd.EndDate, wd.Description);
         }
 
 
+        /// <summary>
+        /// Updates the work history of a given colleague to the database.
+        /// </summary>
+        /// <param name="colleagueID"></param>
+        /// <param name="employerID"></param>
+        /// <param name="jobTitleID"></param>
+        /// <param name="municipalityID"></param>
+        /// <param name="stateID"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <param name="description"></param>
+        /// <returns>The rows updated in the work history table, 0 if nothing ws updated.</returns>
         public static int UpdateWorkHistory(int id, int colleagueID, int employerID, int jobTitleID, int municipalityID, int stateID, DateOnly startDate, DateOnly endDate, string description)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -1769,11 +2110,22 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Updates the work history of a given colleague to the database.
+        /// </summary>
+        /// <param name="wd"></param>
+        /// <returns>The rows updated in the work history table, 0 if nothing ws updated.</returns>
         public static int UpdateWorkHistory(WorkData wd)
         {
             return UpdateWorkHistory(wd.RecordID, wd.Owner.RecordID, wd.EmployerID, wd.JobTitleID, wd.Location.MunicipalityID, wd.Location.StateID, wd.StartDate, wd.EndDate, wd.Description);
         }
 
+
+        /// <summary>
+        /// Checks if a work history record exists in the database.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>True if the work history record exists, false otherwise.</returns>
         public static bool ExistsWorkHistory(int id)
         {
             if (id < 0)
@@ -1797,6 +2149,11 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Saves the work history of a given colleague to the database.
+        /// </summary>
+        /// <param name="wd"></param>
+        /// <returns>True if the work history was saved, false otherwise.</returns>
         public static bool SaveWorkHistory(WorkData wd)
         {
 
@@ -1817,6 +2174,12 @@ namespace SCCPP1
 
 
         #region Employer
+
+        /// <summary>
+        /// Gets the ID of an employer from the database.
+        /// </summary>
+        /// <param name="employer"></param>
+        /// <returns>The ID of the employer, -1 if the employer was not found.</returns>
         public static int GetEmployerID(string employer)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -1837,6 +2200,12 @@ namespace SCCPP1
             }
         }
 
+
+        /// <summary>
+        /// Gets the name of an employer from the database.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>The name of the employer associated with the ID, null otherwise.</returns>
         public static string? GetEmployer(int id)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -1885,7 +2254,13 @@ namespace SCCPP1
 
         }
 
-        //TODO, do we need to care about case?
+
+
+        /// <summary>
+        /// Saves the employer to the database.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns>The ID of the employer that was saved.</returns>
         public static int SaveEmployer(string name)
         {
             int id = GetEmployerID(name);
@@ -1899,6 +2274,12 @@ namespace SCCPP1
 
 
         #region Job Title
+
+        /// <summary>
+        /// Gets the ID of a job title from the database.
+        /// </summary>
+        /// <param name="title"></param>
+        /// <returns>The ID of the job title.</returns>
         public static int GetJobTitleID(string title)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -1920,6 +2301,11 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Inserts a job title into the database.
+        /// </summary>
+        /// <param name="title"></param>
+        /// <returns>The ID of the job title that was just inserted.</returns>
         public static int InsertJobTitle(string title)
         {
 
@@ -1948,7 +2334,11 @@ namespace SCCPP1
 
         }
 
-        //TODO, do we need to care about case?
+
+        /// <summary>
+        /// Saves a job title to the database.
+        /// </summary>
+        /// <param name="title">The name of the job title.</param>
         public static int SaveJobTitle(string title)
         {
             int id = GetJobTitleID(title);
@@ -1961,6 +2351,13 @@ namespace SCCPP1
         #endregion
 
 
+
+        /// <summary>
+        /// Loads the work history of a given colleague from the database and populates a dictionary with the data.
+        /// </summary>
+        /// <param name="account">The account of the colleague whose work history should be loaded.</param>
+        /// <param name="dict">The dictionary that should be populated with the work history data.</param>
+        /// <param name="useCache">Specifies whether cached data should be used, if available.</param>
         public static bool LoadColleagueWorkHistory(Account account, out Dictionary<int, WorkData> dict, bool useCache = false)
         {
             dict = new();
@@ -2013,6 +2410,11 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Searches the work history table for records that match the specified keyphrase.
+        /// </summary>
+        /// <param name="keyphrase">The keyphrase to search for.</param>
+        /// <returns>An array of integers representing the IDs of the matching work history records.</returns>
         public static int[] SearchKeyphraseWorkHistory(string keyphrase)
         {
             if (keyphrase == null)
@@ -2053,6 +2455,13 @@ namespace SCCPP1
 
         #region Profile Methods
 
+        /// <summary>
+        /// Saves the provided profile data to the database. If the profile is marked for removal,
+        /// the corresponding database record will be deleted. Otherwise, the profile will be updated 
+        /// if it already exists in the database or inserted if it does not.
+        /// </summary>
+        /// <param name="pd">The profile data to be saved.</param>
+        /// <returns>True if the operation was successful, false otherwise.</returns>
         public static int InsertProfile(ProfileData pd)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -2116,7 +2525,11 @@ namespace SCCPP1
             }
         }
 
-
+        /// <summary>
+        /// Updates a profile record in the database with the specified ProfileData object
+        /// </summary>
+        /// <param name="pd">The ProfileData object representing the updated profile</param>
+        /// <returns>Returns true if the update was successful, false otherwise</returns>
         public static bool UpdateProfile(ProfileData pd)
         {
             bool success = false;
@@ -2174,6 +2587,12 @@ namespace SCCPP1
             }
         }
 
+
+        /// <summary>
+        /// Loads all profiles associated with a given account.
+        /// </summary>
+        /// <param name="account">The account to load profiles for.</param>
+        /// <returns>True if profiles are successfully loaded, false otherwise.</returns>
         public static bool LoadColleageProfiles(Account account)
         {
             if (account == null || account.RecordID < 0)
@@ -2243,9 +2662,10 @@ namespace SCCPP1
                             pd.ShowEmailAddress = aboutVals[1].Equals("True");
                             pd.ShowPhoneNumber = aboutVals[2].Equals("True");
                             pd.ShowIntroNarrative = aboutVals[3].Equals("True");
-
+#if DEBUG
                             string aboutSectionPD = $"PD: {pd.ShowName}|{pd.ShowEmailAddress}|{pd.ShowPhoneNumber}|{pd.ShowIntroNarrative}";
                             Console.WriteLine(aboutSectionPD);
+#endif
                         }
 
                         account.Profiles = list;
@@ -2253,13 +2673,16 @@ namespace SCCPP1
                 }
             }
 
-
-            //Console.WriteLine($"Found Profile Records: {list?.Count}");
-
             return true;
         }
 
 
+        /// <summary>
+        /// Loads all profiles associated with a given account.
+        /// </summary>
+        /// <param name="account">The account to load profiles for.</param>
+        /// <param name="dict">The dictionary to populate with profile data.</param>
+        /// <returns>True if profiles are successfully loaded, false otherwise.</returns>
         public static bool LoadColleageProfiles(Account account, out Dictionary<int, ProfileData> dict)
         {
             dict = new Dictionary<int, ProfileData>();
@@ -2334,9 +2757,10 @@ namespace SCCPP1
                             pd.ShowEmailAddress = aboutVals[1].Equals("True");
                             pd.ShowPhoneNumber = aboutVals[2].Equals("True");
                             pd.ShowIntroNarrative = aboutVals[3].Equals("True");
-
+#if DEBUG
                             string aboutSectionPD = $"PD: {pd.ShowName}|{pd.ShowEmailAddress}|{pd.ShowPhoneNumber}|{pd.ShowIntroNarrative}";
                             Console.WriteLine(aboutSectionPD);
+#endif
                             dict.TryAdd(pd.RecordID, pd);
                         }
 
@@ -2349,6 +2773,12 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Saves a profile data into the database. If Remove property is set, the corresponding record will be deleted. 
+        /// If the RecordID property is greater than 0, the record will be updated, otherwise it will be inserted into the database.
+        /// </summary>
+        /// <param name="pd">ProfileData object to be saved</param>
+        /// <returns>Returns true if the profile data was successfully saved or removed, false otherwise</returns>
         public static bool SaveProfile(ProfileData pd)
         {
             if (pd.Remove)
@@ -2364,6 +2794,12 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Searches for profile IDs that contain the given keyphrase in their title, or in their colleague_skills_ids,
+        /// education_history_ids, colleague_certs_ids, or work_history_ids field. Returns an array of IDs that match the search criteria.
+        /// </summary>
+        /// <param name="keyphrase">The keyphrase to search for</param>
+        /// <returns>An array of profile IDs that match the search criteria</returns>
         public static int[] SearchKeyphraseProfiles(string keyphrase)
         {
 
@@ -2476,6 +2912,9 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Represents the result set of a search query for profiles.
+        /// </summary>
         private class ProfileResultSet
         {
             public List<ProfileResult> Results;
@@ -2484,6 +2923,10 @@ namespace SCCPP1
             public Dictionary<int, HashSet<int>> CertificationIDToProfileID;
             public Dictionary<int, HashSet<int>> WorkIDToProfileID;
 
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ProfileResultSet"/> class.
+            /// </summary>
             public ProfileResultSet()
             {
                 Results = new List<ProfileResult>();
@@ -2494,6 +2937,10 @@ namespace SCCPP1
             }
 
 
+            /// <summary>
+            /// Adds a search result to the set of search results.
+            /// </summary>
+            /// <param name="result">The search result to be added.</param>
             public void AddResult(ProfileResult result)
             {
                 Results.Add(result);
@@ -2505,6 +2952,12 @@ namespace SCCPP1
             }
 
 
+            /// <summary>
+            /// Adds a record ID and its corresponding set of record IDs to the specified dictionary.
+            /// </summary>
+            /// <param name="recordID">The record ID to be added to the dictionary.</param>
+            /// <param name="recordIDs">The set of record IDs to be added to the dictionary.</param>
+            /// <param name="dict">The dictionary to which the record ID and set of record IDs should be added.</param>
             private void AddToDictionary(int recordID, HashSet<int> recordIDs, Dictionary<int, HashSet<int>> dict)
             {
                 HashSet<int> profileIDs;
@@ -2524,6 +2977,10 @@ namespace SCCPP1
         }
 
 
+
+        /// <summary>
+        /// Represents a single profile search result.
+        /// </summary>
         private class ProfileResult
         {
             public int RecordID, ColleagueID;
@@ -2541,6 +2998,16 @@ namespace SCCPP1
             public string PhoneNumber;
 
 
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ProfileResult"/> class.
+            /// </summary>
+            /// <param name="profileID">The ID of the profile.</param>
+            /// <param name="colleagueID">The ID of the colleague.</param>
+            /// <param name="title">The title of the profile.</param>
+            /// <param name="skillIDsCsv">The comma-separated string of skill record IDs associated with the profile.</param>
+            /// <param name="eduIDsCsv">The comma-separated string of education record IDs associated with the profile.</param>
+            /// <param name="certIDsCsv">The comma-separated string of certification record IDs associated with the profile.</param>
+            /// <param name="workIDsCsv">The comma-separated string of work experience record IDs associated with the profile.</param>
             public ProfileResult(int profileID, int colleagueID, string title, string skillIDsCsv, string eduIDsCsv, string certIDsCsv, string workIDsCsv)
             {
                 RecordID = profileID;
@@ -2553,6 +3020,11 @@ namespace SCCPP1
             }
 
 
+            /// <summary>
+            /// Creates a hash set of integers from the given comma-separated string of values.
+            /// </summary>
+            /// <param name="values">The comma-separated string of values.</param>
+            /// <returns>A hash set of integers.</returns>
             HashSet<int> CreateHashSet(string values)
             {
                 if (string.IsNullOrEmpty(values))
@@ -2567,7 +3039,14 @@ namespace SCCPP1
         #endregion
 
 
+
         #region Certification methods
+
+        /// <summary>
+        /// Saves a certification type to the database, inserting it if it doesn't exist already.
+        /// </summary>
+        /// <param name="certificationType">The name of the certification type to save.</param>
+        /// <returns>The ID of the certification type in the database.</returns>
         public static int SaveCertificationType(string certificationType)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -2581,7 +3060,11 @@ namespace SCCPP1
             }
         }
 
-
+        /// <summary>
+        /// Inserts a new certification into the database.
+        /// </summary>
+        /// <param name="cd">The certification data to insert.</param>
+        /// <returns>The ID of the new certification in the database.</returns>
         public static int InsertCertification(CertificationData cd)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -2613,6 +3096,11 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Updates an existing certification in the database.
+        /// </summary>
+        /// <param name="cd">The certification data to update.</param>
+        /// <returns>True if the update was successful, false otherwise.</returns>
         public static bool UpdateCertification(CertificationData cd)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -2638,6 +3126,11 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Saves a CertificationData object to the database.
+        /// </summary>
+        /// <param name="cd">The CertificationData object to save.</param>
+        /// <returns>True if the save operation succeeded, otherwise false.</returns>
         public static bool SaveCertification(CertificationData cd)
         {
 
@@ -2656,6 +3149,12 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Loads the CertificationData objects for a given account from the database into a dictionary.
+        /// </summary>
+        /// <param name="account">The account to load the certifications for.</param>
+        /// <param name="dict">The dictionary to load the certifications into.</param>
+        /// <returns>True if the load operation succeeded, otherwise false.</returns>
         public static bool LoadColleagueCertifications(Account account, out Dictionary<int, CertificationData> dict)
         {
             dict = new Dictionary<int, CertificationData>();
@@ -2711,6 +3210,11 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Searches the database for CertificationData objects that match a given keyphrase.
+        /// </summary>
+        /// <param name="keyphrase">The keyphrase to search for.</param>
+        /// <returns>An array of integers representing the IDs of the matching CertificationData objects.</returns>
         public static int[] SearchKeyphraseCertifications(string keyphrase)
         {
 
@@ -2751,11 +3255,13 @@ namespace SCCPP1
 
 
 
-
-
-
-
         #region Debugging
+
+        /// <summary>
+        /// Retrieves all records from the specified table and returns a list of strings representing each record.
+        /// </summary>
+        /// <param name="table">The name of the table to retrieve records from.</param>
+        /// <returns>A list of strings representing each record.</returns>
         public static List<string> PrintRecords(string table)
         {
             using (SqliteConnection conn = new SqliteConnection(connStr))
@@ -3295,6 +3801,7 @@ namespace SCCPP1
         #endregion
 
 
+
         #region Sqlite Helper Methods
 
         /// <summary>
@@ -3332,6 +3839,14 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Inserts a list of values into a table if they don't already exist. The query is wrapped in an INSERT OR IGNORE statement.
+        /// </summary>
+        /// <param name="cmd">The SqliteCommand instance to execute the query.</param>
+        /// <param name="tableName">The name of the table to insert the values into.</param>
+        /// <param name="fieldName">The name of the column in the table to insert the values into.</param>
+        /// <param name="values">The list of values to insert.</param>
+        /// <returns>A list of the IDs of the inserted values.</returns>
         protected static List<int> InsertOrIgnore(SqliteCommand cmd, string tableName, string fieldName, List<string> values)
         {
             //save incoming command type
@@ -3371,6 +3886,13 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Deletes a record from the specified table with the given ID.
+        /// </summary>
+        /// <param name="cmd">The SqliteCommand instance to execute the query.</param>
+        /// <param name="tableName">The name of the table to delete the record from.</param>
+        /// <param name="id">The ID of the record to delete.</param>
+        /// <returns>True if the record is deleted successfully, false otherwise.</returns>
         private static bool DeleteRecord(SqliteCommand cmd, string tableName, int id)
         {
 
@@ -3392,6 +3914,13 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Deletes multiple records from the specified table with the given IDs.
+        /// </summary>
+        /// <param name="cmd">The SqliteCommand instance to execute the query.</param>
+        /// <param name="tableName">The name of the table to delete the records from.</param>
+        /// <param name="ids">The IDs of the records to delete.</param>
+        /// <returns>True if the records are deleted successfully, false otherwise.</returns>
         private static bool DeleteRecords(SqliteCommand cmd, string tableName, params int[] ids)
         {
 
@@ -3413,6 +3942,12 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Deletes a record from the specified table with the given ID.
+        /// </summary>
+        /// <param name="tableName">The name of the table to delete the record from.</param>
+        /// <param name="id">The ID of the record to delete.</param>
+        /// <returns>True if the record is deleted successfully, false otherwise.</returns>
         private static bool DeleteRecord(string tableName, int id)
         {
 
@@ -3430,6 +3965,12 @@ namespace SCCPP1
         }
 
 
+        /// <summary>
+        /// Deletes multiple records from the specified table with the given IDs.
+        /// </summary>
+        /// <param name="tableName">The name of the table to delete the records from.</param>
+        /// <param name="ids">The IDs of the records to delete.</param>
+        /// <returns>True if the records are deleted successfully, false otherwise.</returns>
         private static bool DeleteRecords(string tableName, params int[] ids)
         {
 
@@ -3448,7 +3989,26 @@ namespace SCCPP1
         }
 
 
-        private static object ValueCleaner(int val)
+        /// <summary>
+        /// Cleans the value of an object by converting null values to DBNull.Value.
+        /// </summary>
+        /// <param name="val">The value to clean.</param>
+        /// <returns>The cleaned value.</returns>
+        protected static object ValueCleaner(object val)
+        {
+            if (val == null)
+                return DBNull.Value;
+
+            return val;
+        }
+
+
+        /// <summary>
+        /// Cleans the value of an integer by converting 0 and -1 values to DBNull.Value.
+        /// </summary>
+        /// <param name="val">The integer to clean.</param>
+        /// <returns>The cleaned integer.</returns>
+        protected static object ValueCleaner(int val)
         {
             if (val == 0 || val == -1)
                 return DBNull.Value;
@@ -3457,7 +4017,12 @@ namespace SCCPP1
         }
 
 
-        private static object ValueCleaner(long val)
+        /// <summary>
+        /// Cleans the value of a long integer by converting 0 and -1 values to DBNull.Value.
+        /// </summary>
+        /// <param name="val">The long integer to clean.</param>
+        /// <returns>The cleaned long integer.</returns>
+        protected static object ValueCleaner(long val)
         {
             if (val == 0 || val == -1)
                 return DBNull.Value;
@@ -3466,7 +4031,12 @@ namespace SCCPP1
         }
 
 
-        private static object ValueCleaner(string val)
+        /// <summary>
+        /// Cleans the value of a string by converting null values to DBNull.Value.
+        /// </summary>
+        /// <param name="val">The string to clean.</param>
+        /// <returns>The cleaned string.</returns>
+        protected static object ValueCleaner(string val)
         {
             if (val == null)
                 return DBNull.Value;
@@ -3477,7 +4047,12 @@ namespace SCCPP1
         }
 
 
-        private static object ValueCleaner(DateOnly? val)
+        /// <summary>
+        /// Cleans the value of a DateOnly object by converting null values to DBNull.Value.
+        /// </summary>
+        /// <param name="val">The DateOnly object to clean.</param>
+        /// <returns>The cleaned DateOnly object.</returns>
+        protected static object ValueCleaner(DateOnly? val)
         {
             if (val == null)
                 return DBNull.Value;
@@ -3486,7 +4061,13 @@ namespace SCCPP1
         }
 
 
-        private static long GetInt64(SqliteDataReader r, int ordinal)
+        /// <summary>
+        /// Gets a long integer value from the specified ordinal in a SqliteDataReader.
+        /// </summary>
+        /// <param name="r">The SqliteDataReader containing the value.</param>
+        /// <param name="ordinal">The ordinal of the value.</param>
+        /// <returns>The long integer value.</returns>
+        protected static long GetInt64(SqliteDataReader r, int ordinal)
         {
             if (r.IsDBNull(ordinal))
                 return -1;
@@ -3494,7 +4075,13 @@ namespace SCCPP1
         }
 
 
-        private static int GetInt32(SqliteDataReader r, int ordinal)
+        /// <summary>
+        /// Gets an integer value from the specified ordinal in a SqliteDataReader.
+        /// </summary>
+        /// <param name="r">The SqliteDataReader containing the value.</param>
+        /// <param name="ordinal">The ordinal of the value.</param>
+        /// <returns>The integer value.</returns>
+        protected static int GetInt32(SqliteDataReader r, int ordinal)
         {
             if (r.IsDBNull(ordinal))
                 return -1;
@@ -3502,7 +4089,13 @@ namespace SCCPP1
         }
 
 
-        private static string GetString(SqliteDataReader r, int ordinal)
+        /// <summary>
+        /// Gets a string value from the specified ordinal in a SqliteDataReader.
+        /// </summary>
+        /// <param name="r">The SqliteDataReader containing the value.</param>
+        /// <param name="ordinal">The ordinal of the value.</param>
+        /// <returns>The string value.</returns>
+        protected static string GetString(SqliteDataReader r, int ordinal)
         {
             if (r.IsDBNull(ordinal))
                 return null;
@@ -3510,7 +4103,13 @@ namespace SCCPP1
         }
 
 
-        private static DateOnly GetDateOnly(SqliteDataReader r, int ordinal)
+        /// <summary>
+        /// Gets a DateOnly value from the specified ordinal in a SqliteDataReader.
+        /// </summary>
+        /// <param name="r">The SqliteDataReader containing the value.</param>
+        /// <param name="ordinal">The ordinal of the value.</param>
+        /// <returns>The DateOnly value.</returns>
+        protected static DateOnly GetDateOnly(SqliteDataReader r, int ordinal)
         {
             if (r.IsDBNull(ordinal))
                 return DateOnly.MinValue;
@@ -3521,11 +4120,9 @@ namespace SCCPP1
 
 
 
-        ///<summary>
-        ///This is initial query used for creating the initial database and tables.
-        ///Should only be used if the database is being completely reset or initially created.
-        ///</summary>
-        private const string dbSQL = @"
+
+        private const string _resetTablesSql = @"
+
         PRAGMA foreign_keys = 0;
         BEGIN TRANSACTION; 
         DROP TABLE IF EXISTS [colleagues];
@@ -3545,6 +4142,15 @@ namespace SCCPP1
         DROP TABLE IF EXISTS [profiles];
         COMMIT;
         PRAGMA foreign_keys = 1;
+
+        ";
+
+
+        ///<summary>
+        ///This is initial query used for creating the initial database and tables.
+        ///Should only be used if the database is being completely reset or initially created.
+        ///</summary>
+        private const string _schemaCheckSql = @"
 
         CREATE TABLE colleagues (
           id INTEGER PRIMARY KEY AUTOINCREMENT,

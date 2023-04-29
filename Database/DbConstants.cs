@@ -90,7 +90,7 @@ namespace SCCPP1.Database
         }
 
         //clean up every 5 minutes.
-        public const int HANDLER_CLEANUP_INTERVAL = 30 * 1000;// 5 * 60 * 1000;
+        public const int HANDLER_CLEANUP_INTERVAL = 5 * 60 * 1000;
         public const int HANDLER_SLEEP_TIME = 100;
         public const int SLEEP_TIME = 100;
         public const int CONNECTION_POOL_SIZE = 10;
@@ -98,7 +98,7 @@ namespace SCCPP1.Database
 
 
         public const bool STARTUP_DROP_DATABASE_FILE = false;
-        public const bool STARTUP_RESET_TABLES = false;
+        public const bool STARTUP_RESET_TABLES = true;
         public const bool STARTUP_SCHEMA_CHECK = true;
         public const bool STARTUP_ADD_MOCK_DATA = false;
 

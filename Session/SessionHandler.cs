@@ -101,7 +101,7 @@ namespace SCCPP1.Session
 
             if (Program.DbRequestSystem)
             {
-
+#if DEBUG
                 if (Data.Username.Equals("ww8FDk-bnuBk1KJXVreseNbsDmGnt62pNRpswwgGC7k"))
                 {
 
@@ -128,7 +128,7 @@ namespace SCCPP1.Session
                 }
                 else
                 {
-                    
+#endif
                     //shouldn't ever be null unless database is down.
                     acc = RetrieveAccount();
                     if (acc == null)
@@ -140,10 +140,13 @@ namespace SCCPP1.Session
                     {
                         page = "/UserHome";
                     }
+#if DEBUG
                 }
+#endif
             }
             else
             {
+#if DEBUG
                 if (Data.Username.Equals("ww8FDk-bnuBk1KJXVreseNbsDmGnt62pNRpswwgGC7k"))
                 {
                     DatabaseConnector.Andrew(acc = new Account(Data, false));
@@ -156,7 +159,9 @@ namespace SCCPP1.Session
                     //Console.WriteLine(DatabaseConnector.LoadColleagueWorkHistory(acc));
 
                 }
-                else if ((acc = DatabaseConnector.GetAccount(Data)).IsReturning)
+                else
+#endif
+                if ((acc = DatabaseConnector.GetAccount(Data)).IsReturning)
                 {
                     page = "/UserHome";
                 }
